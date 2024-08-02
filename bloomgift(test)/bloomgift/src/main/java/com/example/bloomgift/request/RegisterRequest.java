@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class RegisterRequest {
 
-    private String fullname; 
+    private String fullName; 
     private String email  ; 
     private String password ; 
     private int phone ; 
@@ -16,8 +16,8 @@ public class RegisterRequest {
     public RegisterRequest(){
 
     }
-    public RegisterRequest(String fullname, String email, String password, int  phone, String address, Date birthday, Boolean active) {
-        this.fullname  = fullname;
+    public RegisterRequest(String fullName, String email, String password, int  phone, String address, Date birthday, Boolean active) {
+        this.fullName  = fullName;
         this.email = email; 
         this.password = password;
         this.phone = phone;
@@ -28,12 +28,12 @@ public class RegisterRequest {
 
 
     public String getFullname() {
-        return fullname;
+        return fullName;
     }
 
 
     public void setFullname(String fullName) {
-        this.fullname = fullName;
+        this.fullName = fullName;
     }
 
 

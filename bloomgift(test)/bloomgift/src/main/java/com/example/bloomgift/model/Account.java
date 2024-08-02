@@ -24,8 +24,8 @@ public class Account {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "fullname", nullable = false)
-    private String fullname;
+    @Column(name = "fullName", nullable = false)
+    private String fullName;
 
     @Column(name = "birthday")
     private Date birthday;
@@ -46,7 +46,7 @@ public class Account {
 
     public Account() {
     }
-     public Account(Integer id, String email, String password,String fullname,Date birthday,
+     public Account(Integer id, String email, String password,String fullName,Date birthday,
                         String address,boolean isActive,Integer phone){
                             this.id = id ; 
                             this.email = email; 
@@ -55,7 +55,7 @@ public class Account {
                             this.address = address;
                             this.isActive = isActive;
                             this.phone = phone;
-                            this.fullname = fullname;
+                            this.fullName = fullName;
                         
                         }
 
@@ -84,11 +84,11 @@ public class Account {
     }
 
     public String getFullname() {
-        return fullname;
+        return fullName;
     }
 
-    public void setFullname(String fullname) {
-        this.fullname = fullname;
+    public void setFullname(String fullName) {
+        this.fullName = fullName;
     }
 
     public Date getBirthday() {
