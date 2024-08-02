@@ -11,12 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.repository.AccountRepository;
 // import com.example.bloomgift.request.RegisterRequest;
 
-
+@Service
 
 public class AccountServiece {
     @Autowired

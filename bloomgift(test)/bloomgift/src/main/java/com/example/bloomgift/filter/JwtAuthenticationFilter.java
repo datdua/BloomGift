@@ -27,6 +27,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtUtil jwtUtil ; 
+
+    
     public JwtAuthenticationFilter(JwtUtil jwtUtil,AccountServiece accountServiece){
         this.accountServiece = accountServiece;
         this.jwtUtil = jwtUtil;
