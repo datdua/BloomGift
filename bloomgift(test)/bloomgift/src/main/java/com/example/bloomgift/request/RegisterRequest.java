@@ -23,7 +23,7 @@ public class RegisterRequest {
         this.phone = phone;
         this.email = email;
         this.address = address;
-       
+       this.birthday = birthday;
     }
 
 
@@ -32,8 +32,8 @@ public class RegisterRequest {
     }
 
 
-    public void setFullname(String fullname) {
-        this.fullname = fullname;
+    public void setFullname(String fullName) {
+        this.fullname = fullName;
     }
 
 

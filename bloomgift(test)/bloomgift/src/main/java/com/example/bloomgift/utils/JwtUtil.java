@@ -18,7 +18,10 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Base64.Decoder;
 import java.util.function.Function;
+
+import javax.crypto.SecretKey;
 
 
 
@@ -56,7 +59,11 @@ public class JwtUtil{
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+        return Jwts
+                    .parser()
+                    .setSigningKey(SECRET_KEY)
+                    .parseClaimsJws(token)
+                    .getBody();
     }
 
     public Boolean isTokenExpired(String token) {
@@ -70,4 +77,6 @@ public class JwtUtil{
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
+
+ 
 }

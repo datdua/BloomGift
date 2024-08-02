@@ -32,7 +32,7 @@ public class SecurityConfig  {
     @Autowired
     private final JwtAuthenticationFilter jwtAuthenticationFilter; 
 
-
+    @Autowired
     public SecurityConfig(AccountServiece accountServiece, JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.accountServiece = accountServiece;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -60,9 +60,7 @@ public class SecurityConfig  {
      public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(req -> req
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .anyRequest().authenticated()
+                .authorizeHttpRequests(req -> req.requestMatchers("/api/auth/**").permitAll().anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -71,6 +69,22 @@ public class SecurityConfig  {
 
         return http.build();
     }
+    // @Bean
+    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    //     http
+    //         .csrf(csrf -> csrf.disable())
+    //         .authorizeHttpRequests(req -> req
+    //             .requestMatchers("/api/auth/**").permitAll() // Cho phép truy cập vào /api/auth/** mà không cần xác thực
+    //             .anyRequest().authenticated()
+    //              // Yêu cầu xác thực cho tất cả các yêu cầu khác
+    //         )
+    //         .sessionManagement(session -> session
+    //             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    //         )
+    //         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+    //     return http.build();
+    // }
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
@@ -79,5 +93,8 @@ public class SecurityConfig  {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
-
+    // @Autowired
+    // public void configure(AuthenticationManagerBuilder auth) throws Exception {
+    //     auth.userDetailsService(accountServiece).passwordEncoder(passwordEncoder());
+    // }
 }

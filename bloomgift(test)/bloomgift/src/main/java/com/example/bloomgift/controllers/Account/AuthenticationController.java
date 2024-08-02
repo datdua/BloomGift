@@ -33,7 +33,7 @@ public class AuthenticationController {
     //     Map<String, String> response = accountServiece.register(registerRequest);
     //     return ResponseEntity.ok(response);
     // }
-    @PostMapping(value="/api/auth/register", produces = "application/json;charset=UTF-8")
+    @PostMapping("/register")
     public ResponseEntity<?> register(
         @RequestBody RegisterRequest registerRequest
         ){
@@ -49,7 +49,7 @@ public class AuthenticationController {
     
     
     
-    @PostMapping(value = "/api/auth/login", consumes = "application/json", produces = "application/json")
+    @PostMapping("login")
     public ResponseEntity<?> login(
         @RequestBody LoginRequest loginRequest
         ) {

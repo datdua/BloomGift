@@ -30,6 +30,10 @@ public class Account {
     @Column(name = "birthday")
     private Date birthday;
 
+
+    @Column(name = "roleid")
+    private int roleid;
+
     @Column(name = "address")
     private String address;
 
@@ -51,7 +55,7 @@ public class Account {
                             this.address = address;
                             this.isActive = isActive;
                             this.phone = phone;
-
+                            this.fullname = fullname;
                         
                         }
 
@@ -117,6 +121,13 @@ public class Account {
 
     public void setPhone(Integer phone) {
         this.phone = phone;
+    }
+   
+    public int getRoleid() {
+        return roleid;
+    }
+    public void setRoleid(int roleid) {
+        this.roleid = roleid;
     }
 
         

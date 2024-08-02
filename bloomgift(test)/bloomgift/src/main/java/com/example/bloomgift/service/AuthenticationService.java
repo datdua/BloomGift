@@ -66,6 +66,7 @@ public class AuthenticationService {
     }
     public AuthenticationResponse register(RegisterRequest registerRequest ){
         String fullname = registerRequest.getFullname();
+        
         String password = registerRequest.getPassword();
         String email = registerRequest.getEmail();
         String address = registerRequest.getAddress();
@@ -86,6 +87,7 @@ public class AuthenticationService {
             throw new RuntimeException("Tài khoản đã tồn tại");
         }
         Account account = new Account();
+        account.setRoleid(1);
         account.setFullname(fullname);
         account.setEmail(email);
         account.setAddress(address);
