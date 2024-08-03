@@ -1,6 +1,10 @@
 package com.example.bloomgift.model;
 
+import java.util.Collection;
 import java.util.Date;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,7 +15,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="Account")
-public class Account {
+public class Account implements UserDetails{
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,8 +28,8 @@ public class Account {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "fullName", nullable = false)
-    private String fullName;
+    @Column(name = "fullname", nullable = false)
+    private String fullname;
 
     @Column(name = "birthday")
     private Date birthday;
@@ -43,11 +47,12 @@ public class Account {
     @Column(name = "phone", nullable = false)
     private Integer phone;
 
+    
 
     public Account() {
     }
-     public Account(Integer id, String email, String password,String fullName,Date birthday,
-                        String address,boolean isActive,Integer phone){
+     public Account(Integer id, String email, String password,String fullname,Date birthday,
+                        String address,boolean isActive,Integer phone,Integer roleid){
                             this.id = id ; 
                             this.email = email; 
                             this.password = password; 
@@ -55,8 +60,8 @@ public class Account {
                             this.address = address;
                             this.isActive = isActive;
                             this.phone = phone;
-                            this.fullName = fullName;
-                        
+                            this.fullname = fullname;
+                            this.roleid = roleid;
                         }
 
     public Integer getId() {
@@ -84,11 +89,11 @@ public class Account {
     }
 
     public String getFullname() {
-        return fullName;
+        return fullname;
     }
 
-    public void setFullname(String fullName) {
-        this.fullName = fullName;
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
     }
 
     public Date getBirthday() {
@@ -129,6 +134,16 @@ public class Account {
     public void setRoleid(int roleid) {
         this.roleid = roleid;
     }
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'getAuthorities'");
+	}
+	@Override
+	public String getUsername() {
+		// TODO Auto-generated method stub
+		return email;
+	}
 
         
 

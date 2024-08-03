@@ -46,20 +46,33 @@ public class SecurityConfig {
             "/api/accounts/**",
     };
 
+    // @Bean
+    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    //     http
+    //             .csrf(AbstractHttpConfigurer::disable)
+    //             .authorizeHttpRequests(req -> req
+    //                     .requestMatchers(SWAGGER_URLS).permitAll()
+    //                     .anyRequest().authenticated())
+    //             .sessionManagement(session -> session
+    //                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+    //             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+    //     return http.build();
+    // }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(req -> req
-                        .requestMatchers(SWAGGER_URLS).permitAll()
-                        .anyRequest().authenticated())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(req -> req
+                .requestMatchers(SWAGGER_URLS).permitAll()
+                .requestMatchers("/api/accounts/**").permitAll()
+                .anyRequest().authenticated())
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
+    
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

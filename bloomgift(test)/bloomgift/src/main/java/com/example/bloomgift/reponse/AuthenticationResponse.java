@@ -1,19 +1,54 @@
 package com.example.bloomgift.reponse;
 
-public class AuthenticationResponse {
-    private final String token;
+import jakarta.annotation.sql.DataSourceDefinition;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    public AuthenticationResponse(String token) {
-        this.token = token;
-    }
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+// public class AuthenticationResponse {
+//     private final String token;
 
-    public String getToken() {
-        return token;
-    }
+//     public AuthenticationResponse(String token) {
+//         this.token = token;
+//     }
 
-    // public String getJwt() {
-    //     return jwt;
+//     public String getToken() {
+//         return token;
+//     }
+
+    // public class AuthenticationResponse {
+    
+    //     private String token;
     // }
     
+
+    public class AuthenticationResponse {
+        private String token;
     
-}
+        // Constructors, getters, setters...
+    
+        public static Builder builder() {
+            return new Builder();
+        }
+    
+        public static class Builder {
+            private String token;
+    
+            public Builder token(String token) {
+                this.token = token;
+                return this;
+            }
+    
+            public AuthenticationResponse build() {
+                AuthenticationResponse response = new AuthenticationResponse();
+                response.setToken(this.token);
+                return response;
+            }
+        }
+    }
+
