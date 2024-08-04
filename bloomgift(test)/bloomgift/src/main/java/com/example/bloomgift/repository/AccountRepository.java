@@ -4,8 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.bloomgift.model.Account;
 
-import java.nio.file.OpenOption;
-import java.util.List;
+
 import java.util.Optional;
 
 

@@ -37,6 +37,12 @@ public class AuthenticationService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
      @Autowired
     private OtpUtil otpUtil;
 
@@ -45,12 +51,22 @@ public class AuthenticationService {
     private EmailUtil emailUtil;
 
 
-    @Autowired
-    private AccountRepository accountRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
+    
 
+
+
+    public AuthenticationService(AuthenticationManager authenticationManager, AccountService accountService,
+            JwtUtil jwtUtil, AccountRepository accountRepository, RoleRepository roleRepository, OtpUtil otpUtil,
+            EmailUtil emailUtil) {
+        this.authenticationManager = authenticationManager;
+        this.accountService = accountService;
+        this.jwtUtil = jwtUtil;
+        this.accountRepository = accountRepository;
+        this.roleRepository = roleRepository;
+        this.otpUtil = otpUtil;
+        this.emailUtil = emailUtil;
+    }
 
     public AuthenticationResponse authenticate(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
@@ -66,8 +82,7 @@ public class AuthenticationService {
             emailUtil.sendOtpEmail(registerRequest.getEmail(), otp);
         }catch(MessagingException e){
             throw new RuntimeException("unble");
-        }
-        
+        }      
         String fullname = registerRequest.getFullname();
         String password = registerRequest.getPassword();
         String email = registerRequest.getEmail();
@@ -98,8 +113,10 @@ public class AuthenticationService {
         account.setAddress(address);
         account.setBirthday(birthday);
         account.setPhone(phone);
+        account.setOtp(otp);
+        account.setOtp_generated_time(LocalDateTime.now());
         account.setPassword(password);
-        account.setActive(true);
+        account.setActive(false);
         accountRepository.save(account);
         return Collections.singletonMap("message", "Registration successful");
     }
@@ -111,6 +128,8 @@ public class AuthenticationService {
     private boolean hasInt(int number) {
         return number > 0;
     }
+
+
 
     public String verifyAccount(String email,String otp){
         Account account = accountRepository.findByEmail(email);

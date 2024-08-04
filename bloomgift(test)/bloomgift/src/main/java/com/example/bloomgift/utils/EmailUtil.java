@@ -22,23 +22,28 @@ public class EmailUtil {
 
     public void sendOtpEmail(String email, String otp) throws MessagingException {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
         mimeMessageHelper.setTo(email);
-        mimeMessageHelper.setSubject("xac nhan OTP");
+        mimeMessageHelper.setSubject("Xác Nhận OTP");
+    
+        // Define the email content with a hyperlink using string concatenation
+        mimeMessageHelper.setText("<html>"
+            + "<body>"
+            + "<p>Dear User,</p>"
+            + "<p>Your OTP code is: <strong>" + otp + "</strong></p>"
+            + "<p>Please verify your email by clicking the following link:</p>"
+            + "<p><a href=\"http://localhost:8080/verify?email=" + email + "\">Verify Email</a></p>"
+            + "<p>If you did not request this, please ignore this email.</p>"
+            + "<p>Thank you!</p>"
+            + "<p>Best regards,<br>Your Company</p>"
+            + "</body>"
+            + "</html>".format(email,otp));
+    
+        // Set the email content as HTML
         
-        String emailContent;
-        try {
-            emailContent = loadEmailTemplate_OtpEmail();
-            emailContent = emailContent.replace("{{otp}}", otp);
-            emailContent = emailContent.replace("{{email}}", email);
-        } catch (IOException e) {
-            emailContent = "ko dc dc ";
-        }
-        
-        mimeMessageHelper.setText(emailContent, true);
+        // Send the email
         javaMailSender.send(mimeMessage);
     }
-    
 
     public String loadEmailTemplate_OtpEmail() throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();

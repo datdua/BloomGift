@@ -54,6 +54,8 @@ public class Account {
 
     @Column(name = "otp_generated_time")
     private LocalDateTime otp_generated_time;
+
+    
     public Account() {
     }
      public Account(Integer id, String email, String password,String fullname,Date birthday,
@@ -68,7 +70,7 @@ public class Account {
                             this.phone = phone;
                             this.fullname = fullname;
                             this.roleid = roleid;
-                            this.otp = this.otp;
+                            this.otp = otp;
                             this.otp_generated_time = otp_generated_time;
                         }
 

@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.reponse.AuthenticationResponse;
-import com.example.bloomgift.request.AccountRequest;
 import com.example.bloomgift.request.LoginRequest;
 import com.example.bloomgift.request.RegisterRequest;
 import com.example.bloomgift.service.AccountService;
@@ -40,7 +39,7 @@ public class AuthenticationController {
     private AccountService accountService;
 
  
-    @Autowired
+
     public AuthenticationController(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
        
@@ -59,61 +58,6 @@ public class AuthenticationController {
         AuthenticationResponse response = authenticationService.authenticate(loginRequest);
         return ResponseEntity.ok(response);
     }
-
-    
-    @PostMapping(value ="/create-account", produces =
-    "application/json;charset=UTF-8")
-    public  ResponseEntity<Map<String, String>> createAccountbyAdmin(
-            @RequestBody AccountRequest accountRequest) {
-                try{
-                    accountService.createAccount(accountRequest);
-                    return ResponseEntity.ok(Collections.singletonMap("message", "Tạo tài khoản thành công"));
-                }catch(Exception e){
-                    return ResponseEntity.badRequest().body(Collections.singletonMap("message", e.getMessage()));
-                }
-   
-    }
-
-
-    @GetMapping("/list-all-account")
-    public List<Account> getAllAccounts() {
-        return accountService.getAllAccounts();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Account> getAccountById(@PathVariable("id") int id) {
-        Optional<Account> account = accountService.getAccountById(id);
-        return account.map(ResponseEntity::ok)
-                      .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-
-    
-    @PostMapping(value = "/update-account/{id}",
-            produces = "application/json;charset=UTF-8")
-    public ResponseEntity<?> updateAccount(
-        @PathVariable Integer id,    
-        @RequestBody AccountRequest accountRequest) {
-        try{
-            Account account = accountService.updateAccount(id, accountRequest);
-            return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật thành công"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("message", e.getMessage()));
-        }
-   
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteAccount(@PathVariable("id") Integer id) {
-        try {
-            accountService.deleteAccount(id);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Account deleted successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        }
-    }
-    
-
     
     @PutMapping("/verify-account")
     public ResponseEntity<String> verifyAccount(
@@ -144,6 +88,15 @@ public class AuthenticationController {
             @RequestParam String newPassword 
     ){
         return new ResponseEntity<>(authenticationService.setPassword(email,newPassword),HttpStatus.OK);
-    }
+   }
+
+   @GetMapping("/{id}")
+   public ResponseEntity<Account> getAccountById(@PathVariable("id") int id) {
+       Optional<Account> account = accountService.getAccountById(id);
+       return account.map(ResponseEntity::ok)
+                     .orElseGet(() -> ResponseEntity.notFound().build());
+   }
+
+ 
 
 }
