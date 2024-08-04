@@ -1,5 +1,6 @@
 package com.example.bloomgift.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -48,11 +49,16 @@ public class Account {
     @Column(name = "phone", nullable = false)
     private Integer phone;
 
+    @Column(name = "otp")
+    private String otp;
 
+    @Column(name = "otp_generated_time")
+    private LocalDateTime otp_generated_time;
     public Account() {
     }
      public Account(Integer id, String email, String password,String fullname,Date birthday,
-                        String address,boolean isActive,Integer phone,Role roleid){
+                        String address,boolean isActive,Integer phone,Role roleid
+                        ,String otp, LocalDateTime otp_generated_time ){
                             this.id = id ; 
                             this.email = email; 
                             setPassword(password);
@@ -62,6 +68,8 @@ public class Account {
                             this.phone = phone;
                             this.fullname = fullname;
                             this.roleid = roleid;
+                            this.otp = this.otp;
+                            this.otp_generated_time = otp_generated_time;
                         }
 
     public Integer getId() {
@@ -141,5 +149,16 @@ public class Account {
     public String getRoleName() {
         return roleid != null ? roleid.getName() : null;
     }
-    
+        public String getOtp() {
+        return otp;
+    }
+    public void setOtp(String otp) {
+        this.otp = otp;
+    }
+    public LocalDateTime getOtp_generated_time() {
+        return otp_generated_time;
+    }
+    public void setOtp_generated_time(LocalDateTime otp_generated_time) {
+        this.otp_generated_time = otp_generated_time;
+    }
 }

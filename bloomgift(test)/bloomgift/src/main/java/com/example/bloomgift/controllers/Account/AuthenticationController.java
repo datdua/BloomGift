@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.bloomgift.model.Account;
@@ -111,5 +113,37 @@ public class AuthenticationController {
         }
     }
     
+
+    
+    @PutMapping("/verify-account")
+    public ResponseEntity<String> verifyAccount(
+        @RequestParam String email,
+        @RequestParam String otp){
+            return new ResponseEntity<>(authenticationService.verifyAccount(email,otp),HttpStatus.OK);
+
+    }
+    
+    @PutMapping("regenetate-otp")
+    public ResponseEntity<String>  regenetateOtp(
+            @RequestParam String email){
+
+            return new ResponseEntity<>(authenticationService.generateOtp(email),HttpStatus.OK);
+
+    }
+
+    @PutMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(
+            @RequestParam String email
+    ){
+        return new ResponseEntity<>(authenticationService.forgotPassword(email),HttpStatus.OK);
+    }
+
+    @PutMapping("/set-password")
+    public ResponseEntity<String> setPassword(
+            @RequestParam String email,
+            @RequestParam String newPassword 
+    ){
+        return new ResponseEntity<>(authenticationService.setPassword(email,newPassword),HttpStatus.OK);
+    }
 
 }

@@ -1,8 +1,9 @@
 package com.example.bloomgift.service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
-
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,7 +18,11 @@ import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.repository.RoleRepository;
 import com.example.bloomgift.request.LoginRequest;
 import com.example.bloomgift.request.RegisterRequest;
+import com.example.bloomgift.utils.EmailUtil;
 import com.example.bloomgift.utils.JwtUtil;
+import com.example.bloomgift.utils.OtpUtil;
+
+import jakarta.mail.MessagingException;
 
 
 @Service
@@ -32,7 +37,13 @@ public class AuthenticationService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    
+     @Autowired
+    private OtpUtil otpUtil;
+
+
+    @Autowired
+    private EmailUtil emailUtil;
+
 
     @Autowired
     private AccountRepository accountRepository;
@@ -50,6 +61,13 @@ public class AuthenticationService {
     }
 
     public Map<String, String> register(RegisterRequest registerRequest) {
+        String otp = otpUtil.generateOtp();
+        try{
+            emailUtil.sendOtpEmail(registerRequest.getEmail(), otp);
+        }catch(MessagingException e){
+            throw new RuntimeException("unble");
+        }
+        
         String fullname = registerRequest.getFullname();
         String password = registerRequest.getPassword();
         String email = registerRequest.getEmail();
@@ -92,5 +110,57 @@ public class AuthenticationService {
 
     private boolean hasInt(int number) {
         return number > 0;
+    }
+
+    public String verifyAccount(String email,String otp){
+        Account account = accountRepository.findByEmail(email);
+           
+        if(account.getOtp().equals(otp) && Duration.between(account.getOtp_generated_time(),
+                     LocalDateTime.now()).getSeconds()<(1* 60)){
+                        account.setActive(true);
+                        accountRepository.save(account);
+                        return "OTP verify you can login";
+                     }
+
+        return "please regenerate otp and try again";
+
+    }
+
+
+
+    public String generateOtp(String email){
+        Account account = accountRepository.findByEmail(email);
+           
+        String otp = otpUtil.generateOtp();
+        try{
+            emailUtil.sendOtpEmail(email, otp);
+        }catch(MessagingException e){
+            throw new RuntimeException("unble");
+        }
+        account.setOtp(otp);
+        account.setOtp_generated_time(LocalDateTime.now());
+        accountRepository.save(account);
+        return "Email sent ..... please veryfi account within 1 minute";
+    }
+
+
+
+    public String forgotPassword(String email){
+        Account account =  accountRepository.findByEmail(email);
+            try{
+        emailUtil.sendSetPasswordEmail(email);
+            }catch (MessagingException e){
+                throw new RuntimeException("unble");
+            }
+            return "Please check your email to set new password";
+    }
+
+
+
+    public String setPassword(String email,String newPassword){
+         Account account = accountRepository.findByEmail(email);
+         account.setPassword(newPassword);
+         accountRepository.save(account);
+         return "new password set successfull";
     }
 }
