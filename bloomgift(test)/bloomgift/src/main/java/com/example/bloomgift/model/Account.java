@@ -1,10 +1,8 @@
 package com.example.bloomgift.model;
 
-import java.util.Collection;
 import java.util.Date;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +13,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="Account")
-public class Account implements UserDetails{
+public class Account {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,7 +45,6 @@ public class Account implements UserDetails{
     @Column(name = "phone", nullable = false)
     private Integer phone;
 
-    
 
     public Account() {
     }
@@ -55,7 +52,7 @@ public class Account implements UserDetails{
                         String address,boolean isActive,Integer phone,Integer roleid){
                             this.id = id ; 
                             this.email = email; 
-                            this.password = password; 
+                            setPassword(password);
                             this.birthday = birthday;
                             this.address = address;
                             this.isActive = isActive;
@@ -85,7 +82,8 @@ public class Account implements UserDetails{
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        this.password = passwordEncoder.encode(password);
     }
 
     public String getFullname() {
@@ -134,19 +132,6 @@ public class Account implements UserDetails{
     public void setRoleid(int roleid) {
         this.roleid = roleid;
     }
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'getAuthorities'");
-	}
-	@Override
-	public String getUsername() {
-		// TODO Auto-generated method stub
-		return email;
-	}
 
-        
-
-
-
+    
 }

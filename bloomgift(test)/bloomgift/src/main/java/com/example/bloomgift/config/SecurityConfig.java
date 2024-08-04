@@ -15,19 +15,19 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.bloomgift.filter.JwtAuthenticationFilter;
-import com.example.bloomgift.service.AccountServiece;
+import com.example.bloomgift.service.AccountService;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
     @Autowired
-    private final AccountServiece accountServiece;
+    private final AccountService accountService;
     @Autowired
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Autowired
-    public SecurityConfig(AccountServiece accountServiece, JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.accountServiece = accountServiece;
+    public SecurityConfig(AccountService accountService, JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.accountService = accountService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
@@ -46,19 +46,6 @@ public class SecurityConfig {
             "/api/accounts/**",
     };
 
-    // @Bean
-    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    //     http
-    //             .csrf(AbstractHttpConfigurer::disable)
-    //             .authorizeHttpRequests(req -> req
-    //                     .requestMatchers(SWAGGER_URLS).permitAll()
-    //                     .anyRequest().authenticated())
-    //             .sessionManagement(session -> session
-    //                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-    //             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-    //     return http.build();
-    // }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
