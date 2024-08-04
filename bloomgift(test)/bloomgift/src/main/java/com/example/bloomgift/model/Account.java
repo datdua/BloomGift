@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -33,8 +35,9 @@ public class Account {
     private Date birthday;
 
 
-    @Column(name = "roleid")
-    private int roleid;
+    @ManyToOne
+    @JoinColumn(name = "roleid", nullable = false)
+    private Role roleid;
 
     @Column(name = "address")
     private String address;
@@ -49,7 +52,7 @@ public class Account {
     public Account() {
     }
      public Account(Integer id, String email, String password,String fullname,Date birthday,
-                        String address,boolean isActive,Integer phone,Integer roleid){
+                        String address,boolean isActive,Integer phone,Role roleid){
                             this.id = id ; 
                             this.email = email; 
                             setPassword(password);
@@ -126,12 +129,17 @@ public class Account {
         this.phone = phone;
     }
    
-    public int getRoleid() {
+    public Role getRoleid() {
         return roleid;
     }
-    public void setRoleid(int roleid) {
+
+    public void setRoleid(Role roleid) {
         this.roleid = roleid;
     }
 
+
+    public String getRoleName() {
+        return roleid != null ? roleid.getName() : null;
+    }
     
 }

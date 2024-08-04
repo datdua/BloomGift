@@ -2,23 +2,19 @@ package com.example.bloomgift.service;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.bloomgift.model.Account;
+import com.example.bloomgift.model.Role;
 import com.example.bloomgift.reponse.AuthenticationResponse;
 import com.example.bloomgift.repository.AccountRepository;
+import com.example.bloomgift.repository.RoleRepository;
 import com.example.bloomgift.request.LoginRequest;
 import com.example.bloomgift.request.RegisterRequest;
 import com.example.bloomgift.utils.JwtUtil;
@@ -36,21 +32,20 @@ public class AuthenticationService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    
 
     @Autowired
     private AccountRepository accountRepository;
 
+    @Autowired
+    private RoleRepository roleRepository;
 
 
     public AuthenticationResponse authenticate(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-
         UserDetails userDetails = accountService.loadUserByUsername(loginRequest.getEmail());
         String token = jwtUtil.generateToken(userDetails);
-
         return new AuthenticationResponse(token);
     }
 
@@ -75,9 +70,11 @@ public class AuthenticationService {
         if (existingAccount != null) {
             throw new RuntimeException("Account already exists");
         }
+        Role roleid = roleRepository.findById(2).orElseThrow(() -> new RuntimeException("Role not found"));
+
 
         Account account = new Account();
-        account.setRoleid(1);
+        account.setRoleid(roleid);
         account.setFullname(fullname);
         account.setEmail(email);
         account.setAddress(address);
@@ -85,7 +82,6 @@ public class AuthenticationService {
         account.setPhone(phone);
         account.setPassword(password);
         account.setActive(true);
-
         accountRepository.save(account);
         return Collections.singletonMap("message", "Registration successful");
     }
