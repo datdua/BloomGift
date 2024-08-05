@@ -108,7 +108,7 @@ public class AuthenticationService {
 
         Account account = new Account();
         account.setRoleid(roleid);
-        account.setFullname(fullname);
+        account.setFullname(fullname);                             
         account.setEmail(email);
         account.setAddress(address);
         account.setBirthday(birthday);

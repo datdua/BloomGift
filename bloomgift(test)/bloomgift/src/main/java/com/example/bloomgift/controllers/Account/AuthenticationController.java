@@ -82,6 +82,8 @@ public class AuthenticationController {
         return new ResponseEntity<>(authenticationService.forgotPassword(email),HttpStatus.OK);
     }
 
+    
+
     @PutMapping("/set-password")
     public ResponseEntity<String> setPassword(
             @RequestParam String email,

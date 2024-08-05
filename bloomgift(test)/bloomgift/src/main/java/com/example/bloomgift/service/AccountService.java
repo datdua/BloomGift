@@ -19,6 +19,9 @@ import com.example.bloomgift.model.Account;
 import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.repository.RoleRepository;
 import com.example.bloomgift.request.AccountRequest;
+import com.example.bloomgift.utils.JwtUtil;
+
+import io.jsonwebtoken.Claims;
 
 @Service
 public class AccountService implements UserDetailsService {
@@ -26,7 +29,8 @@ public class AccountService implements UserDetailsService {
     @Autowired
     private AccountRepository accountRepository;
 
-   
+   @Autowired
+   private JwtUtil jwtUtil;
 
     @Autowired
     private RoleRepository roleRepository;
@@ -89,9 +93,6 @@ public class AccountService implements UserDetailsService {
     public Account updateAccount(Integer id,AccountRequest accountRequest){
        
         checkvalidateAccount(accountRequest) ;
-      
-
-
         Account existingAccount = accountRepository.findById(id).orElse(null);
         if (existingAccount == null) {
            throw new RuntimeException("Không tìm thấy tài khoản"); 
@@ -142,6 +143,66 @@ public class AccountService implements UserDetailsService {
         accountRepository.delete(existingAccount);
     }
 
+
+    public Account editAccountProfile_admin(Integer id, AccountRequest accountRequest){
+        checkvalidateAccount(accountRequest) ;
+        Account existingAccount = accountRepository.findById(id).orElseThrow();
+        if (existingAccount == null) {
+            throw new RuntimeException("Không tìm thấy tài khoản");
+        }
+
+        String fullname = accountRequest.getFullname();
+        String password = accountRequest.getPassword();
+        Integer phone = accountRequest.getPhone();
+        String address = accountRequest.getAddress();
+        Date birthday = accountRequest.getBirthday(); 
+        String email = accountRequest.getFullname();
+        // ----=----------------------------------------------
+        existingAccount.setFullname(fullname);
+        existingAccount.setPhone(phone);
+        existingAccount.setBirthday(birthday);
+        existingAccount.setAddress(address);
+        existingAccount.setEmail(email);
+        if (accountRequest.getPassword() != null && !password.isEmpty()
+        && !accountRequest.getPassword().equals(password)) {
+                existingAccount.setPassword(password);
+        }
+        return accountRepository.save(existingAccount);
+    }
+    
+
+
+    public Account editAccountProfile(Integer id, AccountRequest accountRequest){
+        checkvalidateAccount(accountRequest) ;
+        Account existingAccount = accountRepository.findById(id).orElseThrow();
+        if (existingAccount == null) {
+            throw new RuntimeException("Không tìm thấy tài khoản");
+        }
+
+        String fullname = accountRequest.getFullname();
+        String password = accountRequest.getPassword();
+        Integer phone = accountRequest.getPhone();
+        String address = accountRequest.getAddress();
+        Date birthday = accountRequest.getBirthday(); 
+        // ----=----------------------------------------------
+        existingAccount.setFullname(fullname);
+        existingAccount.setPhone(phone);
+        existingAccount.setBirthday(birthday);
+        existingAccount.setAddress(address);
+        String roleName = accountRequest.getRoleName();
+        if (roleName != null && !roleName.isEmpty()) {
+            com.example.bloomgift.model.Role role = roleRepository.findByName(roleName);
+            if (role == null) {
+                throw new RuntimeException("Role not found");
+            }
+            existingAccount.setRoleid(role);
+        }
+        if (accountRequest.getPassword() != null && !password.isEmpty()
+        && !accountRequest.getPassword().equals(password)) {
+                existingAccount.setPassword(password);
+        }
+        return accountRepository.save(existingAccount);
+    }
     
 
     private void checkvalidateAccount(AccountRequest accountRequest){
