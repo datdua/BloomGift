@@ -2,6 +2,7 @@ package com.example.bloomgift.model;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -12,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -55,6 +57,9 @@ public class Account {
     @Column(name = "otp_generated_time")
     private LocalDateTime otp_generated_time;
 
+    
+    @OneToMany(mappedBy = "userID")
+    private List<Comment> comments;
     
     public Account() {
     }

@@ -21,7 +21,6 @@ import com.example.bloomgift.repository.RoleRepository;
 import com.example.bloomgift.request.AccountRequest;
 import com.example.bloomgift.utils.JwtUtil;
 
-import io.jsonwebtoken.Claims;
 
 @Service
 public class AccountService implements UserDetailsService {
@@ -227,10 +226,12 @@ public class AccountService implements UserDetailsService {
                         || !StringUtils.hasText(rolename)) {
             throw new RuntimeException("Vui lòng nhập đầy đủ thông tin");
         }
-     
-     
+          
 
     }
+
+
+
 
 
 

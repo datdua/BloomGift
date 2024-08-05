@@ -3,7 +3,7 @@ package com.example.bloomgift.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
+import org.springframework.data.domain.Sort;
 import com.example.bloomgift.model.Account;
 
 import java.util.Date;
@@ -20,7 +20,6 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
     List<Account> findByRoleid_Name(String roleName);
 
-
     @Query("SELECT a FROM Account a WHERE " +
            "(:id IS NULL OR a.id = :id) AND " +
            "(:text IS NULL OR (LOWER(a.email) LIKE LOWER(CONCAT('%', :text, '%')) OR " +
@@ -34,6 +33,5 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             @Param("text") String text,
             @Param("birthday") Date birthday,
             @Param("phone") Integer phone,
-            @Param("roleName") String roleName);
-
+            @Param("roleName") String roleName);        
 }

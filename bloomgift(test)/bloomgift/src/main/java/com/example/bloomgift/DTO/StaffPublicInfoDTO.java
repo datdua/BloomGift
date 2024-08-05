@@ -1,6 +1,6 @@
 package com.example.bloomgift.DTO;
 
-import java.sql.Date;
+
 
 public class StaffPublicInfoDTO {
     private Integer phoneShop;
@@ -21,7 +21,7 @@ public class StaffPublicInfoDTO {
                 this.dateStartShop = dateStartShop;
                 this.ShopName = ShopName;
                 this.isActive = isActive;
-        //TODO Auto-generated constructor stub
+    
     }
     public Integer getPhoneShop() {
         return phoneShop;

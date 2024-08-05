@@ -45,7 +45,7 @@ public class AuthenticationController {
        
     }
 
-    @PostMapping(value = "register", produces =
+    @PostMapping(value = "/register", produces =
     "application/json;charset=UTF-8")
     public ResponseEntity<Map<String, String>> registerAccount(@RequestBody
     RegisterRequest registerRequest) {
@@ -67,7 +67,7 @@ public class AuthenticationController {
 
     }
     
-    @PutMapping("regenetate-otp")
+    @PutMapping("/regenetate-otp")
     public ResponseEntity<String>  regenetateOtp(
             @RequestParam String email){
 
