@@ -270,7 +270,7 @@
         color: #fff;
         border-radius: 3px;
         &.pink {
-          background-color: #fa6bff;
+          background-color: #f27ac0;
         }
         &.purple {
           background-color: $theme-color;
@@ -1371,7 +1371,7 @@
       transition: all 0.0s ease 0s;
 
       border: none;
-      background: #fa6bff none repeat scroll 0 0;
+      background: #f27ac0 none repeat scroll 0 0;
     }
     .ui-slider-handle {
       width: 15px;
@@ -1379,7 +1379,7 @@
       margin-left: 0;
 
       border: medium none;
-      border: 4px solid #fa6bff;
+      border: 4px solid #f27ac0;
       border-radius: 50%;
       background: #fff none repeat scroll 0 0;
     }
@@ -1421,7 +1421,7 @@
       top: 20px;
       right: 20px;
       &.pink {
-        color: #fa6bff;
+        color: #f27ac0;
       }
       &.red {
         color: #ff3d2a;
@@ -1479,7 +1479,7 @@
         background-color: $theme-color;
         &:hover,
         &.active {
-          background-color: #fa6bff;
+          background-color: #f27ac0;
         }
       }
       &.product-action-2-red {
@@ -1510,7 +1510,7 @@
 
         border-radius: 3px;
         &.pink {
-          color: #fa6bff;
+          color: #f27ac0;
         }
         &.purple {
           color: $theme-color;
@@ -1553,7 +1553,7 @@
           &.old {
             text-decoration: line-through;
 
-            color: #fa6bff;
+            color: #f27ac0;
             &.red {
               color: #ff3d2a;
             }
@@ -1591,7 +1591,7 @@
             &.old {
               text-decoration: line-through;
 
-              color: #fa6bff;
+              color: #f27ac0;
             }
           }
         }
@@ -1864,7 +1864,7 @@
           background-color: $theme-color;
         }
         &.pink {
-          background-color: #fa6bff;
+          background-color: #f27ac0;
         }
         &:last-child {
           margin-bottom: 0;
@@ -1963,10 +1963,10 @@
           border: none;
           border-radius: 50px;
           background: none;
-          background-color: #a749ff;
+          background-color: #f56285;
           &:hover,
           &.active {
-            background-color: #fa6bff;
+            background-color: #f27ac0;
           }
           &:disabled {
             cursor: not-allowed;
@@ -2163,7 +2163,7 @@
         &.old {
           text-decoration: line-through;
 
-          color: #fa6bff;
+          color: #f27ac0;
         }
       }
       &.price-4-center {
@@ -2307,7 +2307,7 @@
         background-color: $theme-color;
       }
       &.pink {
-        background-color: #fa6bff;
+        background-color: #f27ac0;
       }
       &:last-child {
         margin-bottom: 0;
@@ -2331,7 +2331,7 @@
     text-align: center;
 
     opacity: 1;
-    background: none repeat scroll 0 0 #a749ff;
+    background: none repeat scroll 0 0 #f56285;
     .pro-same-action {
       margin: 0 2px;
       a,
@@ -2355,7 +2355,7 @@
         &:hover,
         &.active {
           color: #fff;
-          background-color: #fa6bff;
+          background-color: #f27ac0;
         }
       }
     }
@@ -2401,7 +2401,7 @@
         &.old {
           text-decoration: line-through;
 
-          color: #fa6bff;
+          color: #f27ac0;
         }
       }
     }
