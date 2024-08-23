@@ -58,7 +58,7 @@ const HeaderThree = ({
             <div className="col-xl-12 col-lg-12 col-6">
               <div className="center-menu-logo text-left text-lg-center">
                 {/* header logo */}
-                <Logo imageUrl="/assets/img/logo/logo.png" logoClass="logo" />
+                <Logo imageUrl="https://firebasestorage.googleapis.com/v0/b/bloom-gift-67f83.appspot.com/o/element-layout%2Flogo%2Flogo-header.png?alt=media&token=6d5a2b95-b887-4b2b-820e-2482681fffb4" logoClass="logo" />
               </div>
             </div>
             <div className="col-6 d-block d-lg-none">
