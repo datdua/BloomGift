@@ -78,11 +78,49 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+<<<<<<< HEAD:bloomgift(test)/bloomgift/pom.xml
+    		<groupId>org.springdoc</groupId>
+    			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    				<version>2.3.0</version>
+		</dependency>
+		<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <version>1.18.26</version>
+    <scope>provided</scope>
+</dependency>
+		<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+    <version>0.11.2</version>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-impl</artifactId>
+    <version>0.11.2</version>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.11.2</version>
+</dependency>
+
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+=======
     <groupId>org.springdoc</groupId>
     <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
     <version>2.3.0</version>
 </dependency>
+>>>>>>> main:Test/bloomgift(test)/bloomgift/pom.xml
 	</dependencies>
+	
 
 	<build>
 		<plugins>
