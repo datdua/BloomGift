@@ -9,7 +9,7 @@ const HeaderFive = () => {
     <div>
       <div className="home-sidebar-left">
         {/* header logo */}
-        <Logo imageUrl="/assets/img/logo/logo.png" logoClass="logo" />
+        <Logo imageUrl="https://firebasestorage.googleapis.com/v0/b/bloom-gift-67f83.appspot.com/o/element-layout%2Flogo%2Flogo-header.png?alt=media&token=6d5a2b95-b887-4b2b-820e-2482681fffb4" logoClass="logo" />
         {/* Icon group */}
         <IconGroup />
         {/* sidebar nav menu */}
@@ -33,7 +33,7 @@ const HeaderFive = () => {
           <div className="row">
             <div className="col-xl-2 col-lg-2 col-md-6 col-4">
               {/* header logo */}
-              <Logo imageUrl="/assets/img/logo/logo.png" logoClass="logo" />
+              <Logo imageUrl="https://firebasestorage.googleapis.com/v0/b/bloom-gift-67f83.appspot.com/o/element-layout%2Flogo%2Flogo-header.png?alt=media&token=6d5a2b95-b887-4b2b-820e-2482681fffb4" logoClass="logo" />
             </div>
             <div className="col-xl-10 col-lg-102 col-md-6 col-8">
               {/* Icon group */}
