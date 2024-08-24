@@ -1,11 +1,5 @@
 package com.example.bloomgift.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -38,7 +32,21 @@ public class EmailUtil {
         javaMailSender.send(mimeMessage);
     }
 
-    
 
+    public void sendForgetPasswordEmail(String email) throws MessagingException {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+        mimeMessageHelper.setTo(email);
+        mimeMessageHelper.setSubject("Quên Mật Khẩu");
 
+        // Tạo nội dung email
+        String content = "<p>Bạn đã yêu cầu quên mật khẩu.</p>"
+                + "<p>Vui lòng bấm vào nút dưới đây để reset mật khẩu.</p>"
+                + "<a href='http://localhost:3000/reset-password'>Reset Password</a>";
+
+        mimeMessageHelper.setText(content, true);
+
+        // Gửi email
+        javaMailSender.send(mimeMessage);
+    }
 }
