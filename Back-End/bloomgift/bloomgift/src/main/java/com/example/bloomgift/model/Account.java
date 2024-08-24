@@ -3,7 +3,6 @@ package com.example.bloomgift.model;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-import org.hibernate.annotations.Collate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import jakarta.persistence.Column;
@@ -201,7 +200,9 @@ public class Account {
         this.password = passwordEncoder.encode(password);
     }
     
-
+    public String getRoleName() {
+        return roleID != null ? roleID.getRoleName() : null;
+    }
     
 
 
