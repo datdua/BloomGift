@@ -18,60 +18,60 @@ import com.example.bloomgift.request.RegisterRequest;
 import com.example.bloomgift.service.AccountService;
 import com.example.bloomgift.service.AuthenticationService;
 
-
 @RestController
 @RequestMapping("/api/accounts")
 public class AuthenticationController {
+
     // @Autowired
     // private AccountService accountService;
     @Autowired
     private AuthenticationService authenticationService;
 
-
     @Autowired
     private AccountService accountService;
 
- 
-
     public AuthenticationController(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
-       
+
     }
 
-    @PostMapping(value = "/register", produces =
-    "application/json;charset=UTF-8")
-    public ResponseEntity<Map<String, String>> registerAccount(@RequestBody
-    RegisterRequest registerRequest) {
-    Map<String, String> response = authenticationService.register(registerRequest);
-    return ResponseEntity.ok(response);
+    @PostMapping(value = "/register", produces
+            = "application/json;charset=UTF-8")
+    public ResponseEntity<Map<String, String>> registerAccount(@RequestBody RegisterRequest registerRequest) {
+        Map<String, String> response = authenticationService.register(registerRequest);
+        return ResponseEntity.ok(response);
     }
-    
+
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) {
         AuthenticationResponse response = authenticationService.authenticate(loginRequest);
         return ResponseEntity.ok(response);
     }
-    
+
     @PutMapping("/verify-account")
     public ResponseEntity<String> verifyAccount(
-        @RequestParam String email,
-        @RequestParam String otp){
-            return new ResponseEntity<>(authenticationService.verifyAccount(email,otp),HttpStatus.OK);
+            @RequestParam String email,
+            @RequestParam String otp) {
+        return new ResponseEntity<>(authenticationService.verifyAccount(email, otp), HttpStatus.OK);
 
     }
-    
+
     @PutMapping("/regenetate-otp")
-    public ResponseEntity<String>  regenetateOtp(
-            @RequestParam String email){
+    public ResponseEntity<String> regenetateOtp(
+            @RequestParam String email) {
 
-            return new ResponseEntity<>(authenticationService.generateOtp(email),HttpStatus.OK);
+        return new ResponseEntity<>(authenticationService.generateOtp(email), HttpStatus.OK);
 
     }
 
+    @PostMapping("/forget-password")
+    public ResponseEntity<Map<String, String>> forgetPassword(@RequestParam String email) {
+        return ResponseEntity.ok(accountService.forgetPassword(email));
+    }
 
- 
-   
-    
- 
-  
+    @PutMapping("/set-password")
+    public ResponseEntity<Map<String, String>> setPassword(@RequestParam String email, @RequestParam String newPassword) {
+        return ResponseEntity.ok(accountService.setPassword(email, newPassword));
+    }
+
 }
