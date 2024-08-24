@@ -7,7 +7,7 @@ public class AccountRequest {
     private String email ; 
     private String password; 
     private String address; 
-    private Boolean gender; 
+    private String gender; 
     private String avatar ; 
     private Date birthday ; 
     private int phone ; 
@@ -16,7 +16,7 @@ public class AccountRequest {
     public AccountRequest(){
 
     }
-    public AccountRequest(String fullname, String email, String password, String address, Boolean gender, String avatar,
+    public AccountRequest(String fullname, String email, String password, String address, String gender, String avatar,
             Date birthday, int phone, Boolean accountStatus, String roleName) {
         this.fullname = fullname;
         this.email = email;
@@ -53,10 +53,10 @@ public class AccountRequest {
     public void setAddress(String address) {
         this.address = address;
     }
-    public Boolean getGender() {
+    public String getGender() {
         return gender;
     }
-    public void setGender(Boolean gender) {
+    public void setGender(String gender) {
         this.gender = gender;
     }
     public String getAvatar() {

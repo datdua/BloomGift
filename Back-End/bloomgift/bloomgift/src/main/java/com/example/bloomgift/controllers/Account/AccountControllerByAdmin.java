@@ -64,6 +64,10 @@ public class AccountControllerByAdmin {
     }
 
   
+    // @GetMapping("/list-all-account")
+    // public List<Account> getAllAccounts() {
+    //     return accountService.getAllAccounts();
+    // }
 
   
     @GetMapping("/list-all-account")

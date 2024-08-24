@@ -44,6 +44,10 @@ public class AccountService implements UserDetailsService {
         return accountRepository.findAll(pageable);
     }
 
+    public List<Account> getAllAccounts() {
+        return accountRepository.findAll()  ;
+    } 
+
     public Optional<Account> getAccountById(int accountID) {
         return accountRepository.findById(accountID);
     }
@@ -66,7 +70,7 @@ public class AccountService implements UserDetailsService {
         String address = accountRequest.getAddress();
         Date birthday = accountRequest.getBirthday(); 
         String roleName = accountRequest.getRoleName();
-        Boolean gender = accountRequest.getGender();
+        String gender = accountRequest.getGender();
         String avatar = accountRequest.getAvatar();
         Account existingEmail = accountRepository.findByEmail(email);
         if (existingEmail != null) {
@@ -111,7 +115,7 @@ public class AccountService implements UserDetailsService {
         String address = accountRequest.getAddress();
         Date birthday = accountRequest.getBirthday(); 
         String rolename = accountRequest.getRoleName();
-        Boolean gender = accountRequest.getGender();
+        String gender = accountRequest.getGender();
         Boolean accountstatus = accountRequest.getAccountStatus();
         String avatar = accountRequest.getAvatar();
 
@@ -154,7 +158,7 @@ public class AccountService implements UserDetailsService {
         String address = accountRequest.getAddress();
         Date birthday = accountRequest.getBirthday(); 
         String rolename = accountRequest.getRoleName();
-        Boolean gender = accountRequest.getGender();
+        String gender = accountRequest.getGender();
         if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail.com$") && !email.matches("^[a-zA-Z0-9._%+-]+@fpt.edu.vn$")) {
             throw new RuntimeException("Invalid email format");
         }
