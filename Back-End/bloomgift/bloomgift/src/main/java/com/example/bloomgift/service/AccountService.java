@@ -2,9 +2,7 @@ package com.example.bloomgift.service;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 import org.springframework.util.StringUtils;
 import org.springframework.data.domain.Page;
@@ -17,8 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collections;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
+
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -112,22 +109,22 @@ public AccountReponse getAccountById(int accountID) {
         );
     }
 
-    public Page<AccountReponse> getFilteredAccounts(String address,Date birthday,String fullName,Pageable pageable,int accountID, String gender, int phone) {
-        return accountRepository.findByFilters(fullName,birthday,pageable,accountID, gender, phone,address)
-            .map(account -> new AccountReponse(
-                    account.getAccountID(),
-                    account.getFullname(),
-                    account.getEmail(),
-                    account.getPassword(),
-                    account.getAddress(),
-                    account.getGender(),
-                    account.getAvatar(),
-                    account.getBirthday(),
-                    account.getPhone(),
-                    account.getAccountStatus(),
-                    account.getRoleName() // Assuming role name is a direct property
-            ));
-    }
+    // public Page<AccountReponse> getFilteredAccounts(String address,Date birthday,String fullname ,String roleName,Pageable pageable,int accountID, String gender, int phone) {
+    //     return accountRepository.findByFilters(fullname,birthday,roleName,pageable,accountID, gender, phone,address)
+    //         .map(account -> new AccountReponse(
+    //                 account.getAccountID(),
+    //                 account.getFullname(),
+    //                 account.getEmail(),
+    //                 account.getPassword(),
+    //                 account.getAddress(),
+    //                 account.getGender(),
+    //                 account.getAvatar(),
+    //                 account.getBirthday(),
+    //                 account.getPhone(),
+    //                 account.getAccountStatus(),
+    //                 account.getRoleName() // Assuming role name is a direct property
+    //         ));
+    // }
     public void deleteAccount(Integer accountID) {
         Account existingAccount = accountRepository.findById(accountID)
                 .orElseThrow(() -> new RuntimeException("Account not found"));

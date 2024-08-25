@@ -1,10 +1,8 @@
 package com.example.bloomgift.controllers.Account;
 
 import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +24,7 @@ import com.example.bloomgift.reponse.AccountReponse;
 import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.request.AccountRequest;
 import com.example.bloomgift.service.AccountService;
+import com.example.bloomgift.service.ProductService;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,7 +40,8 @@ public class AccountControllerByAdmin {
     @Autowired
     private AccountService accountService;
 
-    
+    @Autowired
+    private ProductService productService;
 
     public AccountControllerByAdmin(AccountRepository accountRepository, AccountService accountService) {
         this.accountRepository = accountRepository;
@@ -114,19 +113,20 @@ public class AccountControllerByAdmin {
 
 
 
-    @GetMapping("/search")
-    public ResponseEntity<Page<AccountReponse>> getFilteredAccounts(
-        @RequestParam(required = false) String fullName,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date birthday,
-        @RequestParam(required = false) int accountID,
-        @RequestParam(required = false) String gender,
-        @RequestParam(required = false) int phone,
-        @RequestParam(required = false) String address,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size) {
-    Pageable pageable = PageRequest.of(page, size);
-    Page<AccountReponse> accountReponse = accountService.getFilteredAccounts( address, birthday,fullName,pageable,accountID,  gender, phone);
-    return new ResponseEntity<>(accountReponse, HttpStatus.OK);
-}
+//     @GetMapping("/search")
+//     public ResponseEntity<Page<AccountReponse>> getFilteredAccounts(
+//         @RequestParam(required = false) String fullName,
+//         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date birthday,
+//         @RequestParam(required = false) int accountID,
+//         @RequestParam(required = false) String gender,
+//         @RequestParam(required = false) int phone,
+//         @RequestParam(required = false) String address,
+//         @RequestParam(defaultValue = "0") int page,
+//         @RequestParam(defaultValue = "10") int size) {
+//     Pageable pageable = PageRequest.of(page, size);
+//     Page<AccountReponse> accountReponse = accountService.getFilteredAccounts( address, birthday,fullName,pageable,accountID,  gender, phone);
+//     return new ResponseEntity<>(accountReponse, HttpStatus.OK);
+// }
+
 
 }

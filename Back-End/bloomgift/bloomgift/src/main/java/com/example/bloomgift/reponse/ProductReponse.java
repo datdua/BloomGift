@@ -1,23 +1,55 @@
 package com.example.bloomgift.reponse;
 
 import java.util.Date;
+import java.util.List;
 
 
 public class ProductReponse {
     
-    private Integer productID; 
-    private Float price ;
-    private Float discount ;
-    private String description ;
-    private String color ;
-    private Float size ;
-    private Boolean featured ;
-    private Float productStatus ;
-    private Date createDate ;
-    private Integer quantity ;
-    private Integer sold ;
+    private Integer productID;
+    private Float price;
+    private Float discount;
+    private String description;
+    private String colour;
+    private Float size;
+    private Boolean featured;
+    private Boolean productStatus;
+    private Date createDate;
+    private Integer quantity;
+    private Integer sold;
     private String categoryName;
     private String storeName;
+        public ProductReponse(){
+
+    }
+
+
+
+
+
+    
+
+
+    public ProductReponse(Integer productID, Float price, Float discount, String description, String colour,
+                Float size, Boolean featured, Boolean productStatus, Date createDate, Integer quantity, Integer sold,
+                String categoryName, String storeName) {
+            this.productID = productID;
+            this.price = price;
+            this.discount = discount;
+            this.description = description;
+            this.colour = colour;
+            this.size = size;
+            this.featured = featured;
+            this.productStatus = productStatus;
+            this.createDate = createDate;
+            this.quantity = quantity;
+            this.sold = sold;
+            this.categoryName = categoryName;
+            this.storeName = storeName;
+          
+        }
+
+
 
 
 
@@ -48,11 +80,11 @@ public class ProductReponse {
     public void setDescription(String description) {
         this.description = description;
     }
-    public String getColor() {
-        return color;
+    public String getColour() {
+        return colour;
     }
-    public void setColor(String color) {
-        this.color = color;
+    public void setColour(String colour) {
+        this.colour = colour;
     }
     public Float getSize() {
         return size;
@@ -66,10 +98,10 @@ public class ProductReponse {
     public void setFeatured(Boolean featured) {
         this.featured = featured;
     }
-    public Float getProductStatus() {
+    public Boolean getProductStatus() {
         return productStatus;
     }
-    public void setProductStatus(Float productStatus) {
+    public void setProductStatus(Boolean productStatus) {
         this.productStatus = productStatus;
     }
     public Date getCreateDate() {
@@ -102,6 +134,16 @@ public class ProductReponse {
     public void setStoreName(String storeName) {
         this.storeName = storeName;
     }
+
+
+
+
+
+  
+
+
+
+
 
     
 }
