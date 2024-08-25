@@ -1,14 +1,18 @@
 package com.example.bloomgift.model;
 
 import java.util.Date;
+import java.util.List;
+import jakarta.persistence.*;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -29,8 +33,8 @@ public class Product {
     @Column(name = "description")
     private String description ;
 
-    @Column(name = "color")
-    private String color ;
+    @Column(name = "colour")
+    private String colour ;
 
     @Column(name = "size")
     private Float size ;
@@ -39,7 +43,7 @@ public class Product {
     private Boolean featured ;
 
     @Column(name = "productStatus")
-    private Float productStatus ;
+    private Boolean productStatus ;
 
     @Column(name = "createDate")
     private Date createDate ;
@@ -57,6 +61,44 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "storeID")
     private Store storeID;
+
+    @OneToMany(mappedBy = "productID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ProductImage> productImages;
+    
+    public Product(){
+
+    }
+
+
+   
+
+
+
+
+    public Product(Integer productID, Float price, Float discount, String description, String colour, Float size,
+            Boolean featured, Boolean productStatus, Date createDate, Integer quantity, Integer sold,
+            Category categoryID, Store storeID, List<ProductImage> productImages) {
+        this.productID = productID;
+        this.price = price;
+        this.discount = discount;
+        this.description = description;
+        this.colour = colour;
+        this.size = size;
+        this.featured = featured;
+        this.productStatus = productStatus;
+        this.createDate = createDate;
+        this.quantity = quantity;
+        this.sold = sold;
+        this.categoryID = categoryID;
+        this.storeID = storeID;
+        this.productImages = productImages;
+    }
+
+
+
+
+
+
 
     public Integer getProductID() {
         return productID;
@@ -90,12 +132,12 @@ public class Product {
         this.description = description;
     }
 
-    public String getColor() {
-        return color;
+    public String getColour() {
+        return colour;
     }
 
-    public void setColor(String color) {
-        this.color = color;
+    public void setColour(String colour) {
+        this.colour = colour;
     }
 
     public Float getSize() {
@@ -114,11 +156,11 @@ public class Product {
         this.featured = featured;
     }
 
-    public Float getProductStatus() {
+    public Boolean getProductStatus() {
         return productStatus;
     }
 
-    public void setProductStatus(Float productStatus) {
+    public void setProductStatus(Boolean productStatus) {
         this.productStatus = productStatus;
     }
 
@@ -150,8 +192,8 @@ public class Product {
         return categoryID;
     }
 
-    public void setCategoryID(Category categoryID) {
-        this.categoryID = categoryID;
+    public void setCategoryID(Category category) {
+        this.categoryID = category;
     }
 
     public Store getStoreID() {
@@ -161,6 +203,34 @@ public class Product {
     public void setStoreID(Store storeID) {
         this.storeID = storeID;
     }
+    public String getCategoryName(){
+        return categoryID !=null ? categoryID.getCategoryName():null;
+    }
+    public String getStoreName(){
+        return storeID != null ? storeID.getStoreName() : null;
+    }
+
+
+
+
+
+
+
+    public List<ProductImage> getProductImages() {
+        return productImages;
+    }
+
+
+
+
+
+
+
+    public void setProductImages(List<ProductImage> productImages) {
+        this.productImages = productImages;
+    }
+
+
 
     
 }
