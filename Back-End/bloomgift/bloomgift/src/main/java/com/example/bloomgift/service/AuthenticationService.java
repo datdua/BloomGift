@@ -66,6 +66,13 @@ public class AuthenticationService {
     public AuthenticationResponse authenticate(LoginRequest loginRequest){
         org.springframework.security.core.Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassrword()));
+            Account account = accountRepository.findByEmail(loginRequest.getEmail());
+
+            // Check if accountStatus is true
+            if (!account.getAccountStatus()) {
+                // Throw an exception or handle the case where the account is not active
+                throw new RuntimeException("Account is not active");
+            }
     UserDetails userDetails = accountService.loadUserByUsername(loginRequest.getEmail());
     String token = jwtUtil.generateToken(userDetails);
     return new AuthenticationResponse(token);

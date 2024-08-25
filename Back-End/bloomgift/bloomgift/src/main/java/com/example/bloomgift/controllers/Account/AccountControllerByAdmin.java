@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
 import com.example.bloomgift.model.Account;
+import com.example.bloomgift.reponse.AccountReponse;
 import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.request.AccountRequest;
 import com.example.bloomgift.service.AccountService;
@@ -64,29 +65,27 @@ public class AccountControllerByAdmin {
     }
 
   
-    // @GetMapping("/list-all-account")
-    // public List<Account> getAllAccounts() {
-    //     return accountService.getAllAccounts();
-    // }
+  
 
   
+    // @GetMapping("/list-all-account")
+    // public ResponseEntity<List<AccountReponse>> getAllAccounts() {
+    //     List<AccountReponse> accountReponse = accountService.getAllAccounts();
+    //     return new ResponseEntity<>(accountReponse, HttpStatus.OK);
+    // }
     @GetMapping("/list-all-account")
-    public ResponseEntity<Page<Account>> getAllAccounts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Account> accounts = accountService.getAllAccounts(pageable);
-        if (accounts.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(accounts);
-    }
+    public ResponseEntity<Page<AccountReponse>> getAllAccounts(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
+    Pageable pageable = PageRequest.of(page, size);
+    Page<AccountReponse> accountReponse = accountService.getAllAccounts(pageable);
+    return new ResponseEntity<>(accountReponse, HttpStatus.OK);
+}
     
     @GetMapping("/{accountID}")
-    public ResponseEntity<Account> getAccountById(@PathVariable("accountID") int accountID) {
-        Optional<Account> account = accountService.getAccountById(accountID);
-        return account.map(ResponseEntity::ok)
-                      .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<AccountReponse> getAccountById(@PathVariable int accountID) {
+        AccountReponse accountReponse = accountService.getAccountById(accountID);
+        return new ResponseEntity<>(accountReponse, HttpStatus.OK);
     }
     
     @PutMapping(value = "/update-account/{accountID}",
@@ -113,28 +112,21 @@ public class AccountControllerByAdmin {
         }
     }
 
-    @GetMapping("/get-paging")
-    public ResponseEntity<Page<Account>> getAllAccountsPaged(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
-        PageRequest pageable = PageRequest.of(page - 1, size);
-        Page<Account> pageAccount = accountRepository.findAll(pageable);
-        return ResponseEntity.ok(pageAccount);
-    }
+
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchAccounts(
-            @RequestParam(required = false) Integer accountID,
-            @RequestParam(required = false) String text,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date birthday,
-            @RequestParam(required = false) Integer phone,
-            @RequestParam(required = false) String roleName) {
-
-        List<Account> accounts = accountRepository.searchAccounts(accountID, text, birthday, phone, roleName);
-
-        if (accounts.isEmpty()) {
-            return ResponseEntity.noContent().build(); // No content if no accounts found
-        }
-
-        return ResponseEntity.ok(accounts);
-    }
+    public ResponseEntity<Page<AccountReponse>> getFilteredAccounts(
+        @RequestParam(required = false) String fullName,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date birthday,
+        @RequestParam(required = false) int accountID,
+        @RequestParam(required = false) String gender,
+        @RequestParam(required = false) int phone,
+        @RequestParam(required = false) String address,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
+    Pageable pageable = PageRequest.of(page, size);
+    Page<AccountReponse> accountReponse = accountService.getFilteredAccounts( address, birthday,fullName,pageable,accountID,  gender, phone);
+    return new ResponseEntity<>(accountReponse, HttpStatus.OK);
+}
 
 }

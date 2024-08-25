@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.util.StringUtils;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.example.bloomgift.model.Account;
+import com.example.bloomgift.reponse.AccountReponse;
 import com.example.bloomgift.repository.AccountRepository;
 
 import com.example.bloomgift.repository.RoleRepository;
@@ -60,16 +62,71 @@ public class AccountService implements UserDetailsService {
         return new User(account.getEmail(), account.getPassword(), new ArrayList<>());
     }
 
-    public Page<Account> getAllAccounts(Pageable pageable) {
-        return accountRepository.findAll(pageable);
+//    public List<AccountReponse> getAllAccounts() {
+//     return accountRepository.findAll().stream()
+//             .map(account -> new AccountReponse(
+//                     account.getAccountID(),
+//                     account.getFullname(),
+//                     account.getEmail(),
+//                     account.getPassword(),
+//                     account.getAddress(),
+//                     account.getGender(),
+//                     account.getAvatar(),
+//                     account.getBirthday(),
+//                     account.getPhone(),
+//                     account.getAccountStatus(),
+//                     account.getRoleName() 
+//             ))
+//             .collect(Collectors.toList());
+// }
+public Page<AccountReponse> getAllAccounts(Pageable pageable) {
+    return accountRepository.findAll(pageable)
+            .map(account -> new AccountReponse(
+                    account.getAccountID(),
+                    account.getFullname(),
+                    account.getEmail(),
+                    account.getPassword(),
+                    account.getAddress(),
+                    account.getGender(),
+                    account.getAvatar(),
+                    account.getBirthday(),
+                    account.getPhone(),
+                    account.getAccountStatus(),
+                    account.getRoleName() // Assuming role name is a direct property
+            ));
+}
+public AccountReponse getAccountById(int accountID) {
+    Account account = accountRepository.findById(accountID).orElseThrow();
+    return new AccountReponse(
+            account.getAccountID(),
+            account.getFullname(),
+            account.getEmail(),
+            account.getPassword(),
+            account.getAddress(),
+            account.getGender(),
+            account.getAvatar(),
+            account.getBirthday(),
+            account.getPhone(),
+            account.getAccountStatus(),
+            account.getRoleName() // Assuming role name is a direct property
+        );
     }
 
-    public List<Account> getAllAccounts() {
-        return accountRepository.findAll()  ;
-    } 
-
-    public Optional<Account> getAccountById(int accountID) {
-        return accountRepository.findById(accountID);
+    public Page<AccountReponse> getFilteredAccounts(String address,Date birthday,String fullName,Pageable pageable,int accountID, String gender, int phone) {
+        return accountRepository.findByFilters(fullName,birthday,pageable,accountID, gender, phone,address)
+            .map(account -> new AccountReponse(
+                    account.getAccountID(),
+                    account.getFullname(),
+                    account.getEmail(),
+                    account.getPassword(),
+                    account.getAddress(),
+                    account.getGender(),
+                    account.getAvatar(),
+                    account.getBirthday(),
+                    account.getPhone(),
+                    account.getAccountStatus(),
+                    account.getRoleName() // Assuming role name is a direct property
+            ));
     }
     public void deleteAccount(Integer accountID) {
         Account existingAccount = accountRepository.findById(accountID)
@@ -134,7 +191,7 @@ public class AccountService implements UserDetailsService {
         Integer phone = accountRequest.getPhone();
         String address = accountRequest.getAddress();
         Date birthday = accountRequest.getBirthday(); 
-        String rolename = accountRequest.getRoleName();
+        String roleName = accountRequest.getRoleName();
         String gender = accountRequest.getGender();
         Boolean accountstatus = accountRequest.getAccountStatus();
         String avatar = accountRequest.getAvatar();
@@ -150,7 +207,6 @@ public class AccountService implements UserDetailsService {
         existingAccount.setAccountStatus(accountstatus);
         existingAccount.setAvatar(avatar);
 
-        String roleName = accountRequest.getRoleName();
         if (roleName != null && !roleName.isEmpty()) {
             com.example.bloomgift.model.Role role = roleRepository.findByRoleName(roleName);
             if (role == null) {
