@@ -66,6 +66,13 @@ public class AuthenticationService {
     public AuthenticationResponse authenticate(LoginRequest loginRequest){
         org.springframework.security.core.Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassrword()));
+            Account account = accountRepository.findByEmail(loginRequest.getEmail());
+
+            // Check if accountStatus is true
+            if (!account.getAccountStatus()) {
+                // Throw an exception or handle the case where the account is not active
+                throw new RuntimeException("Account is not active");
+            }
     UserDetails userDetails = accountService.loadUserByUsername(loginRequest.getEmail());
     String token = jwtUtil.generateToken(userDetails);
     return new AuthenticationResponse(token);
@@ -84,7 +91,7 @@ public class AuthenticationService {
          Integer phone = registerRequest.getPhone();
          String password = registerRequest.getPassword();
          String address = registerRequest.getAddress();
-         Boolean gender = registerRequest.getGender();
+         String gender = registerRequest.getGender();
          Date birthday = registerRequest.getBirthday();
          Role roleID = roleRepository.findById(2).orElseThrow(); 
         //  Role roleID = roleRepository.findById(1).orElseThrow(() -> new RuntimeException("Role not found"));
@@ -107,7 +114,7 @@ public void checkvalidateRegister(RegisterRequest registerRequest){
     Integer phone = registerRequest.getPhone();
     String password = registerRequest.getPassword();
     String address = registerRequest.getAddress();
-    Boolean gender = registerRequest.getGender();
+    String gender = registerRequest.getGender();
     Date birthday = registerRequest.getBirthday();
     if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail.com$") && !email.matches("^[a-zA-Z0-9._%+-]+@fpt.edu.vn$")) {
         throw new RuntimeException("Invalid email format");

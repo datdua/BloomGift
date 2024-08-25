@@ -7,7 +7,7 @@ public class RegisterRequest {
     private Integer phone ; 
     private String address ; 
     private String fullname ;
-    private Boolean gender ; 
+    private String gender ; 
     private Date birthday ; 
     private String password;
     public RegisterRequest(){
@@ -16,7 +16,7 @@ public class RegisterRequest {
 
  
 
-    public RegisterRequest(String email, Integer phone, String address, String fullname, Boolean gender, Date birthday,
+    public RegisterRequest(String email, Integer phone, String address, String fullname, String gender, Date birthday,
             String password) {
         this.email = email;
         this.phone = phone;
@@ -61,11 +61,11 @@ public class RegisterRequest {
         this.fullname = fullname;
     }
 
-    public Boolean getGender() {
+    public String getGender() {
         return gender;
     }
 
-    public void setGender(Boolean gender) {
+    public void setGender(String gender) {
         this.gender = gender;
     }
 
