@@ -10,6 +10,7 @@ public class RegisterRequest {
     private String gender ; 
     private Date birthday ; 
     private String password;
+    
     public RegisterRequest(){
 
     }
@@ -86,5 +87,9 @@ public class RegisterRequest {
     public void setPassword(String password) {
         this.password = password;
     }
+
+
+
+
     
 }
