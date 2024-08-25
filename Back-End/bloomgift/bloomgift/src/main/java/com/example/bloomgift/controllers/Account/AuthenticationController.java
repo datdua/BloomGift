@@ -19,7 +19,7 @@ import com.example.bloomgift.service.AccountService;
 import com.example.bloomgift.service.AuthenticationService;
 
 @RestController
-@RequestMapping("/api/accounts")
+@RequestMapping("/api/auth")
 public class AuthenticationController {
 
     // @Autowired

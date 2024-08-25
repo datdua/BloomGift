@@ -1,16 +1,13 @@
 package com.example.bloomgift.service;
 
-import java.util.Date;
-import java.util.Map;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.time.Duration;
-
-import javax.management.RuntimeErrorException;
-import org.springframework.security.authentication.AuthenticationManager;
+import java.util.Date;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties.Authentication;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -27,7 +24,6 @@ import com.example.bloomgift.utils.EmailUtil;
 import com.example.bloomgift.utils.JwtUtil;
 import com.example.bloomgift.utils.OtpUtil;
 
-import ch.qos.logback.core.util.StringUtil;
 import jakarta.mail.MessagingException;
 
 
@@ -63,13 +59,18 @@ public class AuthenticationService {
         this.accountService = accountService;
     }
 
-    public AuthenticationResponse authenticate(LoginRequest loginRequest){
+    public AuthenticationResponse authenticate(LoginRequest loginRequest) {
         org.springframework.security.core.Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassrword()));
-    UserDetails userDetails = accountService.loadUserByUsername(loginRequest.getEmail());
-    String token = jwtUtil.generateToken(userDetails);
-    return new AuthenticationResponse(token);
-}
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassrword()));
+
+        UserDetails userDetails = accountService.loadUserByUsername(loginRequest.getEmail());
+        Account account = accountRepository.findByEmail(loginRequest.getEmail());
+
+        String role = account.getRoleID().getRoleName(); 
+
+        String token = jwtUtil.generateToken(userDetails, role); 
+        return new AuthenticationResponse(token);
+    }
 
     public Map<String,String> register(RegisterRequest registerRequest){
          checkvalidateRegister(registerRequest);

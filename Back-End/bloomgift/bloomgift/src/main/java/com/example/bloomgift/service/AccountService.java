@@ -1,11 +1,11 @@
 package com.example.bloomgift.service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,10 +31,17 @@ public class AccountService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(email);
+
         if (account == null) {
-            throw new UsernameNotFoundException("User not found with email: " + email);
+            throw new UsernameNotFoundException("Email không tồn tại.");
         }
-        return new User(account.getEmail(), account.getPassword(), new ArrayList<>());
+
+        GrantedAuthority authority = new SimpleGrantedAuthority(account.getRoleID().getRoleName());
+
+        return new org.springframework.security.core.userdetails.User(
+                account.getEmail(),
+                account.getPassword(),
+                Collections.singletonList(authority));
     }
 
     public Map<String, String> setPassword(String email, String newPassword) {
