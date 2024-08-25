@@ -53,7 +53,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(req -> req
                         .requestMatchers(SWAGGER_URLS).permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/api/auth/set-password/**").hasAuthority("ROLE_CUSTOMER")
+                        .requestMatchers("/api/auth/set-password/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
