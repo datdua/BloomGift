@@ -5,6 +5,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,8 +37,7 @@ public class AuthenticationController {
 
     }
 
-    @PostMapping(value = "/register", produces
-            = "application/json;charset=UTF-8")
+    @PostMapping(value = "/register", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Map<String, String>> registerAccount(@RequestBody RegisterRequest registerRequest) {
         Map<String, String> response = authenticationService.register(registerRequest);
         return ResponseEntity.ok(response);
@@ -70,8 +71,14 @@ public class AuthenticationController {
     }
 
     @PutMapping("/set-password")
-    public ResponseEntity<Map<String, String>> setPassword(@RequestParam String email, @RequestParam String newPassword) {
+    public ResponseEntity<Map<String, String>> setPassword(@RequestParam String email,
+            @RequestParam String newPassword) {
         return ResponseEntity.ok(accountService.setPassword(email, newPassword));
     }
 
+    @GetMapping("/signInWithGoogle")
+    public ResponseEntity<Map<String, Object>> loginWithGoogle(OAuth2AuthenticationToken oAuth2AuthenticationToken) {
+        Map<String, Object> attributes = authenticationService.loginWithGoogle(oAuth2AuthenticationToken);
+        return ResponseEntity.ok(attributes);
+    }
 }

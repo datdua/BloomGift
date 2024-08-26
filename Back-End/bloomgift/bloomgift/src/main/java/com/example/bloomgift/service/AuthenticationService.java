@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -165,5 +167,34 @@ public void checkvalidateRegister(RegisterRequest registerRequest){
         account.setOtp_generated_time(LocalDateTime.now());
         accountRepository.save(account);
         return "Email sent ..... please veryfi account within 1 minute";
+    }
+
+    public Map<String, Object> loginWithGoogle(OAuth2AuthenticationToken oAuth2AuthenticationToken) {
+        OAuth2User oAuth2User = oAuth2AuthenticationToken.getPrincipal();
+        String email = oAuth2User.getAttribute("email");
+        String name = oAuth2User.getAttribute("name");
+        String picture = oAuth2User.getAttribute("picture");
+
+        if (email == null || name == null) {
+            throw new IllegalArgumentException("Email and Name cannot be null");
+        }
+
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) {
+            account = new Account();
+            account.setEmail(email);
+            account.setFullname(name);
+            account.setAvatar(picture);
+            account.setAccountStatus(true);
+            Role roleID = roleRepository.findById(2).orElseThrow(); 
+            account.setRoleID(roleID);
+            accountRepository.save(account);
+        } else {
+            account.setFullname(name);
+            account.setAvatar(picture);
+            accountRepository.save(account);
+        }
+
+        return oAuth2User.getAttributes();
     }
 }
