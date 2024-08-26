@@ -3,13 +3,11 @@ package com.example.bloomgift.service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.time.Duration;
-
-import javax.management.RuntimeErrorException;
-import org.springframework.security.authentication.AuthenticationManager;
+import java.util.Date;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties.Authentication;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
