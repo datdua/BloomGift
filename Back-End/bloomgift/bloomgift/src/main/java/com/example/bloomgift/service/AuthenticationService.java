@@ -1,16 +1,17 @@
 package com.example.bloomgift.service;
 
-import java.util.Date;
-import java.util.Map;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.time.Duration;
-
-import org.springframework.security.authentication.AuthenticationManager;
+import java.util.Date;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -60,20 +61,18 @@ public class AuthenticationService {
         this.accountService = accountService;
     }
 
-    public AuthenticationResponse authenticate(LoginRequest loginRequest){
+    public AuthenticationResponse authenticate(LoginRequest loginRequest) {
         org.springframework.security.core.Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassrword()));
-            Account account = accountRepository.findByEmail(loginRequest.getEmail());
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassrword()));
 
-            // Check if accountStatus is true
-            if (!account.getAccountStatus()) {
-                // Throw an exception or handle the case where the account is not active
-                throw new RuntimeException("Account is not active");
-            }
-    UserDetails userDetails = accountService.loadUserByUsername(loginRequest.getEmail());
-    String token = jwtUtil.generateToken(userDetails);
-    return new AuthenticationResponse(token);
-}
+        UserDetails userDetails = accountService.loadUserByUsername(loginRequest.getEmail());
+        Account account = accountRepository.findByEmail(loginRequest.getEmail());
+
+        String role = account.getRoleID().getRoleName(); 
+
+        String token = jwtUtil.generateToken(userDetails, role); 
+        return new AuthenticationResponse(token);
+    }
 
     public Map<String,String> register(RegisterRequest registerRequest){
          checkvalidateRegister(registerRequest);
@@ -174,5 +173,34 @@ public void checkvalidateRegister(RegisterRequest registerRequest){
         account.setOtp_generated_time(LocalDateTime.now());
         accountRepository.save(account);
         return "Email sent ..... please veryfi account within 1 minute";
+    }
+
+    public Map<String, Object> loginWithGoogle(OAuth2AuthenticationToken oAuth2AuthenticationToken) {
+        OAuth2User oAuth2User = oAuth2AuthenticationToken.getPrincipal();
+        String email = oAuth2User.getAttribute("email");
+        String name = oAuth2User.getAttribute("name");
+        String picture = oAuth2User.getAttribute("picture");
+
+        if (email == null || name == null) {
+            throw new IllegalArgumentException("Email and Name cannot be null");
+        }
+
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) {
+            account = new Account();
+            account.setEmail(email);
+            account.setFullname(name);
+            account.setAvatar(picture);
+            account.setAccountStatus(true);
+            Role roleID = roleRepository.findById(2).orElseThrow(); 
+            account.setRoleID(roleID);
+            accountRepository.save(account);
+        } else {
+            account.setFullname(name);
+            account.setAvatar(picture);
+            accountRepository.save(account);
+        }
+
+        return oAuth2User.getAttributes();
     }
 }

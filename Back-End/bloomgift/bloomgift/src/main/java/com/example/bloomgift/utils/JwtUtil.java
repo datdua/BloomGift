@@ -20,8 +20,10 @@ import io.jsonwebtoken.security.Keys;
 public class JwtUtil {
     private String SECRET_KEY = "9e0039571f380e6d5950cfdeb7b0dcab806913156420699a2bc7bcb971c95271";
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateToken(UserDetails userDetails, String role) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role); // Add role to claims
+        return generateToken(claims, userDetails);
     }
 
     public String generateToken(
@@ -30,15 +32,19 @@ public class JwtUtil {
         return Jwts
                 .builder()
                 .setClaims(extractClaim)
-                .setSubject(userDetails.getUsername())
+                .setSubject(userDetails.getUsername().trim())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
-                .signWith(SignatureAlgorithm.HS256, getSignInKey())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY)), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class)); // Extract role from claims
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -49,20 +55,20 @@ public class JwtUtil {
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
-
     }
 
     public Claims extractAllClaims(String token) {
         return Jwts
-                .parser()
-                .setSigningKey(SECRET_KEY)
+                .parserBuilder()
+                .setSigningKey(getSignInKey())
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
-    public Boolean isTokenvalid(String token, UserDetails account) {
-        String email = extractUsername(token);
-        return email.equals(account.getUsername()) && !isTokenExpired(token);
+    public Boolean isTokenValid(String token, UserDetails userDetails) {
+        String username = extractUsername(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     public Boolean isTokenExpired(String token) {
@@ -72,5 +78,4 @@ public class JwtUtil {
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-
 }
