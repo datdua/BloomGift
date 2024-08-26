@@ -133,9 +133,4 @@ public class AccountControllerByAdmin {
 //     return new ResponseEntity<>(accountReponse, HttpStatus.OK);
 // }
 
-      @PostMapping(value="/create-category", produces =
-      "application/json;charset=UTF-8")
-    public Category createCategory(@RequestBody CategoryRequest categoryRequest) {
-        return categoryService.createCategory(categoryRequest);
-    }
 }
