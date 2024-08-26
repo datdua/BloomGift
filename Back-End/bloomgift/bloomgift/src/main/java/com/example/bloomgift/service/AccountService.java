@@ -1,35 +1,26 @@
 package com.example.bloomgift.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-
-
-import org.springframework.util.StringUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.beans.factory.annotation.Autowired;
-
-
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 
-
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.reponse.AccountReponse;
 import com.example.bloomgift.repository.AccountRepository;
-
 import com.example.bloomgift.repository.RoleRepository;
 import com.example.bloomgift.request.AccountRequest;
-
-
 import com.example.bloomgift.utils.EmailUtil;
 import com.example.bloomgift.utils.OtpUtil;
 
@@ -53,29 +44,19 @@ public class AccountService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(email);
+
         if (account == null) {
-            throw new UsernameNotFoundException("User not found with email: " + email);
+            throw new UsernameNotFoundException("Email không tồn tại.");
         }
-        return new User(account.getEmail(), account.getPassword(), new ArrayList<>());
+
+        GrantedAuthority authority = new SimpleGrantedAuthority(account.getRoleID().getRoleName());
+
+        return new org.springframework.security.core.userdetails.User(
+                account.getEmail(),
+                account.getPassword(),
+                Collections.singletonList(authority));
     }
 
-//    public List<AccountReponse> getAllAccounts() {
-//     return accountRepository.findAll().stream()
-//             .map(account -> new AccountReponse(
-//                     account.getAccountID(),
-//                     account.getFullname(),
-//                     account.getEmail(),
-//                     account.getPassword(),
-//                     account.getAddress(),
-//                     account.getGender(),
-//                     account.getAvatar(),
-//                     account.getBirthday(),
-//                     account.getPhone(),
-//                     account.getAccountStatus(),
-//                     account.getRoleName() 
-//             ))
-//             .collect(Collectors.toList());
-// }
 public Page<AccountReponse> getAllAccounts(Pageable pageable) {
     return accountRepository.findAll(pageable)
             .map(account -> new AccountReponse(
@@ -89,7 +70,7 @@ public Page<AccountReponse> getAllAccounts(Pageable pageable) {
                     account.getBirthday(),
                     account.getPhone(),
                     account.getAccountStatus(),
-                    account.getRoleName() // Assuming role name is a direct property
+                    account.getRoleName() 
             ));
 }
 public AccountReponse getAccountById(int accountID) {
@@ -105,26 +86,10 @@ public AccountReponse getAccountById(int accountID) {
             account.getBirthday(),
             account.getPhone(),
             account.getAccountStatus(),
-            account.getRoleName() // Assuming role name is a direct property
+            account.getRoleName() 
         );
     }
 
-    // public Page<AccountReponse> getFilteredAccounts(String address,Date birthday,String fullname ,String roleName,Pageable pageable,int accountID, String gender, int phone) {
-    //     return accountRepository.findByFilters(fullname,birthday,roleName,pageable,accountID, gender, phone,address)
-    //         .map(account -> new AccountReponse(
-    //                 account.getAccountID(),
-    //                 account.getFullname(),
-    //                 account.getEmail(),
-    //                 account.getPassword(),
-    //                 account.getAddress(),
-    //                 account.getGender(),
-    //                 account.getAvatar(),
-    //                 account.getBirthday(),
-    //                 account.getPhone(),
-    //                 account.getAccountStatus(),
-    //                 account.getRoleName() // Assuming role name is a direct property
-    //         ));
-    // }
     public void deleteAccount(Integer accountID) {
         Account existingAccount = accountRepository.findById(accountID)
                 .orElseThrow(() -> new RuntimeException("Account not found"));

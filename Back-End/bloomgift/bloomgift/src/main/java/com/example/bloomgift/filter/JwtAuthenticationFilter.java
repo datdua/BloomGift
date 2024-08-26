@@ -1,9 +1,11 @@
 package com.example.bloomgift.filter;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -13,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.example.bloomgift.service.AccountService;
 import com.example.bloomgift.utils.JwtUtil;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,9 +46,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.accountService.loadUserByUsername(username);
 
-            if (jwtUtil.isTokenvalid(jwt, userDetails)) {
+            if (jwtUtil.isTokenValid(jwt, userDetails)) {
+                Claims claims = jwtUtil.extractAllClaims(jwt);
+                String role = claims.get("role", String.class);
+
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
+                        userDetails, null, Collections.singletonList(new SimpleGrantedAuthority(role)));
                 usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
