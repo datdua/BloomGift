@@ -17,22 +17,21 @@ public class ProductReponse {
     private Date createDate;
     private Integer quantity;
     private Integer sold;
+    private String productName;
     private String categoryName;
     private String storeName;
+    private List<String> productImages;
+
         public ProductReponse(){
 
     }
-
-
-
-
-
     
+
 
 
     public ProductReponse(Integer productID, Float price, Float discount, String description, String colour,
                 Float size, Boolean featured, Boolean productStatus, Date createDate, Integer quantity, Integer sold,
-                String categoryName, String storeName) {
+                String productName, String categoryName, String storeName) {
             this.productID = productID;
             this.price = price;
             this.discount = discount;
@@ -44,14 +43,32 @@ public class ProductReponse {
             this.createDate = createDate;
             this.quantity = quantity;
             this.sold = sold;
+            this.productName = productName;
             this.categoryName = categoryName;
             this.storeName = storeName;
-          
         }
 
+        
 
-
-
+    public ProductReponse(Integer productID, Float price, Float discount, String description, String colour, Float size,
+            Boolean featured, Boolean productStatus, Date createDate, Integer quantity, Integer sold,
+            String productName, String categoryName, String storeName, List<String> productImages) {
+        this.productID = productID;
+        this.price = price;
+        this.discount = discount;
+        this.description = description;
+        this.colour = colour;
+        this.size = size;
+        this.featured = featured;
+        this.productStatus = productStatus;
+        this.createDate = createDate;
+        this.quantity = quantity;
+        this.sold = sold;
+        this.productName = productName;
+        this.categoryName = categoryName;
+        this.storeName = storeName;
+        this.productImages = productImages;
+    }
 
 
 
@@ -133,6 +150,45 @@ public class ProductReponse {
     }
     public void setStoreName(String storeName) {
         this.storeName = storeName;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public String getProductName() {
+        return productName;
+    }
+
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+
+
+
+    public List<String> getProductImages() {
+        return productImages;
+    }
+
+
+
+
+    public void setProductImages(List<String> productImages) {
+        this.productImages = productImages;
     }
 
 
