@@ -3,11 +3,13 @@ package com.example.bloomgift.service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
+import java.time.Duration;
+
+import javax.management.RuntimeErrorException;
+import org.springframework.security.authentication.AuthenticationManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -87,7 +89,7 @@ public class AuthenticationService {
          Integer phone = registerRequest.getPhone();
          String password = registerRequest.getPassword();
          String address = registerRequest.getAddress();
-         Boolean gender = registerRequest.getGender();
+         String gender = registerRequest.getGender();
          Date birthday = registerRequest.getBirthday();
          Role roleID = roleRepository.findById(2).orElseThrow(); 
         //  Role roleID = roleRepository.findById(1).orElseThrow(() -> new RuntimeException("Role not found"));
@@ -100,7 +102,7 @@ public class AuthenticationService {
         account.setGender(gender);
         account.setBirthday(birthday);
         account.setPhone(phone);
-        account.setAccountStatus(true);
+        account.setAccountStatus(false);
         accountRepository.save(account);
         return Collections.singletonMap("messag e", "check mail and input OTP");
     }
@@ -110,19 +112,25 @@ public void checkvalidateRegister(RegisterRequest registerRequest){
     Integer phone = registerRequest.getPhone();
     String password = registerRequest.getPassword();
     String address = registerRequest.getAddress();
-    Boolean gender = registerRequest.getGender();
+    String gender = registerRequest.getGender();
     Date birthday = registerRequest.getBirthday();
     if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail.com$") && !email.matches("^[a-zA-Z0-9._%+-]+@fpt.edu.vn$")) {
         throw new RuntimeException("Invalid email format");
     }
-    
+ 
+    // Check if email already exists
     Account existingEmail = accountRepository.findByEmail(email);
-        if (existingEmail != null) {
+    if (existingEmail != null) {
+        // If account exists and is active
+        if (existingEmail.getAccountStatus() != null && existingEmail.getAccountStatus()) {
             throw new RuntimeException("Account already exists");
         }
+    }
     Account existingPhone = accountRepository.findByPhone(phone);
         if (existingPhone != null) {
-            throw new RuntimeException("phone already exists");
+            if (existingEmail.getAccountStatus() != null && existingEmail.getAccountStatus()) {
+                throw new RuntimeException("Account already exists");
+            }
         }
         if (birthday.after(new Date())) {
             throw new RuntimeException("Birthday cannot be in the future.");
@@ -142,7 +150,7 @@ public void checkvalidateRegister(RegisterRequest registerRequest){
         Account account = accountRepository.findByEmail(email);
            
         if(account.getOtp().equals(otp) && Duration.between(account.getOtp_generated_time(),
-                     LocalDateTime.now()).getSeconds()<(1* 60)){
+                     LocalDateTime.now()).getSeconds()<(1* 300)){
                         account.setAccountStatus(true);
                         accountRepository.save(account);
                         return "OTP verify you can login";

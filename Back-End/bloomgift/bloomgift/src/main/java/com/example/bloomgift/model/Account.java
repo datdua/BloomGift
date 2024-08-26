@@ -3,7 +3,6 @@ package com.example.bloomgift.model;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-import org.hibernate.annotations.Collate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import jakarta.persistence.Column;
@@ -37,7 +36,7 @@ public class Account {
     private String fullname;
 
     @Column(name= "gender")
-    private Boolean gender ;
+    private String gender ;
     
     @Column(name= "avatar")
     private String  avatar;
@@ -69,7 +68,7 @@ public class Account {
     public Account(){
 
     }
-    public Account(Integer accountID, String email, Integer phone, String address, String fullname, Boolean gender,
+    public Account(Integer accountID, String email, Integer phone, String address, String fullname, String gender,
             String avatar, Integer point, Date birthday, Boolean accountStatus, String password, String otp,
             LocalDateTime otp_generated_time, Role roleID) {
         this.accountID = accountID;
@@ -130,11 +129,11 @@ public class Account {
         this.fullname = fullname;
     }
 
-    public Boolean getGender() {
+    public String getGender() {
         return gender;
     }
 
-    public void setGender(Boolean gender) {
+    public void setGender(String gender) {
         this.gender = gender;
     }
 
@@ -201,7 +200,9 @@ public class Account {
         this.password = passwordEncoder.encode(password);
     }
     
-
+    public String getRoleName() {
+        return roleID != null ? roleID.getRoleName() : null;
+    }
     
 
 
