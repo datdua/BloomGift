@@ -20,10 +20,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
 import com.example.bloomgift.model.Account;
+import com.example.bloomgift.model.Category;
 import com.example.bloomgift.reponse.AccountReponse;
 import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.request.AccountRequest;
+import com.example.bloomgift.request.CategoryRequest;
 import com.example.bloomgift.service.AccountService;
+import com.example.bloomgift.service.CategoryService;
 import com.example.bloomgift.service.ProductService;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 
 @RestController
-@RequestMapping("/api/accounts")
+@RequestMapping("/api/admin/accounts-management")
 public class AccountControllerByAdmin {
     @Autowired
     private AccountRepository accountRepository;
@@ -43,6 +46,8 @@ public class AccountControllerByAdmin {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private CategoryService categoryService;
     public AccountControllerByAdmin(AccountRepository accountRepository, AccountService accountService) {
         this.accountRepository = accountRepository;
         this.accountService = accountService;
@@ -112,7 +117,7 @@ public class AccountControllerByAdmin {
     }
 
 
-
+    
 //     @GetMapping("/search")
 //     public ResponseEntity<Page<AccountReponse>> getFilteredAccounts(
 //         @RequestParam(required = false) String fullName,
@@ -128,5 +133,9 @@ public class AccountControllerByAdmin {
 //     return new ResponseEntity<>(accountReponse, HttpStatus.OK);
 // }
 
-
+      @PostMapping(value="/create-category", produces =
+      "application/json;charset=UTF-8")
+    public Category createCategory(@RequestBody CategoryRequest categoryRequest) {
+        return categoryService.createCategory(categoryRequest);
+    }
 }

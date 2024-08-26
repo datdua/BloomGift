@@ -54,6 +54,9 @@ public class Product {
     @Column(name = "sold")
     private Integer sold ;
 
+    @Column(name = "productName")
+    private String productName ;
+
     @ManyToOne
     @JoinColumn(name = "categoryID")
     private Category categoryID;
@@ -70,14 +73,10 @@ public class Product {
     }
 
 
-   
-
-
-
 
     public Product(Integer productID, Float price, Float discount, String description, String colour, Float size,
             Boolean featured, Boolean productStatus, Date createDate, Integer quantity, Integer sold,
-            Category categoryID, Store storeID, List<ProductImage> productImages) {
+            String productName, Category categoryID, Store storeID, List<ProductImage> productImages) {
         this.productID = productID;
         this.price = price;
         this.discount = discount;
@@ -89,12 +88,11 @@ public class Product {
         this.createDate = createDate;
         this.quantity = quantity;
         this.sold = sold;
+        this.productName = productName;
         this.categoryID = categoryID;
         this.storeID = storeID;
         this.productImages = productImages;
     }
-
-
 
 
 
@@ -228,6 +226,18 @@ public class Product {
 
     public void setProductImages(List<ProductImage> productImages) {
         this.productImages = productImages;
+    }
+
+
+
+    public String getProductName() {
+        return productName;
+    }
+
+
+
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
 

@@ -40,6 +40,8 @@ public class ProductController {
         List<ProductReponse> productResponses = productService.getAllProducts();
     return ResponseEntity.ok(productResponses);
     }
+
+
     @DeleteMapping("/{productID}")
     public ResponseEntity<String> deleteProduct(@PathVariable("productID") Integer productID){
         try {
@@ -63,4 +65,7 @@ public class ProductController {
         }
    
     }
+
+    
+
 }

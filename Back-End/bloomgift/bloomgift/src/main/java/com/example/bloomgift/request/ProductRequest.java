@@ -8,6 +8,7 @@ public class ProductRequest {
     private String description ;
     private String colour ;
     private Float size ;
+    private String productName;
     private Boolean featured ;
     private Integer quantity ;
     private String categoryName;
@@ -110,6 +111,14 @@ public class ProductRequest {
 
     public void setProductStatus(Boolean productStatus) {
         this.productStatus = productStatus;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
     
 }
