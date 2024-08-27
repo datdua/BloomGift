@@ -2,31 +2,31 @@ package com.example.bloomgift.request;
 
 public class LoginRequest {
     private String email; 
-    private String passrword; 
+    private String password; 
 
     public LoginRequest(){
 
     }
 
-    public LoginRequest(String email, String passrword) {
+    public LoginRequest(String email, String password){
         this.email = email;
-        this.passrword = passrword;
+        this.password = password;
     }
 
-    public String getEmail() {
+    public String getEmail(){
         return email;
     }
 
-    public void setEmail(String email) {
+    public void setEmail(String email){
         this.email = email;
     }
 
-    public String getPassrword() {
-        return passrword;
+    public String getPassword(){
+        return password;
     }
 
-    public void setPassrword(String passrword) {
-        this.passrword = passrword;
+    public void setPassword(String password){
+        this.password = password;
     }
 
     

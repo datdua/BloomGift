@@ -19,6 +19,7 @@ import com.example.bloomgift.request.LoginRequest;
 import com.example.bloomgift.request.RegisterRequest;
 import com.example.bloomgift.service.AccountService;
 import com.example.bloomgift.service.AuthenticationService;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -43,11 +44,11 @@ public class AuthenticationController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) {
-        AuthenticationResponse response = authenticationService.authenticate(loginRequest);
-        return ResponseEntity.ok(response);
+    @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody LoginRequest loginRequest) throws Exception {
+        return authenticationService.authenticate(loginRequest);
     }
+    
 
     @PutMapping("/verify-account")
     public ResponseEntity<String> verifyAccount(

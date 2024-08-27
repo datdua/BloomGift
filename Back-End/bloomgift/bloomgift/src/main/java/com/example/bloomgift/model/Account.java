@@ -15,59 +15,57 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Account")
+@Table(name = "Account")
 public class Account {
-    @Id 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "accountID") 
-    private Integer accountID; 
-    
+    @Column(name = "accountID")
+    private Integer accountID;
 
     @Column(name = "email")
-    private String email ; 
+    private String email;
 
-    @Column(name= "phone")
-    private Integer phone ; 
+    @Column(name = "phone")
+    private Integer phone;
 
     @Column(name = "address")
-    private String address; 
+    private String address;
 
-    @Column(name= "fullname")
+    @Column(name = "fullname")
     private String fullname;
 
-    @Column(name= "gender")
-    private String gender ;
-    
-    @Column(name= "avatar")
-    private String  avatar;
+    @Column(name = "gender")
+    private String gender;
 
-    @Column(name= "point")
-    private Integer point; 
-    
-    @Column(name= "birthday")
+    @Column(name = "avatar")
+    private String avatar;
+
+    @Column(name = "point")
+    private Integer point;
+
+    @Column(name = "birthday")
     private Date birthday;
 
-    @Column(name= "accountStatus")
+    @Column(name = "accountStatus")
     private Boolean accountStatus;
 
     @Column(name = "password")
-    private String password; 
+    private String password;
 
-
-    @Column(name= "otp")
-    private String otp ;
+    @Column(name = "otp")
+    private String otp;
 
     @Column(name = "otp_generated_time")
     private LocalDateTime otp_generated_time;
-
 
     @ManyToOne
     @JoinColumn(name = "roleID")
     private Role roleID;
 
-    public Account(){
+    public Account() {
 
     }
+
     public Account(Integer accountID, String email, Integer phone, String address, String fullname, String gender,
             String avatar, Integer point, Date birthday, Boolean accountStatus, String password, String otp,
             LocalDateTime otp_generated_time, Role roleID) {
@@ -86,8 +84,6 @@ public class Account {
         this.otp_generated_time = otp_generated_time;
         this.roleID = roleID;
     }
-
-
 
     public Integer getAccountID() {
         return accountID;
@@ -161,7 +157,7 @@ public class Account {
         this.birthday = birthday;
     }
 
-    public Boolean getAccountStatus() {
+    public Boolean getAccountStatus(boolean par) {
         return accountStatus;
     }
 
@@ -192,20 +188,18 @@ public class Account {
     public void setRoleID(Role roleID) {
         this.roleID = roleID;
     }
+
     public String getPassword() {
         return password;
     }
-   public void setPassword(String password) {
+
+    public void setPassword(String password) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         this.password = passwordEncoder.encode(password);
     }
-    
+
     public String getRoleName() {
         return roleID != null ? roleID.getRoleName() : null;
     }
-    
-
-
-
 
 }

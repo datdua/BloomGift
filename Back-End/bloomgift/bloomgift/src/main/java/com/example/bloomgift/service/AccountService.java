@@ -2,7 +2,9 @@ package com.example.bloomgift.service;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,70 +26,61 @@ import com.example.bloomgift.request.AccountRequest;
 import com.example.bloomgift.utils.EmailUtil;
 import com.example.bloomgift.utils.OtpUtil;
 
-
 @Service
 public class AccountService implements UserDetailsService {
 
     @Autowired
     private AccountRepository accountRepository;
 
-    @Autowired 
+    @Autowired
     private RoleRepository roleRepository;
 
-    
     @Autowired
     private EmailUtil emailUtil;
 
-    @Autowired
-    private OtpUtil otpUtil;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Account account = accountRepository.findByEmail(email);
-
-        if (account == null) {
-            throw new UsernameNotFoundException("Email không tồn tại.");
+        Account accountOptional = accountRepository.findByEmail(email);
+        
+        if (accountOptional == null) {
+            throw new UsernameNotFoundException("Tài khoản không tồn tại");
         }
 
-        GrantedAuthority authority = new SimpleGrantedAuthority(account.getRoleID().getRoleName());
-
-        return new org.springframework.security.core.userdetails.User(
-                account.getEmail(),
-                account.getPassword(),
-                Collections.singletonList(authority));
+        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(accountOptional.getRoleName()));
+        return new org.springframework.security.core.userdetails.User(accountOptional.getEmail(), accountOptional.getPassword(), authorities);
     }
 
-public Page<AccountReponse> getAllAccounts(Pageable pageable) {
-    return accountRepository.findAll(pageable)
-            .map(account -> new AccountReponse(
-                    account.getAccountID(),
-                    account.getFullname(),
-                    account.getEmail(),
-                    account.getPassword(),
-                    account.getAddress(),
-                    account.getGender(),
-                    account.getAvatar(),
-                    account.getBirthday(),
-                    account.getPhone(),
-                    account.getAccountStatus(),
-                    account.getRoleName() 
-            ));
-}
-public AccountReponse getAccountById(int accountID) {
-    Account account = accountRepository.findById(accountID).orElseThrow();
-    return new AccountReponse(
-            account.getAccountID(),
-            account.getFullname(),
-            account.getEmail(),
-            account.getPassword(),
-            account.getAddress(),
-            account.getGender(),
-            account.getAvatar(),
-            account.getBirthday(),
-            account.getPhone(),
-            account.getAccountStatus(),
-            account.getRoleName() 
-        );
+    public Page<AccountReponse> getAllAccounts(Pageable pageable) {
+        return accountRepository.findAll(pageable)
+                .map(account -> new AccountReponse(
+                        account.getAccountID(),
+                        account.getFullname(),
+                        account.getEmail(),
+                        account.getPassword(),
+                        account.getAddress(),
+                        account.getGender(),
+                        account.getAvatar(),
+                        account.getBirthday(),
+                        account.getPhone(),
+                        account.getAccountStatus(true),
+                        account.getRoleName()));
+    }
+
+    public AccountReponse getAccountById(int accountID) {
+        Account account = accountRepository.findById(accountID).orElseThrow();
+        return new AccountReponse(
+                account.getAccountID(),
+                account.getFullname(),
+                account.getEmail(),
+                account.getPassword(),
+                account.getAddress(),
+                account.getGender(),
+                account.getAvatar(),
+                account.getBirthday(),
+                account.getPhone(),
+                account.getAccountStatus(true),
+                account.getRoleName());
     }
 
     public void deleteAccount(Integer accountID) {
@@ -100,14 +93,15 @@ public AccountReponse getAccountById(int accountID) {
 
         accountRepository.delete(existingAccount);
     }
-    public void createAccount(AccountRequest accountRequest){
+
+    public void createAccount(AccountRequest accountRequest) {
         checkvalidateAccount(accountRequest);
         String fullname = accountRequest.getFullname();
         String email = accountRequest.getEmail();
         String password = accountRequest.getPassword();
         Integer phone = accountRequest.getPhone();
         String address = accountRequest.getAddress();
-        Date birthday = accountRequest.getBirthday(); 
+        Date birthday = accountRequest.getBirthday();
         String roleName = accountRequest.getRoleName();
         String gender = accountRequest.getGender();
         String avatar = accountRequest.getAvatar();
@@ -136,15 +130,14 @@ public AccountReponse getAccountById(int accountID) {
         account.setGender(gender);
         account.setAvatar(avatar);
         accountRepository.save(account);
-        
 
     }
 
-    public Account updateAccount(Integer id,AccountRequest accountRequest){
-        checkvalidateAccount(accountRequest) ;
+    public Account updateAccount(Integer id, AccountRequest accountRequest) {
+        checkvalidateAccount(accountRequest);
         Account existingAccount = accountRepository.findById(id).orElse(null);
         if (existingAccount == null) {
-           throw new RuntimeException("Không tìm thấy tài khoản"); 
+            throw new RuntimeException("Không tìm thấy tài khoản");
         }
 
         String fullname = accountRequest.getFullname();
@@ -152,13 +145,13 @@ public AccountReponse getAccountById(int accountID) {
         String password = accountRequest.getPassword();
         Integer phone = accountRequest.getPhone();
         String address = accountRequest.getAddress();
-        Date birthday = accountRequest.getBirthday(); 
+        Date birthday = accountRequest.getBirthday();
         String roleName = accountRequest.getRoleName();
         String gender = accountRequest.getGender();
         Boolean accountstatus = accountRequest.getAccountStatus();
         String avatar = accountRequest.getAvatar();
 
-        //--------------------------------------------//
+        // --------------------------------------------//
         existingAccount.setFullname(fullname);
         existingAccount.setEmail(email);
         existingAccount.setPassword(password);
@@ -176,25 +169,24 @@ public AccountReponse getAccountById(int accountID) {
             }
             existingAccount.setRoleID(role);
         }
-           if(accountRequest.getPassword() !=null && !accountRequest.getPassword().isEmpty()
-                    && !accountRequest.getPassword().equals(existingAccount.getPassword())){
-                             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-                             String encodedPassword = passwordEncoder.encode(accountRequest.getPassword());
-                             existingAccount.setPassword(encodedPassword);
+        if (accountRequest.getPassword() != null && !accountRequest.getPassword().isEmpty()
+                && !accountRequest.getPassword().equals(existingAccount.getPassword())) {
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            String encodedPassword = passwordEncoder.encode(accountRequest.getPassword());
+            existingAccount.setPassword(encodedPassword);
         }
-       
+
         return accountRepository.save(existingAccount);
 
-
-
     }
-    private void checkvalidateAccount(AccountRequest accountRequest){
+
+    private void checkvalidateAccount(AccountRequest accountRequest) {
         String fullname = accountRequest.getFullname();
         String email = accountRequest.getEmail();
         String password = accountRequest.getPassword();
         Integer phone = accountRequest.getPhone();
         String address = accountRequest.getAddress();
-        Date birthday = accountRequest.getBirthday(); 
+        Date birthday = accountRequest.getBirthday();
         String rolename = accountRequest.getRoleName();
         String gender = accountRequest.getGender();
         if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail.com$") && !email.matches("^[a-zA-Z0-9._%+-]+@fpt.edu.vn$")) {
@@ -204,18 +196,17 @@ public AccountReponse getAccountById(int accountID) {
             throw new RuntimeException("Birthday cannot be in the future.");
         }
         if (!StringUtils.hasText(fullname)
-        || !StringUtils.hasText(password) 
-            || !StringUtils.hasText(email)
+                || !StringUtils.hasText(password)
+                || !StringUtils.hasText(email)
                 || !StringUtils.hasText(address)
-                    || !StringUtils.hasText(rolename)
-                        || gender == null
-                            || phone == null
-                                || birthday == null) {
-        throw new RuntimeException("Vui lòng nhập đầy đủ thông tin");
-    }
+                || !StringUtils.hasText(rolename)
+                || gender == null
+                || phone == null
+                || birthday == null) {
+            throw new RuntimeException("Vui lòng nhập đầy đủ thông tin");
+        }
 
     }
-
 
     public Map<String, String> setPassword(String email, String newPassword) {
         Account account = accountRepository.findByEmail(email);
@@ -238,6 +229,10 @@ public AccountReponse getAccountById(int accountID) {
             return Collections.singletonMap("message", "Có lỗi xảy ra khi gửi email.");
         }
         return Collections.singletonMap("message", "Mã OTP đã được gửi đến email của bạn.");
+    }
+
+    public Account findByEmail(String email) {
+        return accountRepository.findByEmail(email);
     }
 
 }
