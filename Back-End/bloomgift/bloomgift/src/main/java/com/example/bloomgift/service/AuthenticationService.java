@@ -113,6 +113,8 @@ public class AuthenticationService {
         account.setBirthday(birthday);
         account.setPhone(phone);
         account.setAccountStatus(false);
+        account.setOtp(otp);
+        account.setOtp_generated_time(LocalDateTime.now());
         accountRepository.save(account);
         return Collections.singletonMap("messag e", "check mail and input OTP");
     }
