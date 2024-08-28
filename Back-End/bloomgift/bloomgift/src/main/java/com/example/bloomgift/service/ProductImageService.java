@@ -57,6 +57,7 @@ public class ProductImageService {
         // Save the updated image
         productImageRepository.save(image);
     }
+    
     public void deleteImageById(Integer imageID) {
         // Fetch the image by imageID
         ProductImage image = productImageRepository.findById(imageID)

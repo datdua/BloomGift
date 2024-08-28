@@ -6,46 +6,45 @@ import java.util.List;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name="Product")
+@Table(name = "Product")
 public class Product {
-    @Id 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "productID") 
-    private Integer productID; 
-    
+    @Column(name = "productID")
+    private Integer productID;
 
     @Column(name = "price")
-    private Float price ;
-    
+    private Float price;
+
     @Column(name = "discount")
-    private Float discount ;
+    private Float discount;
 
     @Column(name = "description")
-    private String description ;
+    private String description;
 
     @Column(name = "colour")
-    private String colour ;
+    private String colour;
 
     @Column(name = "size")
-    private Float size ;
+    private Float size;
 
     @Column(name = "featured")
-    private Boolean featured ;
+    private Boolean featured;
 
     @Column(name = "productStatus")
-    private Boolean productStatus ;
+    private Boolean productStatus;
 
     @Column(name = "createDate")
-    private Date createDate ;
+    private Date createDate;
 
     @Column(name = "quantity")
-    private Integer quantity ;
+    private Integer quantity;
 
     @Column(name = "sold")
-    private Integer sold ;
+    private Integer sold;
 
     @Column(name = "productName")
-    private String productName ;
+    private String productName;
 
     @ManyToOne
     @JoinColumn(name = "categoryID")
@@ -55,15 +54,13 @@ public class Product {
     @JoinColumn(name = "storeID")
     private Store storeID;
 
-    @OneToMany(mappedBy = "productID", fetch = FetchType.LAZY)
-    private List<ProductImage> productImages = new ArrayList<>();
-;
-    
-    public Product(){
+
+    @OneToMany(mappedBy = "productID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ProductImage> productImages;
+
+    public Product() {
 
     }
-
-
 
     public Product(Integer productID, Float price, Float discount, String description, String colour, Float size,
             Boolean featured, Boolean productStatus, Date createDate, Integer quantity, Integer sold,
@@ -84,10 +81,6 @@ public class Product {
         this.storeID = storeID;
         this.productImages = productImages;
     }
-
-
-
-
 
     public Integer getProductID() {
         return productID;
@@ -192,10 +185,12 @@ public class Product {
     public void setStoreID(Store storeID) {
         this.storeID = storeID;
     }
-    public String getCategoryName(){
-        return categoryID !=null ? categoryID.getCategoryName():null;
+
+    public String getCategoryName() {
+        return categoryID != null ? categoryID.getCategoryName() : null;
     }
-    public String getStoreName(){
+
+    public String getStoreName() {
         return storeID != null ? storeID.getStoreName() : null;
     }
 
@@ -207,19 +202,12 @@ public class Product {
         this.productImages = productImages;
     }
 
-
-
     public String getProductName() {
         return productName;
     }
-
-
 
     public void setProductName(String productName) {
         this.productName = productName;
     }
 
-
-
-    
 }

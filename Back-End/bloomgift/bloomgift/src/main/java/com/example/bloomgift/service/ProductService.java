@@ -19,9 +19,7 @@ import com.example.bloomgift.repository.CategoryRepository;
 import com.example.bloomgift.repository.ProductImageRepository;
 import com.example.bloomgift.repository.ProductRepository;
 import com.example.bloomgift.repository.StoreRepository;
-import com.example.bloomgift.request.ProductImageRequest;
 import com.example.bloomgift.request.ProductRequest;
-import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
