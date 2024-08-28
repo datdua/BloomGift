@@ -1,19 +1,9 @@
 package com.example.bloomgift.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import jakarta.persistence.*;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name="Product")
@@ -65,8 +55,9 @@ public class Product {
     @JoinColumn(name = "storeID")
     private Store storeID;
 
-    @OneToMany(mappedBy = "productID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ProductImage> productImages;
+    @OneToMany(mappedBy = "productID", fetch = FetchType.LAZY)
+    private List<ProductImage> productImages = new ArrayList<>();
+;
     
     public Product(){
 
@@ -208,21 +199,9 @@ public class Product {
         return storeID != null ? storeID.getStoreName() : null;
     }
 
-
-
-
-
-
-
     public List<ProductImage> getProductImages() {
         return productImages;
     }
-
-
-
-
-
-
 
     public void setProductImages(List<ProductImage> productImages) {
         this.productImages = productImages;

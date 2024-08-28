@@ -20,12 +20,32 @@ public class ProductReponse {
     private String productName;
     private String categoryName;
     private String storeName;
-    private List<String> productImages;
-
+    private List<ProductImageReponse> images;
         public ProductReponse(){
 
     }
-    
+
+
+    public ProductReponse(Integer productID, Float price, Float discount, String description, String colour,
+                Float size, Boolean featured, Boolean productStatus, Date createDate, Integer quantity, Integer sold,
+                String productName, String categoryName, String storeName, List<ProductImageReponse> images) {
+            this.productID = productID;
+            this.price = price;
+            this.discount = discount;
+            this.description = description;
+            this.colour = colour;
+            this.size = size;
+            this.featured = featured;
+            this.productStatus = productStatus;
+            this.createDate = createDate;
+            this.quantity = quantity;
+            this.sold = sold;
+            this.productName = productName;
+            this.categoryName = categoryName;
+            this.storeName = storeName;
+            this.images = images;
+        }
+
 
 
 
@@ -48,27 +68,12 @@ public class ProductReponse {
             this.storeName = storeName;
         }
 
-        
 
-    public ProductReponse(Integer productID, Float price, Float discount, String description, String colour, Float size,
-            Boolean featured, Boolean productStatus, Date createDate, Integer quantity, Integer sold,
-            String productName, String categoryName, String storeName, List<String> productImages) {
-        this.productID = productID;
-        this.price = price;
-        this.discount = discount;
-        this.description = description;
-        this.colour = colour;
-        this.size = size;
-        this.featured = featured;
-        this.productStatus = productStatus;
-        this.createDate = createDate;
-        this.quantity = quantity;
-        this.sold = sold;
-        this.productName = productName;
-        this.categoryName = categoryName;
-        this.storeName = storeName;
-        this.productImages = productImages;
-    }
+
+
+
+
+   
 
 
 
@@ -180,16 +185,20 @@ public class ProductReponse {
 
 
 
-    public List<String> getProductImages() {
-        return productImages;
+    public List<ProductImageReponse> getImages() {
+        return images;
     }
 
 
 
 
-    public void setProductImages(List<String> productImages) {
-        this.productImages = productImages;
+    public void setImages(List<ProductImageReponse> images) {
+        this.images = images;
     }
+
+
+
+
 
 
 

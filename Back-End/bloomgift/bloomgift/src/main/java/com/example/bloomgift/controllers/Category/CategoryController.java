@@ -18,7 +18,7 @@ import com.example.bloomgift.reponse.CategoryReponse;
 import com.example.bloomgift.request.CategoryRequest;
 import com.example.bloomgift.service.CategoryService;
 
-import org.springframework.web.bind.annotation.RequestBody;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 
 @RestController
@@ -27,7 +27,7 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping("/list-category")
+    @GetMapping("list-category")
     public ResponseEntity<List<CategoryReponse>> getAllCategories() {
         List<CategoryReponse> categoryReponses = categoryService.getAllCategories();
         return ResponseEntity.ok(categoryReponses);
@@ -39,23 +39,15 @@ public class CategoryController {
         return new ResponseEntity<>(categoryReponse,HttpStatus.OK);
     }
 
-    @PostMapping("/create-category")
-    public ResponseEntity<String> createCategory(@RequestBody CategoryRequest categoryRequest) {
-         try{ 
-        categoryService.createCategory(categoryRequest);
-         return new ResponseEntity<>("Product created successfully", HttpStatus.CREATED);
-        }catch(RuntimeException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-     }
+    @PostMapping("create-category")
+    public Category createCategory(@RequestBody CategoryRequest categoryRequest) {
+        return categoryService.createCategory(categoryRequest);
+    }
 
-
-    @PutMapping("/update-category/{id}")
+    @PutMapping("update-category/{id}")
     public ResponseEntity<Category> updateCategory(@PathVariable Integer id, @RequestBody CategoryRequest categoryRequest) {
-       
         Category updatedCategory = categoryService.updateCategory(id, categoryRequest);
         return ResponseEntity.ok(updatedCategory);
-      
     }
 
     @DeleteMapping("/{id}")

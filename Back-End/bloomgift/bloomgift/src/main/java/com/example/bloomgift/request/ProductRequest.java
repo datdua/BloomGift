@@ -1,6 +1,9 @@
 package com.example.bloomgift.request;
 
 import java.util.Date;
+import java.util.List;
+
+import com.example.bloomgift.reponse.ProductImageReponse;
 
 public class ProductRequest {
     private Float price ;
@@ -12,12 +15,32 @@ public class ProductRequest {
     private Boolean featured ;
     private Integer quantity ;
     private String categoryName;
-    private String storeName;
-    private String productImage;
+    private Integer storeID;
     private Boolean productStatus;
+    private List<ProductImageRequest> images;
     public ProductRequest(){
 
     }
+    
+
+    public ProductRequest(Float price, Float discount, String description, String colour, Float size,
+            String productName, Boolean featured, Integer quantity, String categoryName, Integer storeID,
+            Boolean productStatus, List<ProductImageRequest> images) {
+        this.price = price;
+        this.discount = discount;
+        this.description = description;
+        this.colour = colour;
+        this.size = size;
+        this.productName = productName;
+        this.featured = featured;
+        this.quantity = quantity;
+        this.categoryName = categoryName;
+        this.storeID = storeID;
+        this.productStatus = productStatus;
+        this.images = images;
+    }
+
+
 
     public Float getPrice() {
         return price;
@@ -89,21 +112,8 @@ public class ProductRequest {
         this.categoryName = categoryName;
     }
 
-    public String getStoreName() {
-        return storeName;
-    }
 
-    public void setStoreName(String storeName) {
-        this.storeName = storeName;
-    }
-
-    public String getProductImage() {
-        return productImage;
-    }
-
-    public void setProductImage(String productImage) {
-        this.productImage = productImage;
-    }
+   
 
     public Boolean getProductStatus() {
         return productStatus;
@@ -119,6 +129,38 @@ public class ProductRequest {
 
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+
+
+    public List<ProductImageRequest> getImages() {
+        return images;
+    }
+
+
+
+    public void setImages(List<ProductImageRequest> images) {
+        this.images = images;
+    }
+
+
+
+
+
+
+
+    public Integer getStoreID() {
+        return storeID;
+    }
+
+
+
+
+
+
+
+    public void setStoreID(Integer storeID) {
+        this.storeID = storeID;
     }
     
 }

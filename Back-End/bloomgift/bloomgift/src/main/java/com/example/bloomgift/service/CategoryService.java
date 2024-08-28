@@ -32,7 +32,7 @@ public class CategoryService {
             );
     }
 
-    public void createCategory(CategoryRequest categoryRequest) {
+    public Category createCategory(CategoryRequest categoryRequest) {
 
         String categoryName = categoryRequest.getCategoryName();
         if(categoryName == null){
@@ -40,7 +40,7 @@ public class CategoryService {
         }
         Category category = new Category();
         category.setCategoryName(categoryRequest.getCategoryName());
-        categoryRepository.save(category);
+        return categoryRepository.save(category);
     }
 
     public Category updateCategory(Integer id, CategoryRequest categoryRequest) {

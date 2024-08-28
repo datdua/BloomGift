@@ -7,7 +7,10 @@ import java.util.Date;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -28,7 +31,6 @@ import com.example.bloomgift.utils.OtpUtil;
 
 import jakarta.mail.MessagingException;
 
-
 @Service
 public class AuthenticationService {
     @Autowired
@@ -42,7 +44,7 @@ public class AuthenticationService {
 
     @Autowired
     private JwtUtil jwtUtil;
-    
+
     @Autowired
     private AccountService accountService;
 
@@ -51,7 +53,7 @@ public class AuthenticationService {
 
     @Autowired
     private EmailUtil emailUtil;
-    
+
     public AuthenticationService(AccountRepository accountRepository, RoleRepository roleRepository,
             AuthenticationManager authenticationManager, JwtUtil jwtUtil, AccountService accountService) {
         this.accountRepository = accountRepository;
@@ -61,36 +63,45 @@ public class AuthenticationService {
         this.accountService = accountService;
     }
 
-    public AuthenticationResponse authenticate(LoginRequest loginRequest) {
-        org.springframework.security.core.Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassrword()));
+    public ResponseEntity<?> authenticate(LoginRequest loginRequest) throws Exception {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(401).body(Collections.singletonMap("message", "Sai email hoặc mật khẩu"));
+        }
 
-        UserDetails userDetails = accountService.loadUserByUsername(loginRequest.getEmail());
-        Account account = accountRepository.findByEmail(loginRequest.getEmail());
+        final UserDetails userDetails = accountService.loadUserByUsername(loginRequest.getEmail());
+        final Account account = accountService.findByEmail(loginRequest.getEmail());
 
-        String role = account.getRoleID().getRoleName(); 
+        if (account == null || !account.getAccountStatus(true)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Collections.singletonMap("message",
+                            "Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email để kích hoạt tài khoản."));
+        }
 
-        String token = jwtUtil.generateToken(userDetails, role); 
-        return new AuthenticationResponse(token);
+        final String jwt = jwtUtil.generateToken(account);
+
+        return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
 
-    public Map<String,String> register(RegisterRequest registerRequest){
-         checkvalidateRegister(registerRequest);
-         String otp = otpUtil.generateOtp();
-         try{
-             emailUtil.sendOtpEmail(registerRequest.getEmail(), otp);
-         }catch(MessagingException e){
-             throw new RuntimeException("unble");
-         }    
-         String fullname = registerRequest.getFullname() ; 
-         String email = registerRequest.getEmail(); 
-         Integer phone = registerRequest.getPhone();
-         String password = registerRequest.getPassword();
-         String address = registerRequest.getAddress();
-         String gender = registerRequest.getGender();
-         Date birthday = registerRequest.getBirthday();
-         Role roleID = roleRepository.findById(2).orElseThrow(); 
-        //  Role roleID = roleRepository.findById(1).orElseThrow(() -> new RuntimeException("Role not found"));
+    public Map<String, String> register(RegisterRequest registerRequest) {
+        checkvalidateRegister(registerRequest);
+        String otp = otpUtil.generateOtp();
+        try {
+            emailUtil.sendOtpEmail(registerRequest.getEmail(), otp);
+        } catch (MessagingException e) {
+            throw new RuntimeException("unble");
+        }
+        String fullname = registerRequest.getFullname();
+        String email = registerRequest.getEmail();
+        Integer phone = registerRequest.getPhone();
+        String password = registerRequest.getPassword();
+        String address = registerRequest.getAddress();
+        String gender = registerRequest.getGender();
+        Date birthday = registerRequest.getBirthday();
+        Role roleID = roleRepository.findById(2).orElseThrow();
+
         Account account = new Account();
         account.setRoleID(roleID);
         account.setFullname(fullname);
@@ -104,69 +115,69 @@ public class AuthenticationService {
         accountRepository.save(account);
         return Collections.singletonMap("messag e", "check mail and input OTP");
     }
-public void checkvalidateRegister(RegisterRequest registerRequest){
-    String fullname = registerRequest.getFullname() ; 
-    String email = registerRequest.getEmail(); 
-    Integer phone = registerRequest.getPhone();
-    String password = registerRequest.getPassword();
-    String address = registerRequest.getAddress();
-    String gender = registerRequest.getGender();
-    Date birthday = registerRequest.getBirthday();
-    if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail.com$") && !email.matches("^[a-zA-Z0-9._%+-]+@fpt.edu.vn$")) {
-        throw new RuntimeException("Invalid email format");
-    }
- 
-    // Check if email already exists
-    Account existingEmail = accountRepository.findByEmail(email);
-    if (existingEmail != null) {
-        // If account exists and is active
-        if (existingEmail.getAccountStatus() != null && existingEmail.getAccountStatus()) {
-            throw new RuntimeException("Account already exists");
+
+    public void checkvalidateRegister(RegisterRequest registerRequest) {
+        String fullname = registerRequest.getFullname();
+        String email = registerRequest.getEmail();
+        Integer phone = registerRequest.getPhone();
+        String password = registerRequest.getPassword();
+        String address = registerRequest.getAddress();
+        String gender = registerRequest.getGender();
+        Date birthday = registerRequest.getBirthday();
+        if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail.com$") && !email.matches("^[a-zA-Z0-9._%+-]+@fpt.edu.vn$")) {
+            throw new RuntimeException("Invalid email format");
         }
-    }
-    Account existingPhone = accountRepository.findByPhone(phone);
+
+        // Check if email already exists
+        Account existingEmail = accountRepository.findByEmail(email);
+        if (existingEmail != null) {
+            // If account exists and is active
+            if (existingEmail.getAccountStatus(true) != null && existingEmail.getAccountStatus(true)) {
+                throw new RuntimeException("Account already exists");
+            }
+        }
+        Account existingPhone = accountRepository.findByPhone(phone);
         if (existingPhone != null) {
-            if (existingEmail.getAccountStatus() != null && existingEmail.getAccountStatus()) {
+            if (existingEmail.getAccountStatus(true) != null && existingEmail.getAccountStatus(true)) {
                 throw new RuntimeException("Account already exists");
             }
         }
         if (birthday.after(new Date())) {
             throw new RuntimeException("Birthday cannot be in the future.");
         }
-    
-    if(!StringUtils.hasText(fullname)
-        || !StringUtils.hasText(email)
-            || !StringUtils.hasText(password)
-                ||!StringUtils.hasText(address)
-                    ||phone == null
-                        || gender == null
-                            ||birthday == null){
-        throw new RuntimeException("Vui lòng nhập đầy đủ thông tin");
+
+        if (!StringUtils.hasText(fullname)
+                || !StringUtils.hasText(email)
+                || !StringUtils.hasText(password)
+                || !StringUtils.hasText(address)
+                || phone == null
+                || gender == null
+                || birthday == null) {
+            throw new RuntimeException("Vui lòng nhập đầy đủ thông tin");
         }
     }
-        public String verifyAccount(String email,String otp){
+
+    public String verifyAccount(String email, String otp) {
         Account account = accountRepository.findByEmail(email);
-           
-        if(account.getOtp().equals(otp) && Duration.between(account.getOtp_generated_time(),
-                     LocalDateTime.now()).getSeconds()<(1* 300)){
-                        account.setAccountStatus(true);
-                        accountRepository.save(account);
-                        return "OTP verify you can login";
-                     }
+
+        if (account.getOtp().equals(otp) && Duration.between(account.getOtp_generated_time(),
+                LocalDateTime.now()).getSeconds() < (1 * 300)) {
+            account.setAccountStatus(true);
+            accountRepository.save(account);
+            return "OTP verify you can login";
+        }
 
         return "please regenerate otp and try again";
 
     }
 
-
-
-    public String generateOtp(String email){
+    public String generateOtp(String email) {
         Account account = accountRepository.findByEmail(email);
-           
+
         String otp = otpUtil.generateOtp();
-        try{
+        try {
             emailUtil.sendOtpEmail(email, otp);
-        }catch(MessagingException e){
+        } catch (MessagingException e) {
             throw new RuntimeException("unble");
         }
         account.setOtp(otp);
@@ -192,7 +203,7 @@ public void checkvalidateRegister(RegisterRequest registerRequest){
             account.setFullname(name);
             account.setAvatar(picture);
             account.setAccountStatus(true);
-            Role roleID = roleRepository.findById(2).orElseThrow(); 
+            Role roleID = roleRepository.findById(2).orElseThrow();
             account.setRoleID(roleID);
             accountRepository.save(account);
         } else {
