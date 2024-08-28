@@ -11,24 +11,22 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Category")
+@Table(name = "Category")
 public class Category {
-    @Id 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "categoryID") 
-    private Integer categoryID; 
-    
+    @Column(name = "categoryID")
+    private Integer categoryID;
 
     @Column(name = "categoryName")
-    private String categoryName ;
+    private String categoryName;
 
-     @OneToMany(mappedBy = "categoryID")
+    @OneToMany(mappedBy = "categoryID")
     private Set<Product> products;
 
+    @OneToMany(mappedBy = "category")
+    private Set<Store> stores;
 
-
-
-    
     public Integer getCategoryID() {
         return categoryID;
     }
@@ -53,5 +51,11 @@ public class Category {
         this.products = products;
     }
 
-    
+    public Set<Store> getStores() {
+        return stores;
+    }
+
+    public void setStores(Set<Store> stores) {
+        this.stores = stores;
+    }
 }

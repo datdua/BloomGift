@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -212,6 +213,13 @@ public class AuthenticationService {
             accountRepository.save(account);
         }
 
-        return oAuth2User.getAttributes();
+        // Generate JWT token
+        String jwt = jwtUtil.generateToken(account);
+
+        // Create a new modifiable map and copy attributes
+        Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
+        attributes.put("jwt", jwt);
+
+        return attributes;
     }
 }
