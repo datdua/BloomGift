@@ -21,7 +21,6 @@ import com.example.bloomgift.repository.ProductRepository;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.ProductRequest;
 
-
 @Service
 public class ProductService {
     @Autowired
@@ -30,7 +29,7 @@ public class ProductService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @Autowired 
+    @Autowired
     private StoreRepository storeRepository;
 
     @Autowired
@@ -43,9 +42,6 @@ public class ProductService {
     }
 
     private ProductReponse convertToProductReponse(Product product) {
-        // String categoryName = product.getCategory() != null ? product.getCategory().getCategoryName() : null;
-        // String storeName = product.getStore() != null ? product.getStore().getStoreName() : null;
-
         List<ProductImageReponse> imageResponses = product.getProductImages().stream()
                 .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
                 .collect(Collectors.toList());
@@ -65,10 +61,9 @@ public class ProductService {
                 product.getProductName(),
                 product.getCategoryName(),
                 product.getStoreName(),
-                imageResponses
-        );
+                imageResponses);
     }
-  
+
     public void createProductt(ProductRequest productRequest) {
         checkProduct(productRequest);
         Float price = productRequest.getPrice();
@@ -81,7 +76,7 @@ public class ProductService {
         String categoryName = productRequest.getCategoryName();
         String productName = productRequest.getProductName();
         Category category = categoryRepository.findByCategoryName(categoryName);
-    
+
         if (category == null) {
             throw new IllegalArgumentException("Category not found");
         }
@@ -108,30 +103,30 @@ public class ProductService {
         product.setSold(0);
         product.setStoreID(store);
         List<ProductImage> productImages = productRequest.getImages().stream()
-        .map(imageRequest -> {
-            ProductImage image = new ProductImage();
-            image.setProductImage(imageRequest.getProductImage());
-            image.setProductID(product); // set the product reference
-            return image;
-        })
-        .collect(Collectors.toList());
-        
+                .map(imageRequest -> {
+                    ProductImage image = new ProductImage();
+                    image.setProductImage(imageRequest.getProductImage());
+                    image.setProductID(product); // set the product reference
+                    return image;
+                })
+                .collect(Collectors.toList());
+
         product.setProductImages(productImages);
         // productImageRepository.saveAll(productImages);
         productRepository.save(product);
 
-        
     }
-    
-    public void deleteProduct(Integer productID){
+
+    public void deleteProduct(Integer productID) {
         Product existingProduct = productRepository.findById(productID).orElseThrow();
         productRepository.delete(existingProduct);
     }
-    public Product updateProduct(Integer productID ,ProductRequest productRequest){
+
+    public Product updateProduct(Integer productID, ProductRequest productRequest) {
         checkProduct(productRequest);
-         Product existingProduct = productRepository.findById(productID).orElse(null);
+        Product existingProduct = productRepository.findById(productID).orElse(null);
         if (existingProduct == null) {
-           throw new RuntimeException("Không tìm thấy san pham"); 
+            throw new RuntimeException("Không tìm thấy san pham");
         }
 
         Float price = productRequest.getPrice();
@@ -148,8 +143,8 @@ public class ProductService {
         if (category == null) {
             throw new RuntimeException("Category not found");
         }
-    
-        //----------------------------------------------/
+
+        // ----------------------------------------------/
         existingProduct.setPrice(price);
         existingProduct.setDescription(description);
         existingProduct.setDiscount(discount);
@@ -165,8 +160,7 @@ public class ProductService {
 
     }
 
-
-    public void checkProduct(ProductRequest productRequest){
+    public void checkProduct(ProductRequest productRequest) {
         Float price = productRequest.getPrice();
         Float discount = productRequest.getDiscount();
         String description = productRequest.getDescription();
@@ -176,30 +170,25 @@ public class ProductService {
         Integer quantity = productRequest.getQuantity();
         String categoryName = productRequest.getCategoryName();
         String productName = productRequest.getProductName();
-    
-         if(!StringUtils.hasText(description)
-        || !StringUtils.hasText(colour)
-            || !StringUtils.hasText(categoryName)
-                    ||!StringUtils.hasText(productName)
-                        ||price == null 
-                             ||quantity ==null){
-        throw new RuntimeException("Vui lòng nhập đầy đủ thông tin");
+
+        if (!StringUtils.hasText(description)
+                || !StringUtils.hasText(colour)
+                || !StringUtils.hasText(categoryName)
+                || !StringUtils.hasText(productName)
+                || price == null
+                || quantity == null) {
+            throw new RuntimeException("Vui lòng nhập đầy đủ thông tin");
         }
-        if(price < 0 || discount < 0 || size < 0 || quantity< 0){
+        if (price < 0 || discount < 0 || size < 0 || quantity < 0) {
             throw new RuntimeException("Vui lòng nhập đung thông tin");
 
         }
-    
+
     }
-
-
 
     public Product getProductById(Integer productID) {
         return productRepository.findById(productID)
-        .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productID));
+                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productID));
     }
-
-
-
 
 }
