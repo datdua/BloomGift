@@ -13,6 +13,7 @@ import com.example.bloomgift.model.Category;
 import com.example.bloomgift.model.Product;
 import com.example.bloomgift.model.ProductImage;
 import com.example.bloomgift.model.Store;
+import com.example.bloomgift.reponse.ProductImageReponse;
 import com.example.bloomgift.reponse.ProductReponse;
 import com.example.bloomgift.repository.CategoryRepository;
 import com.example.bloomgift.repository.ProductImageRepository;
@@ -37,29 +38,38 @@ public class ProductService {
 
     public List<ProductReponse> getAllProducts() {
         List<Product> products = productRepository.findAll();
-        return products.stream()
-        .map(product -> new ProductReponse(
-        product.getProductID(),
-        product.getPrice(),
-        product.getDiscount(),
-        product.getDescription(),
-        product.getColour(),
-        product.getSize(),
-        product.getFeatured(),
-        product.getProductStatus(),
-        product.getCreateDate(),
-        product.getQuantity(),
-        product.getSold(),
-        product.getProductName(),
-        product.getCategoryName(),
-        product.getStoreName()
-    ))
-    .collect(Collectors.toList());
+
+        return products.stream().map(this::convertToProductReponse).collect(Collectors.toList());
     }
 
+    private ProductReponse convertToProductReponse(Product product) {
+        // String categoryName = product.getCategory() != null ? product.getCategory().getCategoryName() : null;
+        // String storeName = product.getStore() != null ? product.getStore().getStoreName() : null;
 
-    
-    public void createProduct(ProductRequest productRequest){
+        List<ProductImageReponse> imageResponses = product.getProductImages().stream()
+                .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
+                .collect(Collectors.toList());
+
+        return new ProductReponse(
+                product.getProductID(),
+                product.getPrice(),
+                product.getDiscount(),
+                product.getDescription(),
+                product.getColour(),
+                product.getSize(),
+                product.getFeatured(),
+                product.getProductStatus(),
+                product.getCreateDate(),
+                product.getQuantity(),
+                product.getSold(),
+                product.getProductName(),
+                product.getCategoryName(),
+                product.getStoreName(),
+                imageResponses
+        );
+    }
+  
+    public void createProductt(ProductRequest productRequest) {
         checkProduct(productRequest);
         Float price = productRequest.getPrice();
         Float discount = productRequest.getDiscount();
@@ -69,17 +79,19 @@ public class ProductService {
         Boolean featured = productRequest.getFeatured();
         Integer quantity = productRequest.getQuantity();
         String categoryName = productRequest.getCategoryName();
-        String storeName = productRequest.getStoreName();
-        String productImage = productRequest.getProductImage();
         String productName = productRequest.getProductName();
-
-       Category category = categoryRepository.findByCategoryName(categoryName);
+        Category category = categoryRepository.findByCategoryName(categoryName);
+    
         if (category == null) {
-            throw new RuntimeException("Category not found");
+            throw new IllegalArgumentException("Category not found");
         }
-        Store store = storeRepository.findByStoreName(storeName);
+
+        Store store = null;
+        if (productRequest.getStoreID() != null) {
+            store = storeRepository.findById(productRequest.getStoreID()).orElse(null);
+        }
         if (store == null) {
-            throw new RuntimeException("Store not found");
+            throw new IllegalArgumentException("Store not found");
         }
         Product product = new Product();
         product.setPrice(price);
@@ -95,16 +107,22 @@ public class ProductService {
         product.setCategoryID(category);
         product.setSold(0);
         product.setStoreID(store);
+        List<ProductImage> productImages = productRequest.getImages().stream()
+        .map(imageRequest -> {
+            ProductImage image = new ProductImage();
+            image.setProductImage(imageRequest.getProductImage());
+            image.setProductID(product); // set the product reference
+            return image;
+        })
+        .collect(Collectors.toList());
+        
+        product.setProductImages(productImages);
+        // productImageRepository.saveAll(productImages);
         productRepository.save(product);
 
-        ProductImage productImageEntity = new ProductImage();
-        productImageEntity.setProductImage(productImage);
-        productImageEntity.setProductID(product);
-
-        productImageRepository.save(productImageEntity);
-
-
+        
     }
+    
     public void deleteProduct(Integer productID){
         Product existingProduct = productRepository.findById(productID).orElseThrow();
         productRepository.delete(existingProduct);
@@ -124,7 +142,6 @@ public class ProductService {
         Boolean featured = productRequest.getFeatured();
         Integer quantity = productRequest.getQuantity();
         String categoryName = productRequest.getCategoryName();
-        String productImage = productRequest.getProductImage();
         String productName = productRequest.getProductName();
         Boolean productStatus = productRequest.getProductStatus();
         Category category = categoryRepository.findByCategoryName(categoryName);
@@ -158,25 +175,31 @@ public class ProductService {
         Boolean featured = productRequest.getFeatured();
         Integer quantity = productRequest.getQuantity();
         String categoryName = productRequest.getCategoryName();
-        String storeName = productRequest.getStoreName();
-        String productImage = productRequest.getProductImage();
         String productName = productRequest.getProductName();
     
          if(!StringUtils.hasText(description)
         || !StringUtils.hasText(colour)
             || !StringUtils.hasText(categoryName)
-                ||!StringUtils.hasText(storeName)
                     ||!StringUtils.hasText(productName)
                         ||price == null 
                              ||quantity ==null){
         throw new RuntimeException("Vui lòng nhập đầy đủ thông tin");
         }
-        if(price < 0 || discount < 0 || size < 0 || quantity<0){
+        if(price < 0 || discount < 0 || size < 0 || quantity< 0){
             throw new RuntimeException("Vui lòng nhập đung thông tin");
 
         }
     
     }
+
+
+
+    public Product getProductById(Integer productID) {
+        return productRepository.findById(productID)
+        .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productID));
+    }
+
+
 
 
 }
