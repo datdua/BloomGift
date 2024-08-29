@@ -1,31 +1,158 @@
+import {
+  loginAccount,
+  regenerateOTP,
+  registerAccount,
+  verifyAccount,
+} from "../../redux/actions/authenticationActions";
 import PropTypes from "prop-types";
-import React, { Fragment } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import MetaTags from "react-meta-tags";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { BreadcrumbsItem } from "react-breadcrumbs-dynamic";
 import Tab from "react-bootstrap/Tab";
 import Nav from "react-bootstrap/Nav";
 import LayoutOne from "../../layouts/LayoutOne";
 import Breadcrumb from "../../wrappers/breadcrumb/Breadcrumb";
+import Button from "react-bootstrap/Button";
+import { useDispatch } from "react-redux";
+import { useToasts } from "react-toast-notifications";
+import VerifyAccount from "../../components/modal/verifyAccount";
+import ForgetPasswordForm from "../../components/form/forgetPassword";
+import ResetPasswordForm from "../../components/form/resetPassword";
+import "./LoginRegister.css";
 
 const LoginRegister = ({ location }) => {
+  const publicUrl = "";
   const { pathname } = location;
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const { addToast } = useToasts();
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [email, setEmail] = useState("");
+  const [countdown, setCountdown] = useState(0);
+  const [showVerifyButton, setShowVerifyButton] = useState(false);
+  const [showRegenerateButton, setShowRegenerateButton] = useState(false);
+  const [showForgetPasswordForm, setShowForgetPasswordForm] = useState(false);
+  const [showResetPasswordForm, setShowResetPasswordForm] = useState(false);
+
+  useEffect(() => {
+    let timer;
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    } else if (countdown === 0 && showVerifyButton) {
+      setShowVerifyButton(false);
+      setShowRegenerateButton(true);
+    }
+    return () => clearTimeout(timer);
+  }, [countdown, showVerifyButton]);
+
+  const handleRegister = (e) => {
+    e.preventDefault();
+    const userData = {
+      email: e.target["user-email"].value,
+      phone: e.target["user-phone"].value,
+      password: e.target["user-password"].value,
+      fullname: e.target["user-fullname"].value,
+      address: e.target["user-address"].value,
+      gender: e.target["user-gender"].value,
+      birthday: e.target["user-birthday"].value,
+    };
+    if (userData.password !== e.target["user-confirm-password"].value) {
+      addToast("Mật khẩu xác nhận không khớp!", { appearance: "error", autoDismiss: true });
+      return;
+    }
+    dispatch(registerAccount(userData, addToast))
+      .then(() => {
+        setEmail(userData.email);
+        setCountdown(60);
+        setShowVerifyButton(true);
+        setShowRegenerateButton(false);
+      })
+      .catch((error) => {
+        console.error("Registration error:", error);
+      });
+  };
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const userData = {
+      email: e.target["user-email"].value,
+      password: e.target["user-password"].value,
+    };
+
+    dispatch(loginAccount(userData, addToast))
+      .then((response) => {
+        if (response && response.token) {
+          localStorage.setItem("token", response.token);
+          history.push("/home-fashion");
+        }
+      })
+      .catch((error) => {
+        console.error("Login error:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const handleVerifyAccount = (e) => {
+    e.preventDefault();
+    const userData = {
+      email: email,
+      otp: e.target["user-otp"].value,
+    };
+
+    dispatch(verifyAccount(userData, addToast))
+      .then(() => {
+        setShowModal(false);
+      })
+      .catch((error) => {
+        console.error("Verification error:", error);
+      });
+  };
+
+  const toggleForgetPasswordForm = (e) => {
+    e.preventDefault();
+    history.push("/forget-password");
+  };
+
+  const handleRegenerateOTP = (e) => {
+    e.preventDefault();
+    setCountdown(60);
+    setShowVerifyButton(true);
+    setShowRegenerateButton(false);
+    dispatch(regenerateOTP(email, addToast))
+      .then(() => {
+        console.log("OTP regenerated successfully.");
+      })
+      .catch((error) => {
+        console.error("Regenerate OTP error:", error);
+      });
+  };
+
+  const handleOpenModal = () => {
+    console.log("Opening modal"); // Debugging statement
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    console.log("Closing modal"); // Debugging statement
+    setShowModal(false);
+  };
 
   return (
     <Fragment>
       <MetaTags>
         <title>Bloom Gift | Đăng Nhập</title>
-        <meta
-          name="description"
-          content="Compare page of flone react minimalist eCommerce template."
-        />
+        <meta name="description" content="Compare page of flone react minimalist eCommerce template." />
       </MetaTags>
-      <BreadcrumbsItem to={process.env.PUBLIC_URL + "/"}>Trang chủ</BreadcrumbsItem>
-      <BreadcrumbsItem to={process.env.PUBLIC_URL + pathname}>
-        Đăng nhập - Đăng ký
-      </BreadcrumbsItem>
+
+      <BreadcrumbsItem to={publicUrl + "/"}>Trang chủ</BreadcrumbsItem>
+      <BreadcrumbsItem to={publicUrl + pathname}>Đăng nhập - Đăng ký</BreadcrumbsItem>
       <LayoutOne headerTop="visible">
-        {/* breadcrumb */}
         <Breadcrumb />
         <div className="login-register-area pt-100 pb-100">
           <div className="container">
@@ -49,58 +176,98 @@ const LoginRegister = ({ location }) => {
                       <Tab.Pane eventKey="login">
                         <div className="login-form-container">
                           <div className="login-register-form">
-                            <form>
-                              <input
-                                type="text"
-                                name="user-name"
-                                placeholder="Tên tài khoản"
-                              />
-                              <input
-                                type="password"
-                                name="user-password"
-                                placeholder="Mật khẩu"
-                              />
-                              <div className="button-box">
-                                <div className="login-toggle-btn">
-                                  <input type="checkbox" />
-                                  <label className="ml-10">Ghi nhớ tài khoản</label>
-                                  <Link to={process.env.PUBLIC_URL + "/"}>
-                                    Quên mật khẩu?
-                                  </Link>
+                            {!showForgetPasswordForm && !showResetPasswordForm ? (
+                              <form onSubmit={handleLogin}>
+                                <input type="text" name="user-email" placeholder="Email" />
+                                <input type="password" name="user-password" placeholder="Mật khẩu" />
+                                <div className="button-box">
+                                  <div className="login-toggle-btn">
+                                    <input type="checkbox" />
+                                    <label className="ml-10">Ghi nhớ tài khoản</label>
+                                    <Link onClick={toggleForgetPasswordForm}>Quên mật khẩu?</Link>
+                                  </div>
+                                  <button type="submit">
+                                    <span>Đăng Nhập</span>
+                                  </button>
                                 </div>
-                                <button type="submit">
-                                  <span>Đăng Nhập</span>
-                                </button>
-                              </div>
-                            </form>
+                              </form>
+                            ) : showForgetPasswordForm ? (
+                              <ForgetPasswordForm
+                                setEmail={setEmail}
+                                setShowForgetPasswordForm={setShowForgetPasswordForm}
+                                setShowResetPasswordForm={setShowResetPasswordForm}
+                              />
+                            ) : (
+                              <ResetPasswordForm
+                                email={email}
+                                setShowResetPasswordForm={setShowResetPasswordForm}
+                              />
+                            )}
                           </div>
                         </div>
                       </Tab.Pane>
                       <Tab.Pane eventKey="register">
                         <div className="login-form-container">
                           <div className="login-register-form">
-                            <form>
+                            <form onSubmit={handleRegister}>
+                              <input name="user-fullname" placeholder="Họ tên" type="text" required />
+                              <input name="user-email" placeholder="Email" type="email" required />
+                              <input name="user-phone" placeholder="Số điện thoại" type="tel" required />
+                              <input name="user-address" placeholder="Địa chỉ" type="text" required />
+                              <div className="gender-birthday-container">
+                                <div className="form-group">
+                                  <label htmlFor="user-gender">Giới tính</label>
+                                  <select id="user-gender" name="user-gender" className="form-control" required>
+                                    <option value="Male">Nam</option>
+                                    <option value="Female">Nữ</option>
+                                    <option value="Other">Khác</option>
+                                  </select>
+                                </div>
+                                <div className="form-group">
+                                  <label htmlFor="user-birthday">Ngày sinh</label>
+                                  <input
+                                    id="user-birthday"
+                                    name="user-birthday"
+                                    placeholder="Ngày sinh"
+                                    type="date"
+                                    className="form-control"
+                                    required
+                                  />
+                                </div>
+                              </div>
+                              <input name="user-password" placeholder="Mật khẩu" type="password" required />
                               <input
-                                type="text"
-                                name="user-name"
-                                placeholder="Tên tài khoản"
-                              />
-                              <input
+                                name="user-confirm-password"
+                                placeholder="Xác nhận mật khẩu"
                                 type="password"
-                                name="user-password"
-                                placeholder="Mật khẩu"
-                              />
-                              <input
-                                name="user-email"
-                                placeholder="Email"
-                                type="email"
+                                required
                               />
                               <div className="button-box">
                                 <button type="submit">
-                                  <span>Đăng Ký</span>
+                                  <span>Đăng ký</span>
                                 </button>
                               </div>
                             </form>
+                            {showVerifyButton && (
+                              <div className="verify-account-container mt-3">
+                                <p>
+                                  Bạn cần xác minh tài khoản. Vui lòng nhấn vào nút bên dưới trong {countdown} giây.
+                                </p>
+                                <Button onClick={handleOpenModal} disabled={countdown === 0}>
+                                  Xác thực tài khoản
+                                </Button>
+                              </div>
+                            )}
+                            {showRegenerateButton && (
+                              <div className="regenerate-otp-container mt-3">
+                                <p>
+                                  Bạn chưa nhận được mã OTP? Nhấn vào nút bên dưới để gửi lại.
+                                </p>
+                                <Button variant="warning" onClick={handleRegenerateOTP}>
+                                  Gửi lại OTP
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </Tab.Pane>
@@ -112,12 +279,18 @@ const LoginRegister = ({ location }) => {
           </div>
         </div>
       </LayoutOne>
+      <VerifyAccount
+        showModal={showModal}  
+        handleClose={handleCloseModal}
+        email={email}
+        handleVerifyAccount={handleVerifyAccount}
+      />
     </Fragment>
   );
 };
 
 LoginRegister.propTypes = {
-  location: PropTypes.object
+  location: PropTypes.object,
 };
 
 export default LoginRegister;
