@@ -63,11 +63,11 @@ public class Store {
     private String identityName;
 
     @ManyToOne
-    @JoinColumn(name = "accountID", insertable = false, updatable = false)
+    @JoinColumn(name = "accountID", nullable = true)
     private Account account;
 
     @ManyToOne
-    @JoinColumn(name = "categoryID", insertable = false, updatable = false)
+    @JoinColumn(name = "categoryID", nullable = true)
     private Category category;
 
     public Store() {
