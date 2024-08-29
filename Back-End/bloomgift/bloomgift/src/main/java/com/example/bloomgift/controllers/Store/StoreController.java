@@ -69,7 +69,7 @@ public class StoreController {
             @RequestParam(required = false) String identityName,
             @RequestParam(required = false) String accountFullName,
             @RequestParam(required = false) String categoryName,
-            @RequestParam(defaultValue = "1") Integer page, // default page should be 1
+            @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
         Page<Store> stores = storeService.searchStoreWithFilterPage(
                 storeName, type, storePhone, storeAddress, storeEmail, bankAccountName, bankNumber, bankAddress,

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -214,12 +215,18 @@ public class AuthenticationService {
         }
 
         // Generate JWT token
-        String jwt = jwtUtil.generateToken(account);
+        final String jwt = jwtUtil.generateToken(account);
 
-        // Create a new modifiable map and copy attributes
-        Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
-        attributes.put("jwt", jwt);
+        // Set authentication context
+        UserDetails userDetails = accountService.loadUserByUsername(email);
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-        return attributes;
+        // Return user attributes along with the token
+        Map<String, Object> response = new HashMap<>(oAuth2User.getAttributes());
+        response.put("token", jwt);
+
+        return response;
     }
 }
