@@ -3,7 +3,9 @@ package com.example.bloomgift.request;
 public class CategoryRequest {
     private String categoryName ;
 
-
+    public CategoryRequest(){
+        
+    }
     public CategoryRequest(String categoryName) {
         this.categoryName = categoryName;
     }

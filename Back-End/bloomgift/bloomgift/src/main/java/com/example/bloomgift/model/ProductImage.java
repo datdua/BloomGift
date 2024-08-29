@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 
 
 @Entity
-@Table(name="Category")
+@Table(name="ProductImage")
 public class ProductImage {
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,13 +22,23 @@ public class ProductImage {
     private String productImage ;
 
     @ManyToOne
-    @JoinColumn(name = "productID", referencedColumnName = "productID")
+    @JoinColumn(name = "productID")
     private Product productID;
 
     public ProductImage(){
 
     }
+    
+    public ProductImage(Integer imageID, String productImage, Product productID) {
+        this.imageID = imageID;
+        this.productImage = productImage;
+        this.productID = productID;
+    }
 
+    public ProductImage(String productImage, Product product) {
+        this.productImage = productImage;
+        this.productID = product;
+    }
     public Integer getImageID() {
         return imageID;
     }

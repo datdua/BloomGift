@@ -29,7 +29,7 @@ public class ProductController {
     @PostMapping("/create-product")
     public ResponseEntity<String> createProduct(@RequestBody ProductRequest productRequest) {
         try {
-            productService.createProduct(productRequest);
+            productService.createProductt(productRequest);
             return new ResponseEntity<>("Product created successfully", HttpStatus.CREATED);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -65,7 +65,5 @@ public class ProductController {
         }
    
     }
-
-    
 
 }
