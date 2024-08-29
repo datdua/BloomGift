@@ -134,12 +134,12 @@ const LoginRegister = ({ location }) => {
   };
 
   const handleOpenModal = () => {
-    console.log("Opening modal"); // Debugging statement
+    console.log("Opening modal"); 
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
-    console.log("Closing modal"); // Debugging statement
+    console.log("Closing modal"); 
     setShowModal(false);
   };
 

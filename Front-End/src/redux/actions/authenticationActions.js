@@ -83,6 +83,7 @@ export const verifyAccount = (userData, addToast) => {
     };
 };
 
+
 export const forgotPassword = (email, addToast) => {
     return async (dispatch) => {
         try {
@@ -125,21 +126,10 @@ export const resetPassword = (userData, addToast) => {
     };
 };
 
-
-
-
 export const regenerateOTP = (email, addToast) => {
     return async (dispatch) => {
         try {
-            const token = localStorage.getItem('token');
-            console.log("Token:", token);
-
-            // Include the email as a URL parameter
-            const response = await axios.post(`http://localhost:8080/api/auth/regenerate-otp?email=${encodeURIComponent(email)}`, {}, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            const response = await axios.put(`http://localhost:8080/api/auth/regenerate-otp?email=${encodeURIComponent(email)}`);
             dispatch({
                 type: REGENERATE_OTP,
                 payload: response.data

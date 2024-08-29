@@ -17,10 +17,10 @@ const ForgetPasswordForm = ({ setEmail, setShowForgetPasswordForm, setShowResetP
 
   const handleForgetPassword = (e) => {
     e.preventDefault();
-
+  
     dispatch(forgotPassword(email, addToast))
       .then(() => {
-        setEmail(email); // Pass email back to parent
+        setEmail(email); 
         setShowForgetPasswordForm(false);
         setShowResetPasswordForm(true);
       })
