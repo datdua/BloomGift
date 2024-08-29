@@ -13,9 +13,6 @@ public class Product {
     @Column(name = "productID")
     private Integer productID;
 
-    @Column(name = "price")
-    private Float price;
-
     @Column(name = "discount")
     private Float discount;
 
@@ -24,9 +21,6 @@ public class Product {
 
     @Column(name = "colour")
     private String colour;
-
-    @Column(name = "size")
-    private Float size;
 
     @Column(name = "featured")
     private Boolean featured;
@@ -54,23 +48,25 @@ public class Product {
     @JoinColumn(name = "storeID")
     private Store storeID;
 
+    @OneToMany(mappedBy = "productID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Size> sizes = new ArrayList<>();
 
     @OneToMany(mappedBy = "productID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ProductImage> productImages;
+    private List<ProductImage> productImages = new ArrayList<>();
 
     public Product() {
 
     }
 
-    public Product(Integer productID, Float price, Float discount, String description, String colour, Float size,
-            Boolean featured, Boolean productStatus, Date createDate, Integer quantity, Integer sold,
-            String productName, Category categoryID, Store storeID, List<ProductImage> productImages) {
+   
+
+    public Product(Integer productID, Float discount, String description, String colour, Boolean featured,
+            Boolean productStatus, Date createDate, Integer quantity, Integer sold, String productName,
+            Category categoryID, Store storeID, List<Size> sizes, List<ProductImage> productImages) {
         this.productID = productID;
-        this.price = price;
         this.discount = discount;
         this.description = description;
         this.colour = colour;
-        this.size = size;
         this.featured = featured;
         this.productStatus = productStatus;
         this.createDate = createDate;
@@ -79,8 +75,11 @@ public class Product {
         this.productName = productName;
         this.categoryID = categoryID;
         this.storeID = storeID;
+        this.sizes = sizes;
         this.productImages = productImages;
     }
+
+
 
     public Integer getProductID() {
         return productID;
@@ -90,13 +89,7 @@ public class Product {
         this.productID = productID;
     }
 
-    public Float getPrice() {
-        return price;
-    }
-
-    public void setPrice(Float price) {
-        this.price = price;
-    }
+    
 
     public Float getDiscount() {
         return discount;
@@ -122,13 +115,6 @@ public class Product {
         this.colour = colour;
     }
 
-    public Float getSize() {
-        return size;
-    }
-
-    public void setSize(Float size) {
-        this.size = size;
-    }
 
     public Boolean getFeatured() {
         return featured;
@@ -208,6 +194,18 @@ public class Product {
 
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+
+
+    public List<Size> getSizes() {
+        return sizes;
+    }
+
+
+
+    public void setSizes(List<Size> sizes) {
+        this.sizes = sizes;
     }
 
 }
