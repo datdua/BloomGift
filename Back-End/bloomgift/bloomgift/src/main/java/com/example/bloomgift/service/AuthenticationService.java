@@ -223,7 +223,7 @@ public class AuthenticationService {
                 userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-        // Return user attributes along with the token
+        // Put token to user attributes
         Map<String, Object> response = new HashMap<>(oAuth2User.getAttributes());
         response.put("token", jwt);
 
