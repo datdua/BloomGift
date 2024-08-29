@@ -139,9 +139,8 @@ public class AccountService implements UserDetailsService {
         if (existingAccount == null) {
             throw new RuntimeException("Không tìm thấy tài khoản");
         }
-
+        
         String fullname = accountRequest.getFullname();
-        String email = accountRequest.getEmail();
         String password = accountRequest.getPassword();
         Integer phone = accountRequest.getPhone();
         String address = accountRequest.getAddress();
@@ -150,10 +149,8 @@ public class AccountService implements UserDetailsService {
         String gender = accountRequest.getGender();
         Boolean accountstatus = accountRequest.getAccountStatus();
         String avatar = accountRequest.getAvatar();
-
         // --------------------------------------------//
         existingAccount.setFullname(fullname);
-        existingAccount.setEmail(email);
         existingAccount.setPassword(password);
         existingAccount.setPhone(phone);
         existingAccount.setAddress(address);

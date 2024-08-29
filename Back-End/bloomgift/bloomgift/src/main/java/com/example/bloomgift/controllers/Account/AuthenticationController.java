@@ -58,7 +58,7 @@ public class AuthenticationController {
 
     }
 
-    @PutMapping("/regenetate-otp")
+    @PutMapping("/regenerate-otp")
     public ResponseEntity<String> regenetateOtp(
             @RequestParam String email) {
 
