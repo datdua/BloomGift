@@ -1,9 +1,10 @@
 import PropTypes from "prop-types";
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import MenuCart from "./sub-components/MenuCart";
 import { deleteFromCart } from "../../redux/actions/cartActions";
+import "./IconGroup.css"
 
 const IconGroup = ({
   currency,
@@ -13,21 +14,33 @@ const IconGroup = ({
   deleteFromCart,
   iconWhiteClass
 }) => {
+  const history = useHistory();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+
+    const token = localStorage.getItem("token");
+
+    setIsLoggedIn(!!token);
+  }, []);
+
   const handleClick = e => {
     e.currentTarget.nextSibling.classList.toggle("active");
   };
 
   const triggerMobileMenu = () => {
-    const offcanvasMobileMenu = document.querySelector(
-      "#offcanvas-mobile-menu"
-    );
+    const offcanvasMobileMenu = document.querySelector("#offcanvas-mobile-menu");
     offcanvasMobileMenu.classList.add("active");
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    history.push("/login-register");
+  };
+
   return (
-    <div
-      className={`header-right-wrap ${iconWhiteClass ? iconWhiteClass : ""}`}
-    >
+    <div className={`header-right-wrap ${iconWhiteClass ? iconWhiteClass : ""}`}>
       <div className="same-style header-search d-none d-lg-block">
         <button className="search-active" onClick={e => handleClick(e)}>
           <i className="pe-7s-search" />
@@ -42,27 +55,36 @@ const IconGroup = ({
         </div>
       </div>
       <div className="same-style account-setting d-none d-lg-block">
-        <button
-          className="account-setting-active"
-          onClick={e => handleClick(e)}
-        >
+        <button className="account-setting-active" onClick={e => handleClick(e)}>
           <i className="pe-7s-user-female" />
         </button>
         <div className="account-dropdown">
           <ul>
-            <li>
-              <Link to={process.env.PUBLIC_URL + "/login-register"}>Đăng nhập</Link>
-            </li>
-            <li>
-              <Link to={process.env.PUBLIC_URL + "/login-register"}>
-                Đăng ký
-              </Link>
-            </li>
-            <li>
-              <Link to={process.env.PUBLIC_URL + "/my-account"}>
-                Tài khoản
-              </Link>
-            </li>
+            {isLoggedIn ? (
+              <>
+                <li>
+                  <Link to={process.env.PUBLIC_URL + "/account"}>Tài khoản</Link>
+                </li>
+                <li>
+                  <button className="logout-button" onClick={handleLogout} style={{
+                    backgroundColor: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: '13px',
+                    transition: 'transform 0.3s ease, color 0.3s ease'
+                  }}>Đăng xuất</button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <Link to={process.env.PUBLIC_URL + "/login-register"}>Đăng nhập</Link>
+                </li>
+                <li>
+                  <Link to={process.env.PUBLIC_URL + "/login-register"}>Đăng ký</Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>

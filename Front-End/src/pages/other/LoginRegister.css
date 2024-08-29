@@ -1,0 +1,19 @@
+.gender-birthday-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  
+  .gender-birthday-container .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .gender-birthday-container .form-group label {
+    margin-bottom: 5px;
+  }
+  
+  .gender-birthday-container .form-group .form-control {
+    width: 100%;
+  }
