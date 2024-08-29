@@ -1,6 +1,5 @@
 package com.example.bloomgift.config;
 
-
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +23,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.example.bloomgift.filter.JwtAuthenticationFilter;
 import com.example.bloomgift.service.AccountService;
-
-
 
 @Configuration
 @EnableWebSecurity
@@ -70,24 +67,24 @@ public class SecurityConfig {
     }
 
     @Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-            .cors(withDefaults())
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                    .requestMatchers(SWAGGER_URL).permitAll()
-                    .requestMatchers(CUSTOMER_URL).hasRole("CUSTOMER")
-                    .anyRequest().authenticated())
-            .exceptionHandling(exceptionHandling -> exceptionHandling
-                    .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-            .oauth2Login(oauth2 -> oauth2
-                    .loginPage("http://localhost:8080/oauth2/authorization/google")
-                    .defaultSuccessUrl("http://localhost:8080/api/auth/signInWithGoogle", true))
-            .formLogin(Customizer.withDefaults());
-    http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(withDefaults())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .requestMatchers(SWAGGER_URL).permitAll()
+                        .requestMatchers(CUSTOMER_URL).hasRole("CUSTOMER")
+                        .anyRequest().authenticated())
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("http://localhost:8080/oauth2/authorization/google")
+                        .defaultSuccessUrl("http://localhost:8080/api/auth/signInWithGoogle", true))
+                .formLogin(Customizer.withDefaults());
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-    return http.build();
-}
+        return http.build();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

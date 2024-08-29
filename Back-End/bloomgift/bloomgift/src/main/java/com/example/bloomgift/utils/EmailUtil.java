@@ -42,7 +42,7 @@ public class EmailUtil {
         // Tạo nội dung email
         String content = "<p>Bạn đã yêu cầu quên mật khẩu.</p>"
                 + "<p>Vui lòng bấm vào nút dưới đây để reset mật khẩu.</p>"
-                + "<a href='http://localhost:3000/reset-password'>Reset Password</a>";
+                + "<a href='http://localhost:3000/reset-password?email=" + email + "'>Reset Password</a>";
 
         mimeMessageHelper.setText(content, true);
 
