@@ -6,8 +6,6 @@ public class ProductImageRequest {
 
     }
     
-  
-
     public ProductImageRequest(String productImage) {
         this.productImage = productImage;
     }

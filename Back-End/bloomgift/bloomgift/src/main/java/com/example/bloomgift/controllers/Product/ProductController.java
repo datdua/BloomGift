@@ -25,7 +25,6 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-
     @PostMapping("/create-product")
     public ResponseEntity<String> createProduct(@RequestBody ProductRequest productRequest) {
         try {
@@ -35,15 +34,15 @@ public class ProductController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
     @GetMapping("/list-product")
-        public ResponseEntity<List<ProductReponse>> getAllProducts() {
+    public ResponseEntity<List<ProductReponse>> getAllProducts() {
         List<ProductReponse> productResponses = productService.getAllProducts();
-    return ResponseEntity.ok(productResponses);
+        return ResponseEntity.ok(productResponses);
     }
 
-
     @DeleteMapping("/{productID}")
-    public ResponseEntity<String> deleteProduct(@PathVariable("productID") Integer productID){
+    public ResponseEntity<String> deleteProduct(@PathVariable("productID") Integer productID) {
         try {
             productService.deleteProduct(productID);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Account deleted successfully");
@@ -52,18 +51,27 @@ public class ProductController {
         }
     }
 
-      @PutMapping(value = "/update-product/{productID}",
-            produces = "application/json;charset=UTF-8")
+    @PutMapping(value = "/update-product/{productID}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<?> updateProduct(
-        @PathVariable Integer productID,    
-        @RequestBody ProductRequest productRequest) {
-        try{
+            @PathVariable Integer productID,
+            @RequestBody ProductRequest productRequest) {
+        try {
             Product prodcut = productService.updateProduct(productID, productRequest);
             return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật thành công"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("message", e.getMessage()));
         }
-   
+
+    }
+
+    @GetMapping("/{productId}")
+    public ResponseEntity<ProductReponse> getProductById(@PathVariable int productId) {
+        try {
+            ProductReponse productResponse = productService.getProductByID(productId);
+            return ResponseEntity.ok(productResponse);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
 }

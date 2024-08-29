@@ -1,54 +1,57 @@
 package com.example.bloomgift.request;
 
-import java.util.Date;
 import java.util.List;
 
-import com.example.bloomgift.reponse.ProductImageReponse;
 
 public class ProductRequest {
-    private Float price ;
     private Float discount ;
     private String description ;
     private String colour ;
-    private Float size ;
     private String productName;
     private Boolean featured ;
     private Integer quantity ;
     private String categoryName;
     private Integer storeID;
     private Boolean productStatus;
+    private List<SizeRequest> sizes;
     private List<ProductImageRequest> images;
     public ProductRequest(){
 
     }
     
+    
 
-    public ProductRequest(Float price, Float discount, String description, String colour, Float size,
-            String productName, Boolean featured, Integer quantity, String categoryName, Integer storeID,
-            Boolean productStatus, List<ProductImageRequest> images) {
-        this.price = price;
+
+
+
+
+
+
+
+    public ProductRequest(Float discount, String description, String colour, String productName, Boolean featured,
+            Integer quantity, String categoryName, Integer storeID, Boolean productStatus, List<SizeRequest> sizes,
+            List<ProductImageRequest> images) {
         this.discount = discount;
         this.description = description;
         this.colour = colour;
-        this.size = size;
         this.productName = productName;
         this.featured = featured;
         this.quantity = quantity;
         this.categoryName = categoryName;
         this.storeID = storeID;
         this.productStatus = productStatus;
+        this.sizes = sizes;
         this.images = images;
     }
 
 
 
-    public Float getPrice() {
-        return price;
-    }
 
-    public void setPrice(Float price) {
-        this.price = price;
-    }
+
+
+
+
+
 
     public Float getDiscount() {
         return discount;
@@ -74,14 +77,7 @@ public class ProductRequest {
         this.colour = colour;
     }
 
-    public Float getSize() {
-        return size;
-    }
-
-    public void setSize(Float size) {
-        this.size = size;
-    }
-
+ 
     public Boolean getFeatured() {
         return featured;
     }
@@ -161,6 +157,32 @@ public class ProductRequest {
 
     public void setStoreID(Integer storeID) {
         this.storeID = storeID;
+    }
+
+
+
+
+
+
+
+
+
+
+    public List<SizeRequest> getSizes() {
+        return sizes;
+    }
+
+
+
+
+
+
+
+
+
+
+    public void setSizes(List<SizeRequest> sizes) {
+        this.sizes = sizes;
     }
     
 }

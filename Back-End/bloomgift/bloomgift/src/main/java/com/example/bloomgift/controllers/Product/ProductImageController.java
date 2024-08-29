@@ -26,12 +26,12 @@ public class ProductImageController {
     @Autowired
     private ProductImageService productImageService;
 
-    @GetMapping("/{productID}/create-images")
+    @GetMapping("/{productID}/images")
     public ResponseEntity<List<ProductImageReponse>> getListImagesByProductID(@PathVariable int productID) {
         List<ProductImageReponse> productImageResponses = productImageService.getListImagesByProductID(productID);
         return ResponseEntity.ok(productImageResponses);
     }
-    @PostMapping("/{productId}/images")
+    @PostMapping("/{productId}/create-images")
     public void createProductImages(@PathVariable Integer productId, @RequestBody List<String> imageUrls) {
         productImageService.createProductImage(productId, imageUrls);
     }

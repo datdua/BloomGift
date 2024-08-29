@@ -5,16 +5,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.example.bloomgift.model.Category;
 import com.example.bloomgift.model.Product;
 import com.example.bloomgift.model.ProductImage;
+import com.example.bloomgift.model.Size;
 import com.example.bloomgift.model.Store;
 import com.example.bloomgift.reponse.ProductImageReponse;
 import com.example.bloomgift.reponse.ProductReponse;
+import com.example.bloomgift.reponse.SizeReponse;
 import com.example.bloomgift.repository.CategoryRepository;
 import com.example.bloomgift.repository.ProductImageRepository;
 import com.example.bloomgift.repository.ProductRepository;
@@ -41,18 +43,19 @@ public class ProductService {
         return products.stream().map(this::convertToProductReponse).collect(Collectors.toList());
     }
 
-    private ProductReponse convertToProductReponse(Product product) {
+    public ProductReponse getProductByID(int productID) {
+        Product product = productRepository.findById(productID).orElseThrow();
         List<ProductImageReponse> imageResponses = product.getProductImages().stream()
                 .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
                 .collect(Collectors.toList());
-
+        List<SizeReponse> sizeReponses = product.getSizes().stream()
+                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeFloat()))
+                .collect(Collectors.toList());
         return new ProductReponse(
                 product.getProductID(),
-                product.getPrice(),
                 product.getDiscount(),
                 product.getDescription(),
                 product.getColour(),
-                product.getSize(),
                 product.getFeatured(),
                 product.getProductStatus(),
                 product.getCreateDate(),
@@ -61,16 +64,40 @@ public class ProductService {
                 product.getProductName(),
                 product.getCategoryName(),
                 product.getStoreName(),
+                sizeReponses,
+                imageResponses);
+    }
+
+    private ProductReponse convertToProductReponse(Product product) {
+        List<ProductImageReponse> imageResponses = product.getProductImages().stream()
+                .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
+                .collect(Collectors.toList());
+        List<SizeReponse> sizeReponses = product.getSizes().stream()
+                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeFloat()))
+                .collect(Collectors.toList());
+
+        return new ProductReponse(
+                product.getProductID(),
+                product.getDiscount(),
+                product.getDescription(),
+                product.getColour(),
+                product.getFeatured(),
+                product.getProductStatus(),
+                product.getCreateDate(),
+                product.getQuantity(),
+                product.getSold(),
+                product.getProductName(),
+                product.getCategoryName(),
+                product.getStoreName(),
+                sizeReponses,
                 imageResponses);
     }
 
     public void createProductt(ProductRequest productRequest) {
         checkProduct(productRequest);
-        Float price = productRequest.getPrice();
         Float discount = productRequest.getDiscount();
         String description = productRequest.getDescription();
         String colour = productRequest.getColour();
-        Float size = productRequest.getSize();
         Boolean featured = productRequest.getFeatured();
         Integer quantity = productRequest.getQuantity();
         String categoryName = productRequest.getCategoryName();
@@ -89,11 +116,9 @@ public class ProductService {
             throw new IllegalArgumentException("Store not found");
         }
         Product product = new Product();
-        product.setPrice(price);
         product.setDiscount(discount);
         product.setDescription(description);
         product.setColour(colour);
-        product.setSize(size);
         product.setFeatured(featured);
         product.setProductStatus(true);
         product.setProductName(productName);
@@ -102,6 +127,17 @@ public class ProductService {
         product.setCategoryID(category);
         product.setSold(0);
         product.setStoreID(store);
+        List<Size> sizes = productRequest.getSizes().stream()
+                .map(sizeRequest -> {
+                    Size size = new Size();
+                    size.setPrice(sizeRequest.getPrice());
+                    size.setText(sizeRequest.getText());
+                    size.setSizeFloat(sizeRequest.getSizeFloat());
+                    size.setProductID(product);
+                    return size;
+                })
+                .collect(Collectors.toList());
+        product.setSizes(sizes);
         List<ProductImage> productImages = productRequest.getImages().stream()
                 .map(imageRequest -> {
                     ProductImage image = new ProductImage();
@@ -129,11 +165,9 @@ public class ProductService {
             throw new RuntimeException("Không tìm thấy san pham");
         }
 
-        Float price = productRequest.getPrice();
         Float discount = productRequest.getDiscount();
         String description = productRequest.getDescription();
         String colour = productRequest.getColour();
-        Float size = productRequest.getSize();
         Boolean featured = productRequest.getFeatured();
         Integer quantity = productRequest.getQuantity();
         String categoryName = productRequest.getCategoryName();
@@ -145,27 +179,39 @@ public class ProductService {
         }
 
         // ----------------------------------------------/
-        existingProduct.setPrice(price);
         existingProduct.setDescription(description);
         existingProduct.setDiscount(discount);
         existingProduct.setColour(colour);
-        existingProduct.setSize(size);
         existingProduct.setFeatured(featured);
         existingProduct.setQuantity(quantity);
         existingProduct.setCategoryID(category);
         existingProduct.setProductName(productName);
         existingProduct.setProductStatus(productStatus);
-        existingProduct.setSold(0);
+        // List<Size> updatedSizes = productRequest.getSizes().stream()
+        //         .map(sizeRequest -> {
+        //             Size size = existingProduct.getSizes().stream()
+        //                     .filter(s -> s.getSizeID().equals(sizeRequest.getSizeID()))
+        //                     .findFirst()
+        //                     .orElse(new Size());
+        //             size.setPrice(sizeRequest.getPrice());
+        //             size.setText(sizeRequest.getText());
+        //             size.setSizeFloat(sizeRequest.getSizeFloat());
+        //             size.setProductID(existingProduct);
+        //             return size;
+        //         })
+        //         .collect(Collectors.toList());
+        // existingProduct.setSizes(updatedSizes);
         return productRepository.save(existingProduct);
 
     }
+  
+
+  
 
     public void checkProduct(ProductRequest productRequest) {
-        Float price = productRequest.getPrice();
         Float discount = productRequest.getDiscount();
         String description = productRequest.getDescription();
         String colour = productRequest.getColour();
-        Float size = productRequest.getSize();
         Boolean featured = productRequest.getFeatured();
         Integer quantity = productRequest.getQuantity();
         String categoryName = productRequest.getCategoryName();
@@ -175,11 +221,10 @@ public class ProductService {
                 || !StringUtils.hasText(colour)
                 || !StringUtils.hasText(categoryName)
                 || !StringUtils.hasText(productName)
-                || price == null
                 || quantity == null) {
             throw new RuntimeException("Vui lòng nhập đầy đủ thông tin");
         }
-        if (price < 0 || discount < 0 || size < 0 || quantity < 0) {
+        if (discount < 0 || quantity < 0) {
             throw new RuntimeException("Vui lòng nhập đung thông tin");
 
         }
@@ -190,5 +235,8 @@ public class ProductService {
         return productRepository.findById(productID)
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productID));
     }
+
+
+
 
 }
