@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -122,7 +123,7 @@ public class AuthenticationService {
         account.setOtp(otp);
         account.setOtp_generated_time(LocalDateTime.now());
         accountRepository.save(account);
-        return Collections.singletonMap("messag e", "kiểm tra mail và nhập OTP");
+        return Collections.singletonMap("message", "kiểm tra mail và nhập OTP");
     }
 
     public void checkvalidateRegister(RegisterRequest registerRequest) {
@@ -139,7 +140,7 @@ public class AuthenticationService {
 
         // Account existingEmail = accountRepository.findByEmail(email);
         // if (existingEmail != null) {
-        //         throw new RuntimeException("Account already exists");
+        // throw new RuntimeException("Account already exists");
         // }
         Account existingPhone = accountRepository.findByPhone(phone);
         if (existingPhone != null) {
@@ -166,7 +167,7 @@ public class AuthenticationService {
         Account account = accountRepository.findByEmail(email);
 
         if (account.getOtp().equals(otp) && Duration.between(account.getOtp_generated_time(),
-                LocalDateTime.now()).getSeconds() < (1 * 500    )) {
+                LocalDateTime.now()).getSeconds() < (1 * 500)) {
             account.setAccountStatus(true);
             accountRepository.save(account);
             return "OTP verify you can login";
@@ -178,8 +179,8 @@ public class AuthenticationService {
 
     public String generateOtp(String email) {
         Account account = accountRepository.findByEmail(email);
-        
-        if (!account.getAccountStatus(true)) {  // Assuming accountStatus is a boolean field
+
+        if (!account.getAccountStatus(true)) { // Assuming accountStatus is a boolean field
             String otp = otpUtil.generateOtp();
             try {
                 emailUtil.sendOtpEmail(email, otp);
@@ -222,12 +223,18 @@ public class AuthenticationService {
         }
 
         // Generate JWT token
-        String jwt = jwtUtil.generateToken(account);
+        final String jwt = jwtUtil.generateToken(account);
 
-        // Create a new modifiable map and copy attributes
-        Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
-        attributes.put("jwt", jwt);
+        // Set authentication context
+        UserDetails userDetails = accountService.loadUserByUsername(email);
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-        return attributes;
+        // Return user attributes along with the token
+        Map<String, Object> response = new HashMap<>(oAuth2User.getAttributes());
+        response.put("token", jwt);
+
+        return response;
     }
 }
