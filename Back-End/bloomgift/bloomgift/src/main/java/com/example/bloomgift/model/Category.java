@@ -2,6 +2,9 @@ package com.example.bloomgift.model;
 
 import java.util.Set;
 
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,10 +24,13 @@ public class Category {
     @Column(name = "categoryName")
     private String categoryName;
 
+
     @OneToMany(mappedBy = "categoryID")
+    @JsonManagedReference 
     private Set<Product> products;
 
     @OneToMany(mappedBy = "category")
+    @JsonIgnore 
     private Set<Store> stores;
 
     public Integer getCategoryID() {

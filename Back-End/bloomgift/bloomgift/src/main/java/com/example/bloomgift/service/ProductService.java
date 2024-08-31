@@ -56,6 +56,7 @@ public class ProductService {
                 product.getDiscount(),
                 product.getDescription(),
                 product.getColour(),
+                product.getPrice(),
                 product.getFeatured(),
                 product.getProductStatus(),
                 product.getCreateDate(),
@@ -81,6 +82,7 @@ public class ProductService {
                 product.getDiscount(),
                 product.getDescription(),
                 product.getColour(),
+                product.getPrice(),
                 product.getFeatured(),
                 product.getProductStatus(),
                 product.getCreateDate(),
@@ -100,6 +102,7 @@ public class ProductService {
         String colour = productRequest.getColour();
         Boolean featured = productRequest.getFeatured();
         Integer quantity = productRequest.getQuantity();
+        Float price = productRequest.getPrice();
         String categoryName = productRequest.getCategoryName();
         String productName = productRequest.getProductName();
         Category category = categoryRepository.findByCategoryName(categoryName);
@@ -124,6 +127,7 @@ public class ProductService {
         product.setProductName(productName);
         product.setCreateDate(new Date());
         product.setQuantity(quantity);
+        product.setPrice(price);
         product.setCategoryID(category);
         product.setSold(0);
         product.setStoreID(store);
@@ -173,6 +177,7 @@ public class ProductService {
         String categoryName = productRequest.getCategoryName();
         String productName = productRequest.getProductName();
         Boolean productStatus = productRequest.getProductStatus();
+        Float price = productRequest.getPrice();
         Category category = categoryRepository.findByCategoryName(categoryName);
         if (category == null) {
             throw new RuntimeException("Category not found");
@@ -187,6 +192,7 @@ public class ProductService {
         existingProduct.setCategoryID(category);
         existingProduct.setProductName(productName);
         existingProduct.setProductStatus(productStatus);
+        existingProduct.setPrice(price);
         // List<Size> updatedSizes = productRequest.getSizes().stream()
         //         .map(sizeRequest -> {
         //             Size size = existingProduct.getSizes().stream()
@@ -204,9 +210,6 @@ public class ProductService {
         return productRepository.save(existingProduct);
 
     }
-  
-
-  
 
     public void checkProduct(ProductRequest productRequest) {
         Float discount = productRequest.getDiscount();
@@ -216,15 +219,17 @@ public class ProductService {
         Integer quantity = productRequest.getQuantity();
         String categoryName = productRequest.getCategoryName();
         String productName = productRequest.getProductName();
+        Float price = productRequest.getPrice();
 
         if (!StringUtils.hasText(description)
                 || !StringUtils.hasText(colour)
                 || !StringUtils.hasText(categoryName)
                 || !StringUtils.hasText(productName)
-                || quantity == null) {
+                || quantity == null
+                || price == null) {
             throw new RuntimeException("Vui lòng nhập đầy đủ thông tin");
         }
-        if (discount < 0 || quantity < 0) {
+        if (discount < 0 || quantity < 0 || price <0) {
             throw new RuntimeException("Vui lòng nhập đung thông tin");
 
         }

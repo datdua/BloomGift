@@ -1,6 +1,7 @@
-    package com.example.bloomgift.service;
+package com.example.bloomgift.service;
 
 import java.util.List;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ public class StoreService {
         store.setBankAddress(storeRequest.getBankAddress());
 
         String storeEmail = storeRequest.getStoreEmail();
-        if (!storeEmail.contains("^[a-zA-Z0-9._%+-]+@gmail.com$")) {
+        if (!storeEmail.matches("^[a-zA-Z0-9._%+-]+@gmail.com$")) {
             return ResponseEntity.badRequest().body("Email không hợp lệ");
         }
         store.setStoreEmail(storeEmail);
@@ -86,7 +87,7 @@ public class StoreService {
         store.setCategory(category);
 
         storeRepository.save(store);
-        return ResponseEntity.ok().body("Thêm cửa hàng thành công");
+        return ResponseEntity.ok(Collections.singletonMap("message", "Thêm cửa hàng thành công"));
     }
 
     public ResponseEntity<?> updateStore(Integer storeID, StorePutRequest storePutRequest) {
@@ -103,7 +104,7 @@ public class StoreService {
         store.setBankAddress(storePutRequest.getBankAddress());
 
         String storeEmail = storePutRequest.getStoreEmail();
-        if (!storeEmail.contains("^[a-zA-Z0-9._%+-]+@gmail.com$")) {
+        if (!storeEmail.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
             return ResponseEntity.badRequest().body("Email không hợp lệ");
         }
         store.setStoreEmail(storeEmail);
@@ -128,7 +129,7 @@ public class StoreService {
 
         String identityCard = storePutRequest.getIdentityCard();
         if (identityCard.length() != 12) {
-            return ResponseEntity.badRequest().body("Số CMND không hợp lệ");
+            return ResponseEntity.badRequest().body("Số CCCD không hợp lệ");
         }
         store.setIdentityCard(identityCard);
 
@@ -143,16 +144,17 @@ public class StoreService {
         Category category = new Category();
         category.setCategoryID(storePutRequest.getCategoryID());
 
-        return ResponseEntity.ok().body("Cập nhật cửa hàng thành công");
+        return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật cửa hàng thành công"));
 
     }
 
     public ResponseEntity<?> deleteStore(@RequestBody List<Integer> storeIDs) {
-        // Filter non-existent storeIDs
+        // Filter existent storeIDs
         List<Integer> existingStoreIDs = storeIDs.stream()
                 .filter(storeID -> storeRepository.existsById(storeID))
                 .collect(Collectors.toList());
 
+        // Filter non-existent storeIDs
         List<Integer> nonExistentStoreIDs = storeIDs.stream()
                 .filter(storeID -> !storeRepository.existsById(storeID))
                 .collect(Collectors.toList());

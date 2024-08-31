@@ -3,7 +3,21 @@ package com.example.bloomgift.model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import jakarta.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Product")
@@ -40,28 +54,36 @@ public class Product {
     @Column(name = "productName")
     private String productName;
 
+    @Column(name = "price")
+    private Float price;
+
     @ManyToOne
     @JoinColumn(name = "categoryID")
+    @JsonBackReference
     private Category categoryID;
 
     @ManyToOne
     @JoinColumn(name = "storeID")
+    @JsonBackReference
     private Store storeID;
 
     @OneToMany(mappedBy = "productID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Size> sizes = new ArrayList<>();
 
     @OneToMany(mappedBy = "productID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ProductImage> productImages = new ArrayList<>();
+    private List<ProductImage> productImages= new ArrayList<>();
 
     public Product() {
 
     }
 
-   
+
+
+
+
 
     public Product(Integer productID, Float discount, String description, String colour, Boolean featured,
-            Boolean productStatus, Date createDate, Integer quantity, Integer sold, String productName,
+            Boolean productStatus, Date createDate, Integer quantity, Integer sold, String productName, Float price,
             Category categoryID, Store storeID, List<Size> sizes, List<ProductImage> productImages) {
         this.productID = productID;
         this.discount = discount;
@@ -73,11 +95,15 @@ public class Product {
         this.quantity = quantity;
         this.sold = sold;
         this.productName = productName;
+        this.price = price;
         this.categoryID = categoryID;
         this.storeID = storeID;
         this.sizes = sizes;
         this.productImages = productImages;
     }
+
+
+
 
 
 
@@ -88,8 +114,6 @@ public class Product {
     public void setProductID(Integer productID) {
         this.productID = productID;
     }
-
-    
 
     public Float getDiscount() {
         return discount;
@@ -114,7 +138,6 @@ public class Product {
     public void setColour(String colour) {
         this.colour = colour;
     }
-
 
     public Boolean getFeatured() {
         return featured;
@@ -196,16 +219,33 @@ public class Product {
         this.productName = productName;
     }
 
-
-
     public List<Size> getSizes() {
         return sizes;
     }
-
-
 
     public void setSizes(List<Size> sizes) {
         this.sizes = sizes;
     }
 
+
+
+
+
+
+    public Float getPrice() {
+        return price;
+    }
+
+
+
+
+
+
+    public void setPrice(Float price) {
+        this.price = price;
+    }
+
+
+
+ 
 }

@@ -10,7 +10,7 @@ public class ProductReponse {
     private Float discount;
     private String description;
     private String colour;
-    
+    private Float price;
     private Boolean featured;
     private Boolean productStatus;
     private Date createDate;
@@ -27,21 +27,6 @@ public class ProductReponse {
 
 
  
-
-
-
-
-
-
-
-
-
-
-
-   
-
-
-
 
     public ProductReponse(Integer productID, Float discount, String description, String colour, Boolean featured,
                 Boolean productStatus, Date createDate, Integer quantity, Integer sold, String productName,
@@ -67,15 +52,26 @@ public class ProductReponse {
 
 
 
-
-
-
-
-
-
-
-
-
+    public ProductReponse(Integer productID, Float discount, String description, String colour, Float price,
+            Boolean featured, Boolean productStatus, Date createDate, Integer quantity, Integer sold,
+            String productName, String categoryName, String storeName, List<SizeReponse> sizes,
+            List<ProductImageReponse> images) {
+        this.productID = productID;
+        this.discount = discount;
+        this.description = description;
+        this.colour = colour;
+        this.price = price;
+        this.featured = featured;
+        this.productStatus = productStatus;
+        this.createDate = createDate;
+        this.quantity = quantity;
+        this.sold = sold;
+        this.productName = productName;
+        this.categoryName = categoryName;
+        this.storeName = storeName;
+        this.sizes = sizes;
+        this.images = images;
+    }
 
 
 
@@ -205,6 +201,20 @@ public class ProductReponse {
 
     public void setSizes(List<SizeReponse> sizes) {
         this.sizes = sizes;
+    }
+
+
+
+
+    public Float getPrice() {
+        return price;
+    }
+
+
+
+
+    public void setPrice(Float price) {
+        this.price = price;
     }
 
 

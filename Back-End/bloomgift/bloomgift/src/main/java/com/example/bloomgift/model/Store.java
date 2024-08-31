@@ -2,6 +2,8 @@ package com.example.bloomgift.model;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,14 +15,15 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Store")
+@Table(name = "Store")
 public class Store {
-    @Id 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "storeID") 
-    private Integer storeID; 
-    
+    @Column(name = "storeID")
+    private Integer storeID;
+
     @OneToMany(mappedBy = "storeID")
+    @JsonIgnore // Ignore this field during serialization
     private Set<Product> products;
 
     @Column(name = "storeName")
@@ -73,7 +76,10 @@ public class Store {
     public Store() {
     }
 
-    public Store(Integer storeID, Set<Product> products, String storeName, String type, String storePhone, String storeAddress, String storeEmail, String bankAccountName, String bankNumber, String bankAddress, String taxNumber, String storeStatus, String storeAvatar, String identityCard, String identityName, Account account, Category category) {
+    public Store(Integer storeID, Set<Product> products, String storeName, String type, String storePhone,
+            String storeAddress, String storeEmail, String bankAccountName, String bankNumber, String bankAddress,
+            String taxNumber, String storeStatus, String storeAvatar, String identityCard, String identityName,
+            Account account, Category category) {
         this.storeID = storeID;
         this.products = products;
         this.storeName = storeName;
@@ -221,11 +227,12 @@ public class Store {
         this.category = category;
     }
 
-    public void setIdentityName(String identityName2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setIdentityName'");
+    public String getIdentityName() {
+        return identityName;
     }
-    
 
-    
+    public void setIdentityName(String identityName) {
+        this.identityName = identityName;
+    }
+
 }
