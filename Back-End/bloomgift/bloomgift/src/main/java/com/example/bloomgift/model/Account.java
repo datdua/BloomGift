@@ -6,6 +6,8 @@ import java.util.Set;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -65,6 +67,7 @@ public class Account {
     private Role roleID;
 
     @OneToMany(mappedBy = "account")
+    @JsonIgnore 
     private Set<Store> stores;
 
     public Account() {
