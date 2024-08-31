@@ -13,6 +13,7 @@ public class ProductRequest {
     private String categoryName;
     private Integer storeID;
     private Boolean productStatus;
+    private Float price;
     private List<SizeRequest> sizes;
     private List<ProductImageRequest> images;
     public ProductRequest(){
@@ -20,6 +21,32 @@ public class ProductRequest {
     }
     
     
+
+
+
+
+
+
+
+
+    public ProductRequest(Float discount, String description, String colour, String productName, Boolean featured,
+            Integer quantity, String categoryName, Integer storeID, Boolean productStatus, Float price,
+            List<SizeRequest> sizes, List<ProductImageRequest> images) {
+        this.discount = discount;
+        this.description = description;
+        this.colour = colour;
+        this.productName = productName;
+        this.featured = featured;
+        this.quantity = quantity;
+        this.categoryName = categoryName;
+        this.storeID = storeID;
+        this.productStatus = productStatus;
+        this.price = price;
+        this.sizes = sizes;
+        this.images = images;
+    }
+
+
 
 
 
@@ -183,6 +210,32 @@ public class ProductRequest {
 
     public void setSizes(List<SizeRequest> sizes) {
         this.sizes = sizes;
+    }
+
+
+
+
+
+
+
+
+
+
+    public Float getPrice() {
+        return price;
+    }
+
+
+
+
+
+
+
+
+
+
+    public void setPrice(Float price) {
+        this.price = price;
     }
     
 }
