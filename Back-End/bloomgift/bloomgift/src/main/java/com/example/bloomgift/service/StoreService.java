@@ -148,11 +148,12 @@ public class StoreService {
     }
 
     public ResponseEntity<?> deleteStore(@RequestBody List<Integer> storeIDs) {
-        // Filter non-existent storeIDs
+        // Filter existent storeIDs
         List<Integer> existingStoreIDs = storeIDs.stream()
                 .filter(storeID -> storeRepository.existsById(storeID))
                 .collect(Collectors.toList());
 
+        // Filter non-existent storeIDs
         List<Integer> nonExistentStoreIDs = storeIDs.stream()
                 .filter(storeID -> !storeRepository.existsById(storeID))
                 .collect(Collectors.toList());
