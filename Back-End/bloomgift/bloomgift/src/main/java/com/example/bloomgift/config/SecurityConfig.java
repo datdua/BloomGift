@@ -41,13 +41,15 @@ public class SecurityConfig {
             "/swagger-ui.html",
             "/api-docs/**",
             "/api/auth/**",
+            "/api/store/**",
+             "/api/admin/**"
     };
 
     private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**" };
 
     private static final String[] ADMIN_URL = { "/api/admin/**" };
 
-    private static final String[] CUSTOMER_URL = { "/api/customer/**", "/api/store/**" };
+    private static final String[] CUSTOMER_URL = { "/api/customer/**" };
 
     private static final String[] MANAGER_URL = { "/api/manager/**" };
 

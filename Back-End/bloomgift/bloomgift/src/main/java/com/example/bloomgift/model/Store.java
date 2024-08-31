@@ -2,6 +2,8 @@ package com.example.bloomgift.model;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,12 +17,13 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name="Store")
 public class Store {
-    @Id 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "storeID") 
-    private Integer storeID; 
-    
+    @Column(name = "storeID")
+    private Integer storeID;
+
     @OneToMany(mappedBy = "storeID")
+    @JsonIgnore // Ignore this field during serialization
     private Set<Product> products;
 
     @Column(name = "storeName")
