@@ -63,7 +63,7 @@ const IconGroup = ({
             {isLoggedIn ? (
               <>
                 <li>
-                  <Link to={process.env.PUBLIC_URL + "/account"}>Tài khoản</Link>
+                  <Link to={process.env.PUBLIC_URL + "/my-account"}>Tài khoản</Link>
                 </li>
                 <li>
                   <button className="logout-button" onClick={handleLogout} style={{

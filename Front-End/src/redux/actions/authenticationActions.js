@@ -9,7 +9,6 @@ export const FORGOT_PASSWORD = "FORGOT_PASSWORD";
 export const REGENERATE_OTP = "REGENERATE_OTP";
 
 
-
 export const registerAccount = (userData, addToast) => {
     return async (dispatch) => {
         try {
@@ -83,7 +82,6 @@ export const verifyAccount = (userData, addToast) => {
     };
 };
 
-
 export const forgotPassword = (email, addToast) => {
     return async (dispatch) => {
         try {
@@ -104,8 +102,6 @@ export const forgotPassword = (email, addToast) => {
         }
     };
 };
-
-
 
 export const resetPassword = (userData, addToast) => {
     return async (dispatch) => {
@@ -141,6 +137,3 @@ export const regenerateOTP = (email, addToast) => {
         }
     };
 };
-
-
-
