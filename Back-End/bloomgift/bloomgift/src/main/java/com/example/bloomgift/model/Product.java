@@ -54,6 +54,9 @@ public class Product {
     @Column(name = "productName")
     private String productName;
 
+    @Column(name = "price")
+    private Float price;
+
     @ManyToOne
     @JoinColumn(name = "categoryID")
     @JsonBackReference
@@ -68,15 +71,19 @@ public class Product {
     private List<Size> sizes = new ArrayList<>();
 
     @OneToMany(mappedBy = "productID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<ProductImage> productImages;
+    private List<ProductImage> productImages= new ArrayList<>();
 
     public Product() {
 
     }
 
+
+
+
+
+
     public Product(Integer productID, Float discount, String description, String colour, Boolean featured,
-            Boolean productStatus, Date createDate, Integer quantity, Integer sold, String productName,
+            Boolean productStatus, Date createDate, Integer quantity, Integer sold, String productName, Float price,
             Category categoryID, Store storeID, List<Size> sizes, List<ProductImage> productImages) {
         this.productID = productID;
         this.discount = discount;
@@ -88,11 +95,17 @@ public class Product {
         this.quantity = quantity;
         this.sold = sold;
         this.productName = productName;
+        this.price = price;
         this.categoryID = categoryID;
         this.storeID = storeID;
         this.sizes = sizes;
         this.productImages = productImages;
     }
+
+
+
+
+
 
     public Integer getProductID() {
         return productID;
@@ -214,4 +227,25 @@ public class Product {
         this.sizes = sizes;
     }
 
+
+
+
+
+
+    public Float getPrice() {
+        return price;
+    }
+
+
+
+
+
+
+    public void setPrice(Float price) {
+        this.price = price;
+    }
+
+
+
+ 
 }
