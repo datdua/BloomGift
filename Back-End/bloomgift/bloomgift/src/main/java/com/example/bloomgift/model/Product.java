@@ -1,5 +1,6 @@
 package com.example.bloomgift.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "categoryID")
-    @JsonBackReference 
+    @JsonBackReference
     private Category categoryID;
 
     @ManyToOne
@@ -64,14 +65,15 @@ public class Product {
     private Store storeID;
 
     @OneToMany(mappedBy = "productID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference 
+    private List<Size> sizes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "productID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<ProductImage> productImages;
 
     public Product() {
 
     }
-
-   
 
     public Product(Integer productID, Float discount, String description, String colour, Boolean featured,
             Boolean productStatus, Date createDate, Integer quantity, Integer sold, String productName,
@@ -92,8 +94,6 @@ public class Product {
         this.productImages = productImages;
     }
 
-
-
     public Integer getProductID() {
         return productID;
     }
@@ -101,8 +101,6 @@ public class Product {
     public void setProductID(Integer productID) {
         this.productID = productID;
     }
-
-    
 
     public Float getDiscount() {
         return discount;
@@ -127,7 +125,6 @@ public class Product {
     public void setColour(String colour) {
         this.colour = colour;
     }
-
 
     public Boolean getFeatured() {
         return featured;
@@ -209,13 +206,9 @@ public class Product {
         this.productName = productName;
     }
 
-
-
     public List<Size> getSizes() {
         return sizes;
     }
-
-
 
     public void setSizes(List<Size> sizes) {
         this.sizes = sizes;
