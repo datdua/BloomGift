@@ -3,6 +3,7 @@ import {
   regenerateOTP,
   registerAccount,
   verifyAccount,
+  signInWithGoogle,
 } from "../../redux/actions/authenticationActions";
 import PropTypes from "prop-types";
 import React, { Fragment, useState, useEffect } from "react";
@@ -19,6 +20,7 @@ import { useToasts } from "react-toast-notifications";
 import VerifyAccount from "../../components/modal/verifyAccount";
 import ForgetPasswordForm from "../../components/form/forgetPassword";
 import ResetPasswordForm from "../../components/form/resetPassword";
+import { GoogleLogin } from "react-google-login";
 import "./LoginRegister.css";
 
 const LoginRegister = ({ location }) => {
@@ -35,6 +37,8 @@ const LoginRegister = ({ location }) => {
   const [showRegenerateButton, setShowRegenerateButton] = useState(false);
   const [showForgetPasswordForm, setShowForgetPasswordForm] = useState(false);
   const [showResetPasswordForm, setShowResetPasswordForm] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
     let timer;
@@ -47,6 +51,23 @@ const LoginRegister = ({ location }) => {
     return () => clearTimeout(timer);
   }, [countdown, showVerifyButton]);
 
+  useEffect(() => {
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    };
+
+    const savedEmail = getCookie("userEmail");
+    const savedPassword = getCookie("userPassword");
+
+    if (savedEmail && savedPassword) {
+      document.querySelector('input[name="user-email"]').value = savedEmail;
+      document.querySelector('input[name="user-password"]').value = savedPassword;
+      setRememberMe(true);
+    }
+  }, []);
+
   const handleRegister = (e) => {
     e.preventDefault();
     const userData = {
@@ -58,26 +79,30 @@ const LoginRegister = ({ location }) => {
       gender: e.target["user-gender"].value,
       birthday: e.target["user-birthday"].value,
     };
+
     if (userData.password !== e.target["user-confirm-password"].value) {
       addToast("Mật khẩu xác nhận không khớp!", { appearance: "error", autoDismiss: true });
       return;
     }
+
     dispatch(registerAccount(userData, addToast))
       .then(() => {
         setEmail(userData.email);
         setCountdown(60);
         setShowVerifyButton(true);
         setShowRegenerateButton(false);
+        setRegistrationSuccess(true);
       })
       .catch((error) => {
         console.error("Registration error:", error);
+        setShowVerifyButton(false);
+        setShowRegenerateButton(false);
+        setRegistrationSuccess(false);
       });
   };
 
   const handleLogin = (e) => {
     e.preventDefault();
-    setLoading(true);
-
     const userData = {
       email: e.target["user-email"].value,
       password: e.target["user-password"].value,
@@ -85,6 +110,10 @@ const LoginRegister = ({ location }) => {
 
     dispatch(loginAccount(userData, addToast))
       .then((response) => {
+        if (rememberMe) {
+          document.cookie = `userEmail=${userData.email}; max-age=31536000; path=/`; // Save for 1 year
+          document.cookie = `userPassword=${userData.password}; max-age=31536000; path=/`; // Save for 1 year
+        }
         if (response && response.token) {
           localStorage.setItem("token", response.token);
           history.push("/home-fashion");
@@ -92,9 +121,6 @@ const LoginRegister = ({ location }) => {
       })
       .catch((error) => {
         console.error("Login error:", error);
-      })
-      .finally(() => {
-        setLoading(false);
       });
   };
 
@@ -133,13 +159,30 @@ const LoginRegister = ({ location }) => {
       });
   };
 
+  const handleGoogleLoginSuccess = (response) => {
+    const { email, name, imageUrl } = response.profileObj;
+
+    dispatch(signInWithGoogle(addToast))
+      .then(() => {
+        localStorage.setItem("email", email);
+        localStorage.setItem("name", name);
+        localStorage.setItem("picture", imageUrl);
+        history.push("/home-fashion");
+      })
+      .catch((error) => {
+        console.error("Google login error:", error);
+      });
+  };
+
+  const handleGoogleLoginFailure = (error) => {
+    console.error("Google login failed:", error);
+  };
+
   const handleOpenModal = () => {
-    console.log("Opening modal"); 
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
-    console.log("Closing modal"); 
     setShowModal(false);
   };
 
@@ -149,7 +192,6 @@ const LoginRegister = ({ location }) => {
         <title>Bloom Gift | Đăng Nhập</title>
         <meta name="description" content="Compare page of flone react minimalist eCommerce template." />
       </MetaTags>
-
       <BreadcrumbsItem to={publicUrl + "/"}>Trang chủ</BreadcrumbsItem>
       <BreadcrumbsItem to={publicUrl + pathname}>Đăng nhập - Đăng ký</BreadcrumbsItem>
       <LayoutOne headerTop="visible">
@@ -182,13 +224,25 @@ const LoginRegister = ({ location }) => {
                                 <input type="password" name="user-password" placeholder="Mật khẩu" />
                                 <div className="button-box">
                                   <div className="login-toggle-btn">
-                                    <input type="checkbox" />
+                                    <input
+                                      type="checkbox"
+                                      checked={rememberMe}
+                                      onChange={(e) => setRememberMe(e.target.checked)}
+                                    />
                                     <label className="ml-10">Ghi nhớ tài khoản</label>
-                                    <Link onClick={toggleForgetPasswordForm}>Quên mật khẩu?</Link>
+                                    <Link onClick={() => history.push("/forget-password")}>Quên mật khẩu?</Link>
                                   </div>
                                   <button type="submit">
                                     <span>Đăng Nhập</span>
                                   </button>
+                                  <GoogleLogin
+                                    clientId={"420284682542-jlrvke351pava5pa2vtqs92brc3mk5cp.apps.googleusercontent.com"}
+                                    buttonText="Đăng nhập với Google"
+                                    onSuccess={handleGoogleLoginSuccess}
+                                    onFailure={handleGoogleLoginFailure}
+                                    cookiePolicy={'single_host_origin'}
+                                    className="ml-3"
+                                  />
                                 </div>
                               </form>
                             ) : showForgetPasswordForm ? (
@@ -242,13 +296,15 @@ const LoginRegister = ({ location }) => {
                                 type="password"
                                 required
                               />
-                              <div className="button-box">
-                                <button type="submit">
-                                  <span>Đăng ký</span>
-                                </button>
-                              </div>
+                              {!registrationSuccess && (
+                                <div className="button-box">
+                                  <button type="submit">
+                                    <span>Đăng ký</span>
+                                  </button>
+                                </div>
+                              )}
                             </form>
-                            {showVerifyButton && (
+                            {showVerifyButton && registrationSuccess && (
                               <div className="verify-account-container mt-3">
                                 <p>
                                   Bạn cần xác minh tài khoản. Vui lòng nhấn vào nút bên dưới trong {countdown} giây.
@@ -258,7 +314,7 @@ const LoginRegister = ({ location }) => {
                                 </Button>
                               </div>
                             )}
-                            {showRegenerateButton && (
+                            {showRegenerateButton && registrationSuccess && (
                               <div className="regenerate-otp-container mt-3">
                                 <p>
                                   Bạn chưa nhận được mã OTP? Nhấn vào nút bên dưới để gửi lại.
@@ -268,6 +324,12 @@ const LoginRegister = ({ location }) => {
                                 </Button>
                               </div>
                             )}
+                            <VerifyAccount
+                              showModal={showModal}
+                              handleCloseModal={handleCloseModal}
+                              handleVerifyAccount={handleVerifyAccount}
+                              email={email}
+                            />
                           </div>
                         </div>
                       </Tab.Pane>
@@ -279,12 +341,6 @@ const LoginRegister = ({ location }) => {
           </div>
         </div>
       </LayoutOne>
-      <VerifyAccount
-        showModal={showModal}  
-        handleClose={handleCloseModal}
-        email={email}
-        handleVerifyAccount={handleVerifyAccount}
-      />
     </Fragment>
   );
 };

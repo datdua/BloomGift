@@ -7,6 +7,7 @@ export const VERIFY_ACCOUNT = "VERIFY_ACCOUNT";
 export const RESET_PASSWORD = "RESET_PASSWORD";
 export const FORGOT_PASSWORD = "FORGOT_PASSWORD";
 export const REGENERATE_OTP = "REGENERATE_OTP";
+export const LOGIN_GOOGLE = "LOGIN_GOOGLE"
 
 
 export const registerAccount = (userData, addToast) => {
@@ -28,9 +29,12 @@ export const registerAccount = (userData, addToast) => {
             });
             if (addToast) addToast("Đăng ký thành công! Vui lòng xác thực tài khoản.", { appearance: "success", autoDismiss: true });
 
+            return Promise.resolve();
         } catch (error) {
             console.error("Registration failed:", error);
             if (addToast) addToast("Đăng ký thất bại.", { appearance: "error", autoDismiss: true });
+
+            return Promise.reject(error);
         }
     }
 };
@@ -86,7 +90,7 @@ export const forgotPassword = (email, addToast) => {
     return async (dispatch) => {
         try {
             const url = `http://localhost:8080/api/auth/forget-password?email=${encodeURIComponent(email)}`;
-            console.log("Forgot Password URL:", url); 
+            console.log("Forgot Password URL:", url);
 
             const response = await axios.post(url);
 
@@ -137,3 +141,21 @@ export const regenerateOTP = (email, addToast) => {
         }
     };
 };
+
+export const signInWithGoogle = (addToast) => {
+    return async (dispatch) => {
+        try {
+            const response = await axios.get("http://localhost:8080/api/auth/signInWithGoogle");
+
+            dispatch({
+                type: LOGIN_GOOGLE,
+                payload: response.data
+            });
+
+            if (addToast) addToast("Đăng nhập thành công!", { appearance: "success", autoDismiss: true });
+        } catch (error) {
+            console.error("Google login failed:", error);
+            if (addToast) addToast("Đăng nhập thất bại!", { appearance: "error", autoDismiss: true });
+        }
+    };
+}
