@@ -46,7 +46,7 @@ public class SecurityConfig {
 
     private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**" };
 
-    private static final String[] ADMIN_URL = { "/api/admin/**", "/api/google-sheets/**"};
+    private static final String[] ADMIN_URL = { "/api/admin/**", "/api/google-sheets/**" };
 
     private static final String[] CUSTOMER_URL = { "/api/customer/**", "/api/promotion/**", "/api/store/**" };
 
@@ -81,10 +81,9 @@ public class SecurityConfig {
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("http://localhost:8080/oauth2/authorization/google")
-                        .defaultSuccessUrl("http://localhost:8080/api/auth/signInWithGoogle", true))
+                        .defaultSuccessUrl("http://localhost:3000/signInWithGoogle", true))
                 .formLogin(Customizer.withDefaults());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 
