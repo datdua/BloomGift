@@ -2,6 +2,7 @@ package com.example.bloomgift.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.bloomgift.model.Promotion;
 import com.example.bloomgift.model.Store;
+import com.example.bloomgift.reponse.PromotionResponse;
+import com.example.bloomgift.reponse.StoreResponse;
 import com.example.bloomgift.repository.PromotionRepository;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.PromotionRequest;
@@ -32,18 +35,68 @@ public class PromotionService {
     @Autowired
     private StoreRepository storeRepository;
 
-    public List<Promotion> getAllPromotions() {
-        return promotionRepository.findAll();
+    private PromotionResponse convertPromotionToResponse(Promotion promotion) {
+        PromotionResponse promotionResponse = new PromotionResponse();
+        promotionResponse.setPromotionID(promotion.getPromotionID());
+        promotionResponse.setPromotionName(promotion.getPromotionName());
+        promotionResponse.setPromotionCode(promotion.getPromotionCode());
+        promotionResponse.setPromotionDescription(promotion.getPromotionDescription());
+        promotionResponse.setPromotionDiscount(promotion.getPromotionDiscount());
+        promotionResponse.setQuantity(promotion.getQuantity());
+        promotionResponse.setPromotionStatus(promotion.getPromotionStatus());
+        promotionResponse.setStartDate(promotion.getStartDate());
+        promotionResponse.setEndDate(promotion.getEndDate());
+
+        // Create a StoreResponse
+        StoreResponse storeResponse = new StoreResponse();
+        storeResponse.setStoreID(promotion.getStoreID().getStoreID());
+        storeResponse.setStoreName(promotion.getStoreID().getStoreName());
+        storeResponse.setType(promotion.getStoreID().getType());
+        storeResponse.setStorePhone(promotion.getStoreID().getStorePhone());
+        storeResponse.setStoreAddress(promotion.getStoreID().getStoreAddress());
+        storeResponse.setStoreEmail(promotion.getStoreID().getStoreEmail());
+        storeResponse.setBankAccountName(promotion.getStoreID().getBankAccountName());
+        storeResponse.setBankNumber(promotion.getStoreID().getBankNumber());
+        storeResponse.setBankAddress(promotion.getStoreID().getBankAddress());
+        storeResponse.setTaxNumber(promotion.getStoreID().getTaxNumber());
+        storeResponse.setStoreStatus(promotion.getStoreID().getStoreStatus());
+        storeResponse.setStoreAvatar(promotion.getStoreID().getStoreAvatar());
+        storeResponse.setIdentityCard(promotion.getStoreID().getIdentityCard());
+        storeResponse.setIdentityName(promotion.getStoreID().getIdentityName());
+
+        // storeResponse to promotionResponse
+        promotionResponse.setStoreID(storeResponse);
+
+        return promotionResponse;
     }
 
-    public Promotion getPromotionById(int promotionID) {
-        return promotionRepository.findById(promotionID).orElse(null);
+    public List<PromotionResponse> getAllPromotions() {
+        List<Promotion> promotions = promotionRepository.findAll();
+        List<PromotionResponse> promotionResponses = new ArrayList<>();
+        for (Promotion promotion : promotions) {
+            promotionResponses.add(convertPromotionToResponse(promotion));
+        }
+        return promotionResponses;
     }
 
-    public Promotion getPromotionByPromotionCode(String promotionCode) {
-        return promotionRepository.findByPromotionCode(promotionCode);
+    public ResponseEntity<?> getPromotionById(int promotionID) {
+        Promotion promotion = promotionRepository.findById(promotionID).orElse(null);
+        if (promotion == null) {
+            return ResponseEntity.badRequest().body("Không tìm thấy mã giảm giá.");
+        } else {
+            return ResponseEntity.ok(convertPromotionToResponse(promotion));
+        }
     }
-    
+
+    public ResponseEntity<?> getPromotionByPromotionCode(String promotionCode) {
+        Promotion promotion = promotionRepository.findByPromotionCode(promotionCode);
+        if (promotion == null) {
+            return ResponseEntity.badRequest().body("Không tìm thấy mã giảm giá.");
+        } else {
+            return ResponseEntity.ok(convertPromotionToResponse(promotion));
+        }
+    }
+
     public ResponseEntity<?> createPromotion(@RequestBody PromotionRequest promotionRequest) {
 
         if (promotionRequest.getStartDate().isAfter(promotionRequest.getEndDate())) {
@@ -109,7 +162,7 @@ public class PromotionService {
         List<Integer> existingPromotionIDs = promotionIDs.stream()
                 .filter(promotionID -> promotionRepository.existsById(promotionID))
                 .collect(Collectors.toList());
-        
+
         // Filter non-existent promotionIDs
         List<Integer> nonExistentPromotionIDs = promotionIDs.stream()
                 .filter(promotionID -> !existingPromotionIDs.contains(promotionID))
@@ -127,16 +180,22 @@ public class PromotionService {
         }
     }
 
-    public Page<Promotion> getPromotions(int page, int size) {
+    public Page<PromotionResponse> getPromotions(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return promotionRepository.findAll(pageable);
+        Page<Promotion> promotions = promotionRepository.findAll(pageable);
+        return promotions.map(this::convertPromotionToResponse);
     }
 
-    public Promotion getPromotionsByStatus(String promotionStatus) {
-        return promotionRepository.findByPromotionStatus(promotionStatus);
+    public ResponseEntity<?> getPromotionsByStatus(String promotionStatus) {
+        Promotion promotion = promotionRepository.findByPromotionStatus(promotionStatus);
+        if (promotion == null) {
+            return ResponseEntity.badRequest().body("Không tìm thấy mã giảm giá.");
+        } else {
+            return ResponseEntity.ok(convertPromotionToResponse(promotion));
+        }
     }
 
-    public Page<Promotion> searchPromotionWithFilterPage(
+    public Page<PromotionResponse> searchPromotionWithFilterPage(
             String promotionDescription,
             BigDecimal promotionDiscount,
             String promotionStatus,
@@ -168,10 +227,9 @@ public class PromotionService {
         }
 
         Pageable pageable = PageRequest.of(page, size);
-        return promotionRepository.findAll(spec, pageable);
+        Page<Promotion> promotions = promotionRepository.findAll(spec, pageable);
+
+        return promotions.map(this::convertPromotionToResponse);
     }
 
-
-
-    
 }
