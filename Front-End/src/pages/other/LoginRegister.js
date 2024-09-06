@@ -159,25 +159,6 @@ const LoginRegister = ({ location }) => {
       });
   };
 
-  const handleGoogleLoginSuccess = (response) => {
-    const { email, name, imageUrl } = response.profileObj;
-
-    dispatch(signInWithGoogle(addToast))
-      .then(() => {
-        localStorage.setItem("email", email);
-        localStorage.setItem("name", name);
-        localStorage.setItem("picture", imageUrl);
-        history.push("/home-fashion");
-      })
-      .catch((error) => {
-        console.error("Google login error:", error);
-      });
-  };
-
-  const handleGoogleLoginFailure = (error) => {
-    console.error("Google login failed:", error);
-  };
-
   const handleOpenModal = () => {
     setShowModal(true);
   };
@@ -235,14 +216,12 @@ const LoginRegister = ({ location }) => {
                                   <button type="submit">
                                     <span>Đăng Nhập</span>
                                   </button>
-                                  <GoogleLogin
-                                    clientId={"420284682542-jlrvke351pava5pa2vtqs92brc3mk5cp.apps.googleusercontent.com"}
-                                    buttonText="Đăng nhập với Google"
-                                    onSuccess={handleGoogleLoginSuccess}
-                                    onFailure={handleGoogleLoginFailure}
-                                    cookiePolicy={'single_host_origin'}
-                                    className="ml-3"
-                                  />
+                                  <button
+                                    onClick={() => window.location.href = 'http://localhost:8080/oauth2/authorization/google'}
+                                    className="ml-5"
+                                  >
+                                    Đăng nhập với Google
+                                  </button>
                                 </div>
                               </form>
                             ) : showForgetPasswordForm ? (

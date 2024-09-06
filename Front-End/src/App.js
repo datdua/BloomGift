@@ -8,6 +8,7 @@ import { connect } from "react-redux";
 import { BreadcrumbsProvider } from "react-breadcrumbs-dynamic";
 import ForgetPasswordForm from "./components/form/forgetPassword";
 import ResetPasswordForm from "./components/form/resetPassword";
+import signInWithGoogle from "./pages/other/SignInWithGoogle";
 
 // home pages
 const HomeFashion = lazy(() => import("./pages/home/HomeFashion"));
@@ -432,8 +433,12 @@ const App = (props) => {
                   path={publicUrl + "/reset-password"}
                   component={ResetPasswordForm}
                 />
-
+                <Route 
+                  path={publicUrl + "/signInWithGoogle"}
+                  component={signInWithGoogle}
+                />
                 <Route exact component={NotFound} />
+                <Route exact path="/not-found" component={NotFound} />
               </Switch>
             </Suspense>
           </ScrollToTop>

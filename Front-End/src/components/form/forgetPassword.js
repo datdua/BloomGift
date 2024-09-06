@@ -59,7 +59,7 @@ const ForgetPasswordForm = ({ setEmail, setShowForgetPasswordForm, setShowResetP
                         <span>Gửi yêu cầu đặt lại mật khẩu</span>
                       </button>
                       <button
-                        type="button"
+                        type="submit"
                         onClick={() => history.push("/login-register")}
                       >
                         <span>Quay lại đăng nhập</span>
