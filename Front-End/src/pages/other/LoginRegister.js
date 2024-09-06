@@ -20,7 +20,6 @@ import { useToasts } from "react-toast-notifications";
 import VerifyAccount from "../../components/modal/verifyAccount";
 import ForgetPasswordForm from "../../components/form/forgetPassword";
 import ResetPasswordForm from "../../components/form/resetPassword";
-import { GoogleLogin } from "react-google-login";
 import "./LoginRegister.css";
 
 const LoginRegister = ({ location }) => {
@@ -235,14 +234,12 @@ const LoginRegister = ({ location }) => {
                                   <button type="submit">
                                     <span>Đăng Nhập</span>
                                   </button>
-                                  <GoogleLogin
-                                    clientId={"420284682542-jlrvke351pava5pa2vtqs92brc3mk5cp.apps.googleusercontent.com"}
-                                    buttonText="Đăng nhập với Google"
-                                    onSuccess={handleGoogleLoginSuccess}
-                                    onFailure={handleGoogleLoginFailure}
-                                    cookiePolicy={'single_host_origin'}
-                                    className="ml-3"
-                                  />
+                                  <button
+                                    onClick={() => window.location.href = 'http://localhost:8080/oauth2/authorization/google'}
+                                    className="ml-5"
+                                  >
+                                    Đăng nhập với Google
+                                  </button>
                                 </div>
                               </form>
                             ) : showForgetPasswordForm ? (
