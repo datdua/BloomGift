@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,7 +23,6 @@ import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.repository.RoleRepository;
 import com.example.bloomgift.request.AccountRequest;
 import com.example.bloomgift.utils.EmailUtil;
-import com.example.bloomgift.utils.OtpUtil;
 
 @Service
 public class AccountService implements UserDetailsService {
@@ -42,13 +40,23 @@ public class AccountService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Account accountOptional = accountRepository.findByEmail(email);
-        
+
         if (accountOptional == null) {
             throw new UsernameNotFoundException("Tài khoản không tồn tại");
         }
 
-        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(accountOptional.getRoleName()));
-        return new org.springframework.security.core.userdetails.User(accountOptional.getEmail(), accountOptional.getPassword(), authorities);
+        String password = accountOptional.getPassword();
+        List<GrantedAuthority> authorities = Collections
+                .singletonList(new SimpleGrantedAuthority(accountOptional.getRoleName()));
+
+        // If the account has a password, create UserDetails with password
+        if (password != null && !password.isEmpty()) {
+            return new org.springframework.security.core.userdetails.User(accountOptional.getEmail(), password,
+                    authorities);
+        } else {
+            // If the account doesn't have a password, create UserDetails no password
+            return new org.springframework.security.core.userdetails.User(accountOptional.getEmail(), "", authorities);
+        }
     }
 
     public Page<AccountReponse> getAllAccounts(Pageable pageable) {
