@@ -2,30 +2,36 @@ import { useEffect } from "react";
 import { signInWithGoogle } from "../../redux/actions/authenticationActions";
 import { useDispatch } from "react-redux";
 import { useToasts } from "react-toast-notifications";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 
 function SignInWithGoogle() {
   const dispatch = useDispatch();
   const { addToast } = useToasts();
   const history = useHistory();
+  const location = useLocation();
 
   useEffect(() => {
-    dispatch(signInWithGoogle(addToast))
-      .then((response) => {
-        if (!response.ok) {
-          console.error("Google login failed:", response);
-          if (addToast) addToast("Đăng nhập bằng Google thất bại.", { appearance: "error", autoDismiss: true });
-        } else {
-          console.log("Google login successful:", response);
-          localStorage.setItem("token", response.token);
+    const handleGoogleSignIn = async () => {
+      try {
+        const result = await dispatch(signInWithGoogle(addToast));
+        if (result.ok) {
+          console.log("Google login successful:", result.data);
           history.push("/home-fashion");
+        } else {
+          console.error("Google login failed:", result.error);
+          addToast("Đăng nhập bằng Google thất bại.", { appearance: "error", autoDismiss: true });
+          history.push("/login");
         }
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Google login error:", error);
-        history.push("/not-found")
-      })
-  }, [dispatch, addToast, history]);
+        history.push("/not-found");
+      }
+    };
+
+    if (location.pathname === "/signInWithGoogle") {
+      handleGoogleSignIn();
+    }
+  }, [dispatch, addToast, history, location]);
 
   return null;
 }
