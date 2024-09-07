@@ -443,6 +443,7 @@ const App = (props) => {
                 />
 
                 <Route exact component={NotFound} />
+                <Route exact path="/not-found" component={NotFound} />
               </Switch>
             </Suspense>
           </ScrollToTop>

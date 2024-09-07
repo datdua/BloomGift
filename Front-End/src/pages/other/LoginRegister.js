@@ -158,25 +158,6 @@ const LoginRegister = ({ location }) => {
       });
   };
 
-  const handleGoogleLoginSuccess = (response) => {
-    const { email, name, imageUrl } = response.profileObj;
-
-    dispatch(signInWithGoogle(addToast))
-      .then(() => {
-        localStorage.setItem("email", email);
-        localStorage.setItem("name", name);
-        localStorage.setItem("picture", imageUrl);
-        history.push("/home-fashion");
-      })
-      .catch((error) => {
-        console.error("Google login error:", error);
-      });
-  };
-
-  const handleGoogleLoginFailure = (error) => {
-    console.error("Google login failed:", error);
-  };
-
   const handleOpenModal = () => {
     setShowModal(true);
   };

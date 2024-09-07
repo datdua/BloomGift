@@ -71,7 +71,8 @@ const IconGroup = ({
                     border: "none",
                     cursor: "pointer",
                     fontSize: '13px',
-                    transition: 'transform 0.3s ease, color 0.3s ease'
+                    transition: 'transform 0.3s ease, color 0.3s ease',
+                    marginRight: '0px'
                   }}>Đăng xuất</button>
                 </li>
               </>

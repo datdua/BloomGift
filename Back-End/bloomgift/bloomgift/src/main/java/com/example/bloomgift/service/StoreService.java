@@ -1,7 +1,7 @@
 package com.example.bloomgift.service;
 
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +15,13 @@ import org.springframework.stereotype.Service;
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.model.Category;
 import com.example.bloomgift.model.Store;
+import com.example.bloomgift.reponse.StoreResponse;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.StoreRequest;
 import com.example.bloomgift.request.putRequest.StorePutRequest;
 import com.example.bloomgift.specification.StoreSpecification;
+import com.example.bloomgift.reponse.AccountReponse;
+import com.example.bloomgift.reponse.CategoryReponse;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
@@ -28,12 +31,50 @@ public class StoreService {
     @Autowired
     private StoreRepository storeRepository;
 
-    public List<Store> getAllStores() {
-        return storeRepository.findAll();
+    private StoreResponse convertStoreToResponse(Store store) {
+        StoreResponse storeResponse = new StoreResponse();
+        storeResponse.setStoreID(store.getStoreID());
+        storeResponse.setStoreName(store.getStoreName());
+        storeResponse.setType(store.getType());
+        storeResponse.setStorePhone(store.getStorePhone());
+        storeResponse.setStoreAddress(store.getStoreAddress());
+        storeResponse.setStoreEmail(store.getStoreEmail());
+        storeResponse.setBankAccountName(store.getBankAccountName());
+        storeResponse.setBankNumber(store.getBankNumber());
+        storeResponse.setBankAddress(store.getBankAddress());
+        storeResponse.setTaxNumber(store.getTaxNumber());
+        storeResponse.setStoreStatus(store.getStoreStatus());
+        storeResponse.setStoreAvatar(store.getStoreAvatar());
+        storeResponse.setIdentityCard(store.getIdentityCard());
+        storeResponse.setIdentityName(store.getIdentityName());
+
+        // Set accountResponse
+        AccountReponse accountResponse = new AccountReponse();
+        accountResponse.setAccountID(store.getAccount().getAccountID());
+        storeResponse.setAccount(accountResponse);
+
+        // Set categoryResponse
+        CategoryReponse categoryResponse = new CategoryReponse(store.getCategory().getCategoryID(),
+                store.getCategory().getCategoryName());
+        storeResponse.setCategory(categoryResponse);
+
+        return storeResponse;
     }
 
-    public Store getStoreByName(String storeName) {
-        return storeRepository.findByStoreName(storeName);
+    public ResponseEntity<List<StoreResponse>> getAllStores() {
+        List<Store> stores = storeRepository.findAll();
+        List<StoreResponse> storeResponses = stores.stream().map(this::convertStoreToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(storeResponses);
+    }
+
+    public ResponseEntity<?> getStoreByName(String storeName) {
+        Store store = storeRepository.findByStoreName(storeName);
+        if (store != null) {
+            return ResponseEntity.ok(convertStoreToResponse(store));
+        } else {
+            return ResponseEntity.badRequest().body("Không tìm thấy cửa hàng");
+        }
     }
 
     public ResponseEntity<?> addStore(StoreRequest storeRequest) {
@@ -171,16 +212,22 @@ public class StoreService {
         }
     }
 
-    public Store getStoreById(Integer storeID) {
-        return storeRepository.findById(storeID).orElseThrow();
+    public ResponseEntity<?> getStoreById(Integer storeID) {
+        Store store = storeRepository.findById(storeID).orElse(null);
+        if (store != null) {
+            return ResponseEntity.ok(convertStoreToResponse(store));
+        } else {
+            return ResponseEntity.badRequest().body("Không tìm thấy cửa hàng");
+        }
     }
 
-    public Page<Store> getAllStoreByPage(Integer page, Integer size) {
+    public Page<StoreResponse> getAllStoreByPage(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
-        return storeRepository.findAll(pageable);
+        Page<Store> stores = storeRepository.findAll(pageable);
+        return stores.map(this::convertStoreToResponse);
     }
 
-    public Page<Store> searchStoreWithFilterPage(
+    public Page<StoreResponse> searchStoreWithFilterPage(
             String storeName,
             String type,
             String storePhone,
@@ -248,7 +295,9 @@ public class StoreService {
         }
 
         Pageable pageable = PageRequest.of(page - 1, size);
-        return storeRepository.findAll(spec, pageable);
+        Page<Store> stores = storeRepository.findAll(spec, pageable);
+
+        return stores.map(this::convertStoreToResponse);
 
     }
 
