@@ -67,7 +67,7 @@ public class Account {
     private Role roleID;
 
     @OneToMany(mappedBy = "account")
-    @JsonIgnore 
+    @JsonIgnore
     private Set<Store> stores;
 
     public Account() {
