@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Template Mail OTP Register</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body
+    style="
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #ffffff;
+      font-size: 14px;
+    "
+  >
+    <div
+      style="
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 45px 30px 60px;
+        background: #feebf0;
+        background-image: url(https://firebasestorage.googleapis.com/v0/b/bloom-gift-67f83.appspot.com/o/element-layout%2Fvecto%2Femail-template-background-banner1.png?alt=media&token=cbc3f0e4-f5f9-4219-975e-55d3505fe90f);
+        background-repeat: no-repeat;
+        background-size: 800px 452px;
+        background-position: top center;
+        font-size: 14px;
+        color: #434343;
+      "
+    >
+      <header>
+        <table style="width: 100%;">
+          <tbody>
+            <tr style="height: 0;">
+              <td>
+                <img
+                  alt=""
+                  src="https://firebasestorage.googleapis.com/v0/b/bloom-gift-67f83.appspot.com/o/element-layout%2Flogo%2Flogo-header.png?alt=media&token=6d5a2b95-b887-4b2b-820e-2482681fffb4"
+                  height="70px"
+                />
+              </td>
+              <td style="text-align: right;">
+                <span
+                  style="font-size: 16px; line-height: 30px; color: #ffffff;"
+                  >Nền tảng kết nối các cửa hàng bán hoa, quà tặng.</span
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </header>
+
+      <main>
+        <div
+          style="
+            margin: 0;
+            margin-top: 70px;
+            padding: 92px 30px 115px;
+            background: #ffffff;
+            border-radius: 30px;
+            text-align: center;
+          "
+        >
+          <div style="width: 100%; max-width: 489px; margin: 0 auto;">
+            <h1
+              style="
+                margin: 0;
+                font-size: 24px;
+                font-weight: 500;
+                color: #1f1f1f;
+              "
+            >
+              Mã xác nhận OTP
+            </h1>
+            <p
+              style="
+                margin: 0;
+                margin-top: 17px;
+                font-size: 16px;
+                font-weight: 500;
+              "
+            >
+              Chào <span style="font-weight: 600; color: #f56387;">{{username}}</span>,
+            </p>
+            <p
+              style="
+                margin: 0;
+                margin-top: 17px;
+                font-weight: 500;
+                letter-spacing: 0.56px;
+              "
+            >
+              Cảm ơn bạn đã lựa chọn Bloom Gift. Sử dụng mã OTP sau để hoàn tất thủ tục đăng ký tài khoản. Mã OTP có hiệu lực đối với mã
+              <span style="font-weight: 600; color: #1f1f1f;">5 phút</span>.
+              Không chia sẻ mã này với người khác, kể cả nhân viên của Bloom Gift.
+            </p>
+            <p
+              style="
+                margin: 0;
+                margin-top: 60px;
+                font-size: 40px;
+                font-weight: 600;
+                letter-spacing: 25px;
+                color: #f56387;
+              "
+            >
+              {{otp}}
+            </p>
+          </div>
+        </div>
+
+        <p
+          style="
+            max-width: 400px;
+            margin: 0 auto;
+            margin-top: 30px;
+            text-align: center;
+            font-weight: 500;
+            color: #8c8c8c;
+          "
+        >
+          Cần trợ giúp? Hãy liên hệ với chúng tôi qua email:
+          <a
+            href="mailto:bloomgift.info@gmail.com"
+            style="color: #f56387; text-decoration: none;"
+            >bloomgift.info@gmail.com</a
+          >
+        </p>
+      </main>
+
+      <footer
+        style="
+          width: 100%;
+          max-width: 490px;
+          margin: 20px auto 0;
+          text-align: center;
+          border-top: 1px solid #e6ebf1;
+        "
+      >
+        <p
+          style="
+            margin: 0;
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #434343;
+          "
+        >
+          Bloom Gift
+        </p>
+        <p style="margin: 0; margin-top: 8px; color: #434343;">
+          FPT University
+        </p>
+        <div style="margin: 0; margin-top: 16px;">
+          <a href="https://www.facebook.com/bloomgift201" target="_blank" style="display: inline-block;">
+            <img
+              width="36px"
+              alt="Facebook"
+              src="https://firebasestorage.googleapis.com/v0/b/bloom-gift-67f83.appspot.com/o/element-layout%2Flogo%2Femail-template-icon-facebook.png?alt=media&token=6fe90f18-ec42-4ba1-9355-20327b07871f"
+            />
+          </a>
+          <a
+            href="bloomgift.shop"
+            target="_blank"
+            style="display: inline-block; margin-left: 8px;"
+          >
+            <img
+              width="36px"
+              alt="Website"
+              src="https://firebasestorage.googleapis.com/v0/b/bloom-gift-67f83.appspot.com/o/element-layout%2Flogo%2Femail-template-icon-website.png?alt=media&token=d32551a2-3d86-436b-8723-2c2ecec2d209"
+          /></a>
+        </div>
+        <p style="margin: 0; margin-top: 16px; color: #434343;">
+          Copyright © 2024 Company. All rights reserved.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>
