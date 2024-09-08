@@ -11,14 +11,14 @@ public class AccountReponse {
     private String gender; 
     private String avatar ; 
     private Date birthday ; 
-    private int phone ; 
+    private Integer phone ; 
     private Boolean accountStatus; 
     private String roleName; 
     public AccountReponse(){
 
     }
     public AccountReponse(int accountID ,String fullname, String email, String password, String address, String gender, String avatar,
-            Date birthday, int phone, Boolean accountStatus, String roleName) {
+            Date birthday, Integer phone, Boolean accountStatus, String roleName) {
         this.accountID = accountID;
         this.fullname = fullname;
         this.email = email;
@@ -73,10 +73,10 @@ public class AccountReponse {
     public void setBirthday(Date birthday) {
         this.birthday = birthday;
     }
-    public int getPhone() {
+    public Integer getPhone() {
         return phone;
     }
-    public void setPhone(int phone) {
+    public void setPhone(Integer phone) {
         this.phone = phone;
     }
     public Boolean getAccountStatus() {

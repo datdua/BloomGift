@@ -1,5 +1,6 @@
 package com.example.bloomgift.service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,22 +15,40 @@ import org.springframework.stereotype.Service;
 
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.model.Category;
+import com.example.bloomgift.model.Role;
 import com.example.bloomgift.model.Store;
 import com.example.bloomgift.reponse.StoreResponse;
+import com.example.bloomgift.repository.RoleRepository;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.StoreRequest;
 import com.example.bloomgift.request.putRequest.StorePutRequest;
 import com.example.bloomgift.specification.StoreSpecification;
+import com.example.bloomgift.utils.OtpUtil;
 import com.example.bloomgift.reponse.AccountReponse;
 import com.example.bloomgift.reponse.CategoryReponse;
+import com.example.bloomgift.utils.EmailUtil;
+import com.example.bloomgift.repository.AccountRepository;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import jakarta.mail.MessagingException;
 
 @Service
 public class StoreService {
 
     @Autowired
     private StoreRepository storeRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private OtpUtil otpUtil;
+    
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private EmailUtil emailUtil;
 
     private StoreResponse convertStoreToResponse(Store store) {
         StoreResponse storeResponse = new StoreResponse();
@@ -38,7 +57,7 @@ public class StoreService {
         storeResponse.setType(store.getType());
         storeResponse.setStorePhone(store.getStorePhone());
         storeResponse.setStoreAddress(store.getStoreAddress());
-        storeResponse.setStoreEmail(store.getStoreEmail());
+        storeResponse.setEmail(store.getEmail());
         storeResponse.setBankAccountName(store.getBankAccountName());
         storeResponse.setBankNumber(store.getBankNumber());
         storeResponse.setBankAddress(store.getBankAddress());
@@ -47,16 +66,8 @@ public class StoreService {
         storeResponse.setStoreAvatar(store.getStoreAvatar());
         storeResponse.setIdentityCard(store.getIdentityCard());
         storeResponse.setIdentityName(store.getIdentityName());
-
-        // Set accountResponse
-        AccountReponse accountResponse = new AccountReponse();
-        accountResponse.setAccountID(store.getAccount().getAccountID());
-        storeResponse.setAccount(accountResponse);
-
-        // Set categoryResponse
-        CategoryReponse categoryResponse = new CategoryReponse(store.getCategory().getCategoryID(),
-                store.getCategory().getCategoryName());
-        storeResponse.setCategory(categoryResponse);
+        storeResponse.setPassword(store.getPassword());
+        storeResponse.setRoleName(store.getRole().getRoleName());
 
         return storeResponse;
     }
@@ -77,19 +88,28 @@ public class StoreService {
         }
     }
 
-    public ResponseEntity<?> addStore(StoreRequest storeRequest) {
+    public ResponseEntity<?> registerStore(StoreRequest storeRequest) {
+        String otp = otpUtil.generateOtp();
+        String Email = storeRequest.getEmail();
+        if (!Email.matches("^[a-zA-Z0-9._%+-]+@gmail.com$")) {
+            return ResponseEntity.badRequest().body("Email không hợp lệ");
+        } else if (storeRepository.existsByEmail(Email) || accountRepository.existsByEmail(Email)) {
+            return ResponseEntity.badRequest().body("Email đã tồn tại");
+        } else {
+            try {
+                emailUtil.sendOtpEmail(Email, otp);
+            } catch (MessagingException e) {
+                return ResponseEntity.badRequest().body("Gửi email thất bại");
+            }
+        }
+
         Store store = new Store();
         store.setStoreName(storeRequest.getStoreName());
         store.setType(storeRequest.getType());
         store.setStoreAddress(storeRequest.getStoreAddress());
         store.setBankAccountName(storeRequest.getBankAccountName());
         store.setBankAddress(storeRequest.getBankAddress());
-
-        String storeEmail = storeRequest.getStoreEmail();
-        if (!storeEmail.matches("^[a-zA-Z0-9._%+-]+@gmail.com$")) {
-            return ResponseEntity.badRequest().body("Email không hợp lệ");
-        }
-        store.setStoreEmail(storeEmail);
+        store.setEmail(Email);
 
         String storePhone = storeRequest.getStorePhone();
         if (storePhone.length() != 10) {
@@ -116,19 +136,17 @@ public class StoreService {
         store.setIdentityCard(identityCard);
 
         store.setIdentityName(storeRequest.getIdentityName());
-        store.setStoreStatus("Chờ duyệt");
+        store.setStoreStatus("Đang xử lý");
         store.setStoreAvatar(storeRequest.getStoreAvatar());
+        store.setPassword(storeRequest.getPassword());
+        store.setOtp(otp);
+        store.setOtp_generated_time(LocalDateTime.now());
 
-        Account account = new Account();
-        account.setAccountID(storeRequest.getAccountID());
-        store.setAccount(account);
-
-        Category category = new Category();
-        category.setCategoryID(storeRequest.getCategoryID());
-        store.setCategory(category);
+        Role roleID = roleRepository.findById(3).orElseThrow();
+        store.setRole(roleID);
 
         storeRepository.save(store);
-        return ResponseEntity.ok(Collections.singletonMap("message", "Thêm cửa hàng thành công"));
+        return ResponseEntity.ok(Collections.singletonMap("message", "Gửi email xác thực thành công. Vui lòng kiểm tra email"));
     }
 
     public ResponseEntity<?> updateStore(Integer storeID, StorePutRequest storePutRequest) {
@@ -144,11 +162,11 @@ public class StoreService {
         store.setBankAccountName(storePutRequest.getBankAccountName());
         store.setBankAddress(storePutRequest.getBankAddress());
 
-        String storeEmail = storePutRequest.getStoreEmail();
-        if (!storeEmail.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
+        String Email = storePutRequest.getEmail();
+        if (!Email.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
             return ResponseEntity.badRequest().body("Email không hợp lệ");
         }
-        store.setStoreEmail(storeEmail);
+        store.setEmail(Email);
 
         String storePhone = storePutRequest.getStorePhone();
         if (storePhone.length() != 10) {
@@ -178,9 +196,7 @@ public class StoreService {
         store.setStoreStatus(storePutRequest.getStoreStatus());
         store.setStoreAvatar(storePutRequest.getStoreAvatar());
 
-        Account account = new Account();
-        account.setAccountID(storePutRequest.getAccountID());
-        store.setAccount(account);
+        
 
         Category category = new Category();
         category.setCategoryID(storePutRequest.getCategoryID());
@@ -232,7 +248,7 @@ public class StoreService {
             String type,
             String storePhone,
             String storeAddress,
-            String storeEmail,
+            String email,
             String bankAccountName,
             String bankNumber,
             String bankAddress,
@@ -260,8 +276,8 @@ public class StoreService {
         if (storeAddress != null && !storeAddress.isEmpty()) {
             spec = spec.and(StoreSpecification.hasStoreAddress(storeAddress));
         }
-        if (storeEmail != null && !storeEmail.isEmpty()) {
-            spec = spec.and(StoreSpecification.hasStoreEmail(storeEmail));
+        if (email != null && !email.isEmpty()) {
+            spec = spec.and(StoreSpecification.hasEmail(email));
         }
         if (bankAccountName != null && !bankAccountName.isEmpty()) {
             spec = spec.and(StoreSpecification.hasBankAccountName(bankAccountName));
