@@ -6,7 +6,7 @@ public class StoreResponse {
     private String type;
     private String storePhone;
     private String storeAddress;
-    private String storeEmail;
+    private String email;
     private String bankAccountName;
     private String bankNumber;
     private String bankAddress;
@@ -15,8 +15,8 @@ public class StoreResponse {
     private String storeAvatar;
     private String identityCard;
     private String identityName;
-    private AccountReponse account;
-    private CategoryReponse category;
+    private String password;
+    private String roleName;
 
     public StoreResponse() {
     }
@@ -61,12 +61,12 @@ public class StoreResponse {
         this.storeAddress = storeAddress;
     }
 
-    public String getStoreEmail() {
-        return storeEmail;
+    public String getEmail() {
+        return email;
     }
 
-    public void setStoreEmail(String storeEmail) {
-        this.storeEmail = storeEmail;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getBankAccountName() {
@@ -133,22 +133,20 @@ public class StoreResponse {
         this.identityName = identityName;
     }
 
-    public AccountReponse getAccount() {
-        return account;
+    public String getPassword() {
+        return password;
     }
 
-    public void setAccount(AccountReponse account) {
-        this.account = account;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public CategoryReponse getCategory() {
-        return category;
+    public String getRoleName() {
+        return roleName;
     }
 
-    public void setCategory(CategoryReponse category) {
-        this.category = category;
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
     }
-
-    
     
 }

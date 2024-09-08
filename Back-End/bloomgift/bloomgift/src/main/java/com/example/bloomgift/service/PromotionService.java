@@ -54,7 +54,7 @@ public class PromotionService {
         storeResponse.setType(promotion.getStoreID().getType());
         storeResponse.setStorePhone(promotion.getStoreID().getStorePhone());
         storeResponse.setStoreAddress(promotion.getStoreID().getStoreAddress());
-        storeResponse.setStoreEmail(promotion.getStoreID().getStoreEmail());
+        storeResponse.setEmail(promotion.getStoreID().getEmail());
         storeResponse.setBankAccountName(promotion.getStoreID().getBankAccountName());
         storeResponse.setBankNumber(promotion.getStoreID().getBankNumber());
         storeResponse.setBankAddress(promotion.getStoreID().getBankAddress());
