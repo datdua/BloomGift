@@ -21,8 +21,8 @@ public class StoreSpecification{
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("storeAddress"), storeAddress);
     }
 
-    public static Specification<Store> hasEmail(String email) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("email"), email);
+    public static Specification<Store> hasStoreEmail(String storeEmail) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("storeEmail"), storeEmail);
     }
 
     public static Specification<Store> hasBankAccountName(String bankAccountName) {

@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.bloomgift.model.Promotion;
-import com.example.bloomgift.reponse.PromotionResponse;
 import com.example.bloomgift.request.PromotionRequest;
 import com.example.bloomgift.service.PromotionService;
 
@@ -22,17 +21,17 @@ public class PromotionController {
     private PromotionService promotionService;
 
     @GetMapping("/get-all")
-    public List<PromotionResponse> getAllPromotions() {
+    public List<Promotion> getAllPromotions() {
         return promotionService.getAllPromotions();
     }
 
     @GetMapping("/get-by-promotionID/{promotionID}")
-    public ResponseEntity<?> getPromotionById(@PathVariable int promotionID) {
+    public Promotion getPromotionById(@PathVariable int promotionID) {
         return promotionService.getPromotionById(promotionID);
     }
 
     @GetMapping("/get-by-promotion-code/{promotionCode}")
-    public ResponseEntity<?> getPromotionByPromotionCode(@PathVariable String promotionCode) {
+    public Promotion getPromotionByPromotionCode(@PathVariable String promotionCode) {
         return promotionService.getPromotionByPromotionCode(promotionCode);
     }
 
@@ -51,18 +50,18 @@ public class PromotionController {
         return promotionService.deletePromotion(promotionIDs);
     }
 
-    @GetMapping(value = "/get-all-paging", produces = "application/json;charset=UTF-8")
-    public Page<PromotionResponse> getPromotions(@RequestParam int page, @RequestParam int size) {
+    @GetMapping(value = "/paging", produces = "application/json;charset=UTF-8")
+    public Page<Promotion> getPromotions(@RequestParam int page, @RequestParam int size) {
         return promotionService.getPromotions(page, size);
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<?> getPromotionsByStatus(@PathVariable String status) {
+    public Promotion getPromotionsByStatus(@PathVariable String status) {
         return promotionService.getPromotionsByStatus(status);
     }
 
     @GetMapping(value = "/search/get-paging", produces = "application/json;charset=UTF-8")
-    public Page<PromotionResponse> searchPromotionWithFilterPage(
+    public Page<Promotion> searchPromotionWithFilterPage(
             @RequestParam(required = false) String promotionDescription,
             @RequestParam(required = false) BigDecimal promotionDiscount,
             @RequestParam(required = false) String promotionStatus,

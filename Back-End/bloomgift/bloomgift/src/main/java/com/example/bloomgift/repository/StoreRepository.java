@@ -9,8 +9,6 @@ public interface StoreRepository extends JpaRepository<Store,Integer>, JpaSpecif
 
     Store findByStoreName(String storeName);
 
-    boolean existsByEmail(String email);
-
-    Store findByEmail(String email);
+    
 
 }
