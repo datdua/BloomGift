@@ -16,8 +16,6 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
         Account findByPhone(Integer phone);
 
-        boolean existsByEmail(String email);
-
         @Query("SELECT a FROM Account a WHERE " +
                         "(:accountID IS NULL OR a.accountID = :accountID) AND " +
                         "(:address IS NULL OR a.address LIKE %:address%) AND " +

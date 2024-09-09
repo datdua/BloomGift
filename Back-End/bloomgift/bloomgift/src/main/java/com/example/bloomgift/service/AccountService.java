@@ -1,9 +1,12 @@
 package com.example.bloomgift.service;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,16 +19,31 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageException;
+import com.google.cloud.storage.StorageOptions;
+import org.springframework.core.io.ByteArrayResource;
 
+import java.util.logging.Level;
+
+import java.util.logging.Logger;
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.reponse.AccountReponse;
 import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.repository.RoleRepository;
 import com.example.bloomgift.request.AccountRequest;
 import com.example.bloomgift.utils.EmailUtil;
+import com.example.bloomgift.utils.OtpUtil;
+import com.google.firebase.FirebaseApp;
 
 @Service
 public class AccountService implements UserDetailsService {
+
+    @Autowired
+    private FirebaseStorageService firebaseStorageService;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -36,7 +54,6 @@ public class AccountService implements UserDetailsService {
     @Autowired
     private EmailUtil emailUtil;
 
-
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Account accountOptional = accountRepository.findByEmail(email);
@@ -45,18 +62,10 @@ public class AccountService implements UserDetailsService {
             throw new UsernameNotFoundException("Tài khoản không tồn tại");
         }
 
-        String password = accountOptional.getPassword();
         List<GrantedAuthority> authorities = Collections
                 .singletonList(new SimpleGrantedAuthority(accountOptional.getRoleName()));
-
-        // If the account has a password, create UserDetails with password
-        if (password != null && !password.isEmpty()) {
-            return new org.springframework.security.core.userdetails.User(accountOptional.getEmail(), password,
-                    authorities);
-        } else {
-            // If the account doesn't have a password, create UserDetails no password
-            return new org.springframework.security.core.userdetails.User(accountOptional.getEmail(), "", authorities);
-        }
+        return new org.springframework.security.core.userdetails.User(accountOptional.getEmail(),
+                accountOptional.getPassword(), authorities);
     }
 
     public Page<AccountReponse> getAllAccounts(Pageable pageable) {
@@ -112,7 +121,6 @@ public class AccountService implements UserDetailsService {
         Date birthday = accountRequest.getBirthday();
         String roleName = accountRequest.getRoleName();
         String gender = accountRequest.getGender();
-        String avatar = accountRequest.getAvatar();
         Account existingEmail = accountRepository.findByEmail(email);
         if (existingEmail != null) {
             throw new RuntimeException("Tài khoản đã tồn tại");
@@ -136,10 +144,60 @@ public class AccountService implements UserDetailsService {
         account.setPassword(password);
         account.setAccountStatus(true);
         account.setGender(gender);
-        account.setAvatar(avatar);
         accountRepository.save(account);
 
     }
+
+    // public void createAccount(AccountRequest accountRequest, MultipartFile
+    // avatarFile) {
+    // checkvalidateAccount(accountRequest);
+
+    // String fullname = accountRequest.getFullname();
+    // String email = accountRequest.getEmail();
+    // String password = accountRequest.getPassword();
+    // Integer phone = accountRequest.getPhone();
+    // String address = accountRequest.getAddress();
+    // Date birthday = accountRequest.getBirthday();
+    // String roleName = accountRequest.getRoleName();
+    // String gender = accountRequest.getGender();
+
+    // Account existingEmail = accountRepository.findByEmail(email);
+    // if (existingEmail != null) {
+    // throw new RuntimeException("Tài khoản đã tồn tại");
+    // }
+    // Account existingPhone = accountRepository.findByPhone(phone);
+    // if (existingPhone != null) {
+    // throw new RuntimeException("Số điện thoại đã tồn tại");
+    // }
+
+    // com.example.bloomgift.model.Role role =
+    // roleRepository.findByRoleName(roleName);
+    // if (role == null) {
+    // throw new RuntimeException("Role not found");
+    // }
+
+    // Account account = new Account();
+    // account.setRoleID(role);
+    // account.setFullname(fullname);
+    // account.setEmail(email);
+    // account.setAddress(address);
+    // account.setBirthday(birthday);
+    // account.setPhone(phone);
+    // account.setPassword(password);
+    // account.setAccountStatus(true);
+    // account.setGender(gender);
+
+    // try {
+    // String avatarUrl = firebaseStorageService.uploadFileByAdmin(avatarFile,
+    // email);
+    // account.setAvatar(avatarUrl);
+    // } catch (IOException e) {
+    // throw new RuntimeException("Failed to upload avatar", e);
+    // }
+
+    // accountRepository.save(account);
+
+    // }
 
     public Account updateAccount(Integer id, AccountRequest accountRequest) {
         checkvalidateAccount(accountRequest);
@@ -147,7 +205,7 @@ public class AccountService implements UserDetailsService {
         if (existingAccount == null) {
             throw new RuntimeException("Không tìm thấy tài khoản");
         }
-        
+
         String fullname = accountRequest.getFullname();
         String password = accountRequest.getPassword();
         Integer phone = accountRequest.getPhone();
@@ -156,7 +214,6 @@ public class AccountService implements UserDetailsService {
         String roleName = accountRequest.getRoleName();
         String gender = accountRequest.getGender();
         Boolean accountstatus = accountRequest.getAccountStatus();
-        String avatar = accountRequest.getAvatar();
         // --------------------------------------------//
         existingAccount.setFullname(fullname);
         existingAccount.setPassword(password);
@@ -165,7 +222,6 @@ public class AccountService implements UserDetailsService {
         existingAccount.setBirthday(birthday);
         existingAccount.setGender(gender);
         existingAccount.setAccountStatus(accountstatus);
-        existingAccount.setAvatar(avatar);
 
         if (roleName != null && !roleName.isEmpty()) {
             com.example.bloomgift.model.Role role = roleRepository.findByRoleName(roleName);
@@ -229,7 +285,7 @@ public class AccountService implements UserDetailsService {
             return Collections.singletonMap("message", "Email không tồn tại.");
         }
         try {
-            emailUtil.sendSetPasswordEmail(email);
+            emailUtil.sendForgetPasswordEmail(email);
         } catch (Exception e) {
             return Collections.singletonMap("message", "Có lỗi xảy ra khi gửi email.");
         }

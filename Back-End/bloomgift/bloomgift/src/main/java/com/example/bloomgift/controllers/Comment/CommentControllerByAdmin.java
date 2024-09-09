@@ -17,7 +17,7 @@ public class CommentControllerByAdmin {
     private CommentService commentService;
 
 
-    @PostMapping("/update-status")
+    @PostMapping("/update-status-comment")
     public ResponseEntity<String> updateCommentStatus(@RequestParam Integer commentID,
                                                       @RequestParam Boolean status) {
         try {
