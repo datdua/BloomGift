@@ -81,16 +81,27 @@ public class AuthenticationService {
             return ResponseEntity.status(401).body(Collections.singletonMap("message", "Sai email hoặc mật khẩu"));
         }
 
-        final UserDetails userDetails = accountService.loadUserByUsername(loginRequest.getEmail());
-        final Account account = accountService.findByEmail(loginRequest.getEmail());
+        // Tìm thông tin người dùng trong cả Account và Store
+        final UserDetails userDetails = accountService.loadUserByEmail(loginRequest.getEmail());
 
-        if (account == null || !account.getAccountStatus(true)) {
+        // Kiểm tra trạng thái tài khoản
+        Account account = accountRepository.findByEmail(loginRequest.getEmail());
+        Store store = storeRepository.findByEmail(loginRequest.getEmail());
+
+        if (account != null && !account.getAccountStatus(true)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Collections.singletonMap("message",
                             "Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email để kích hoạt tài khoản."));
         }
 
-        final String jwt = jwtUtil.generateToken(account);
+        if (store != null && !store.getStoreStatus().equals("Đã kích hoạt")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Collections.singletonMap("message",
+                            "Cửa hàng chưa được kích hoạt. Vui lòng liên hệ quản lý."));
+        }
+
+        // Tạo JWT cho tài khoản hoặc cửa hàng
+        final String jwt = account != null ? jwtUtil.generateToken(account) : jwtUtil.generateToken(store);
 
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
@@ -146,10 +157,10 @@ public class AuthenticationService {
             throw new RuntimeException("Invalid email format");
         }
 
-        // Account existingEmail = accountRepository.findByEmail(email);
-        // if (existingEmail != null) {
-        // throw new RuntimeException("Account already exists");
-        // }
+        Account existingEmail = accountRepository.findByEmail(email);
+        if (existingEmail != null) {
+            throw new RuntimeException("Account already exists");
+        }
         Account existingPhone = accountRepository.findByPhone(phone);
         if (existingPhone != null) {
             if (existingPhone.getAccountStatus(true) != null && existingPhone.getAccountStatus(true)) {

@@ -13,21 +13,18 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.example.bloomgift.model.Account;
 import com.example.bloomgift.model.Category;
 import com.example.bloomgift.model.Role;
 import com.example.bloomgift.model.Store;
 import com.example.bloomgift.reponse.StoreResponse;
+import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.repository.RoleRepository;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.StoreRequest;
 import com.example.bloomgift.request.putRequest.StorePutRequest;
 import com.example.bloomgift.specification.StoreSpecification;
-import com.example.bloomgift.utils.OtpUtil;
-import com.example.bloomgift.reponse.AccountReponse;
-import com.example.bloomgift.reponse.CategoryReponse;
 import com.example.bloomgift.utils.EmailUtil;
-import com.example.bloomgift.repository.AccountRepository;
+import com.example.bloomgift.utils.OtpUtil;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.mail.MessagingException;
@@ -241,6 +238,10 @@ public class StoreService {
         Pageable pageable = PageRequest.of(page, size);
         Page<Store> stores = storeRepository.findAll(pageable);
         return stores.map(this::convertStoreToResponse);
+    }
+
+    public Store findByEmail(String email) {
+        return storeRepository.findByEmail(email);
     }
 
     public Page<StoreResponse> searchStoreWithFilterPage(
