@@ -66,6 +66,9 @@ public class Account {
     @JoinColumn(name = "roleID")
     private Role roleID;
 
+    @OneToMany(mappedBy = "account")
+    @JsonIgnore 
+    private Set<Store> stores;
 
     public Account() {
 
@@ -207,4 +210,11 @@ public class Account {
         return roleID != null ? roleID.getRoleName() : null;
     }
 
+    public Set<Store> getStores() {
+        return stores;
+    }
+
+    public void setStores(Set<Store> stores) {
+        this.stores = stores;
+    }
 }

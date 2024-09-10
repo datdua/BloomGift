@@ -238,7 +238,7 @@ public class ProductService {
 
     public Product getProductById(Integer productID) {
         return productRepository.findById(productID)
-                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productID));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm: " + productID));
     }
 
 

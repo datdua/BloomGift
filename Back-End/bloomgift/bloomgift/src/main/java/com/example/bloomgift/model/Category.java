@@ -29,6 +29,9 @@ public class Category {
     @JsonManagedReference 
     private Set<Product> products;
 
+    @OneToMany(mappedBy = "category")
+    @JsonIgnore 
+    private Set<Store> stores;
 
     public Integer getCategoryID() {
         return categoryID;
@@ -54,4 +57,11 @@ public class Category {
         this.products = products;
     }
 
+    public Set<Store> getStores() {
+        return stores;
+    }
+
+    public void setStores(Set<Store> stores) {
+        this.stores = stores;
+    }
 }

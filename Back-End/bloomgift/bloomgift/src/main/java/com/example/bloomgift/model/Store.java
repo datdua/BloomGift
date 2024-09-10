@@ -1,9 +1,6 @@
 package com.example.bloomgift.model;
 
-import java.time.LocalDateTime;
 import java.util.Set;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -26,7 +23,7 @@ public class Store {
     private Integer storeID;
 
     @OneToMany(mappedBy = "storeID")
-    @JsonIgnore
+    @JsonIgnore // Ignore this field during serialization
     private Set<Product> products;
 
     @Column(name = "storeName")
@@ -41,8 +38,8 @@ public class Store {
     @Column(name = "storeAddress")
     private String storeAddress;
 
-    @Column(name = "email")
-    private String email;
+    @Column(name = "storeEmail")
+    private String storeEmail;
 
     @Column(name = "bankAccountName")
     private String bankAccountName;
@@ -68,34 +65,28 @@ public class Store {
     @Column(name = "identityName")
     private String identityName;
 
-    @Column(name = "password")
-    private String password;
-
-    @Column(name = "otp")
-    private String otp;
-
-    @Column(name = "otp_generated_time")
-    private LocalDateTime otp_generated_time;
-
+    @ManyToOne
+    @JoinColumn(name = "accountID", nullable = true)
+    private Account account;
 
     @ManyToOne
-    @JoinColumn(name = "roleID", nullable = false)
-    private Role role;
+    @JoinColumn(name = "categoryID", nullable = true)
+    private Category category;
 
     public Store() {
     }
 
     public Store(Integer storeID, Set<Product> products, String storeName, String type, String storePhone,
-            String storeAddress, String email, String bankAccountName, String bankNumber, String bankAddress,
+            String storeAddress, String storeEmail, String bankAccountName, String bankNumber, String bankAddress,
             String taxNumber, String storeStatus, String storeAvatar, String identityCard, String identityName,
-            String password, String otp, LocalDateTime otp_generated_time, Role role) {
+            Account account, Category category) {
         this.storeID = storeID;
         this.products = products;
         this.storeName = storeName;
         this.type = type;
         this.storePhone = storePhone;
         this.storeAddress = storeAddress;
-        this.email = email;
+        this.storeEmail = storeEmail;
         this.bankAccountName = bankAccountName;
         this.bankNumber = bankNumber;
         this.bankAddress = bankAddress;
@@ -104,10 +95,8 @@ public class Store {
         this.storeAvatar = storeAvatar;
         this.identityCard = identityCard;
         this.identityName = identityName;
-        this.password = password;
-        this.otp = otp;
-        this.otp_generated_time = otp_generated_time;
-        this.role = role;
+        this.account = account;
+        this.category = category;
     }
 
     public Integer getStoreID() {
@@ -158,12 +147,12 @@ public class Store {
         this.storeAddress = storeAddress;
     }
 
-    public String getEmail() {
-        return email;
+    public String getStoreEmail() {
+        return storeEmail;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setStoreEmail(String storeEmail) {
+        this.storeEmail = storeEmail;
     }
 
     public String getBankAccountName() {
@@ -222,6 +211,22 @@ public class Store {
         this.identityCard = identityCard;
     }
 
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
     public String getIdentityName() {
         return identityName;
     }
@@ -229,40 +234,5 @@ public class Store {
     public void setIdentityName(String identityName) {
         this.identityName = identityName;
     }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        this.password = passwordEncoder.encode(password);
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public String getOtp() {
-        return otp;
-    }
-
-    public void setOtp(String otp) {
-        this.otp = otp;
-    }
-
-    public LocalDateTime getOtp_generated_time() {
-        return otp_generated_time;
-    }
-
-    public void setOtp_generated_time(LocalDateTime otp_generated_time) {
-        this.otp_generated_time = otp_generated_time;
-    }
-
-    
 
 }

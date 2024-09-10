@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -22,11 +21,9 @@ import org.springframework.util.StringUtils;
 
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.model.Role;
-import com.example.bloomgift.model.Store;
 import com.example.bloomgift.reponse.AuthenticationResponse;
 import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.repository.RoleRepository;
-import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.LoginRequest;
 import com.example.bloomgift.request.RegisterRequest;
 import com.example.bloomgift.utils.EmailUtil;
@@ -57,12 +54,6 @@ public class AuthenticationService {
 
     @Autowired
     private EmailUtil emailUtil;
-
-    @Autowired
-    private StoreService storeService;
-
-    @Autowired
-    private StoreRepository storeRepository;
 
     public AuthenticationService(AccountRepository accountRepository, RoleRepository roleRepository,
             AuthenticationManager authenticationManager, JwtUtil jwtUtil, AccountService accountService) {
@@ -142,7 +133,7 @@ public class AuthenticationService {
         account.setOtp(otp);
         account.setOtp_generated_time(LocalDateTime.now());
         accountRepository.save(account);
-        return Collections.singletonMap("message", "kiểm tra mail và nhập OTP");
+        return Collections.singletonMap("messag e", "kiểm tra mail và nhập OTP");
     }
 
     public void checkvalidateRegister(RegisterRequest registerRequest) {
@@ -184,31 +175,22 @@ public class AuthenticationService {
 
     public String verifyAccount(String email, String otp) {
         Account account = accountRepository.findByEmail(email);
-        Store store = storeRepository.findByEmail(email);
 
-        boolean isAccountOtpValid = account != null && account.getOtp().equals(otp) &&
-                Duration.between(account.getOtp_generated_time(), LocalDateTime.now()).getSeconds() < (1 * 500);
-
-        boolean isStoreOtpValid = store != null && store.getOtp().equals(otp) &&
-                Duration.between(store.getOtp_generated_time(), LocalDateTime.now()).getSeconds() < (1 * 500);
-
-        if (isAccountOtpValid) {
+        if (account.getOtp().equals(otp) && Duration.between(account.getOtp_generated_time(),
+                LocalDateTime.now()).getSeconds() < (1 * 500    )) {
             account.setAccountStatus(true);
             accountRepository.save(account);
-            return "OTP verified, you can login";
-        } else if (isStoreOtpValid) {
-            store.setStoreStatus("Chờ duyệt");
-            storeRepository.save(store);
-            return "OTP verified, you can login";
+            return "OTP verify you can login";
         }
 
-        return "Please regenerate OTP and try again";
+        return "please regenerate otp and try again";
+
     }
 
     public String generateOtp(String email) {
         Account account = accountRepository.findByEmail(email);
-
-        if (!account.getAccountStatus(true)) { // Assuming accountStatus is a boolean field
+        
+        if (!account.getAccountStatus(true)) {  // Assuming accountStatus is a boolean field
             String otp = otpUtil.generateOtp();
             try {
                 emailUtil.sendOtpEmail(email, otp);
@@ -251,18 +233,12 @@ public class AuthenticationService {
         }
 
         // Generate JWT token
-        final String jwt = jwtUtil.generateToken(account);
+        String jwt = jwtUtil.generateToken(account);
 
-        // Set authentication context
-        UserDetails userDetails = accountService.loadUserByUsername(email);
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        // Create a new modifiable map and copy attributes
+        Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
+        attributes.put("jwt", jwt);
 
-        // Return user attributes along with the token
-        Map<String, Object> response = new HashMap<>(oAuth2User.getAttributes());
-        response.put("token", jwt);
-
-        return response;
+        return attributes;
     }
 }

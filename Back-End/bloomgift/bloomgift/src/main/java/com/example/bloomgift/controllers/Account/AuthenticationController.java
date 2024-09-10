@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.bloomgift.request.LoginRequest;
 import com.example.bloomgift.request.RegisterRequest;
-import com.example.bloomgift.request.StoreRequest;
 import com.example.bloomgift.service.AccountService;
 import com.example.bloomgift.service.AuthenticationService;
 import com.example.bloomgift.service.StoreService;
@@ -29,9 +28,6 @@ public class AuthenticationController {
     // private AccountService accountService;
     @Autowired
     private AuthenticationService authenticationService;
-
-    @Autowired
-    private StoreService storeService;
 
     @Autowired
     private AccountService accountService;
@@ -84,10 +80,5 @@ public class AuthenticationController {
     public ResponseEntity<Map<String, Object>> loginWithGoogle(OAuth2AuthenticationToken oAuth2AuthenticationToken) {
         Map<String, Object> attributes = authenticationService.loginWithGoogle(oAuth2AuthenticationToken);
         return ResponseEntity.ok(attributes);
-    }
-
-    @PostMapping("/store/register")
-    public ResponseEntity<?> registerStore(@RequestBody StoreRequest storeRequest) {
-        return storeService.registerStore(storeRequest);
     }
 }
