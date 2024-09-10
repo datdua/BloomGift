@@ -13,10 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.example.bloomgift.request.LoginRequest;
 import com.example.bloomgift.request.RegisterRequest;
 import com.example.bloomgift.service.AccountService;
 import com.example.bloomgift.service.AuthenticationService;
+import com.example.bloomgift.service.StoreService;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {

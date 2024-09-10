@@ -31,9 +31,11 @@ import java.util.logging.Level;
 
 import java.util.logging.Logger;
 import com.example.bloomgift.model.Account;
+import com.example.bloomgift.model.Store;
 import com.example.bloomgift.reponse.AccountReponse;
 import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.repository.RoleRepository;
+import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.AccountRequest;
 import com.example.bloomgift.utils.EmailUtil;
 import com.example.bloomgift.utils.OtpUtil;
@@ -54,18 +56,34 @@ public class AccountService implements UserDetailsService {
     @Autowired
     private EmailUtil emailUtil;
 
+    @Autowired
+    private StoreRepository storeRepository; 
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Account accountOptional = accountRepository.findByEmail(email);
+        return loadUserByEmail(email);
+    }
 
-        if (accountOptional == null) {
-            throw new UsernameNotFoundException("Tài khoản không tồn tại");
+    public UserDetails loadUserByEmail(String email) throws UsernameNotFoundException {
+        // Kiểm tra trong bảng Account trước
+        Account account = accountRepository.findByEmail(email);
+        if (account != null) {
+            List<GrantedAuthority> authorities = Collections
+                    .singletonList(new SimpleGrantedAuthority(account.getRoleName()));
+            return new org.springframework.security.core.userdetails.User(account.getEmail(), account.getPassword(),
+                    authorities);
         }
 
-        List<GrantedAuthority> authorities = Collections
-                .singletonList(new SimpleGrantedAuthority(accountOptional.getRoleName()));
-        return new org.springframework.security.core.userdetails.User(accountOptional.getEmail(),
-                accountOptional.getPassword(), authorities);
+        // Nếu không tìm thấy trong bảng Account, kiểm tra trong bảng Store
+        Store store = storeRepository.findByEmail(email);
+        if (store != null) {
+            List<GrantedAuthority> authorities = Collections
+                    .singletonList(new SimpleGrantedAuthority(store.getRole().getRoleName()));
+            return new org.springframework.security.core.userdetails.User(store.getEmail(), store.getPassword(),
+                    authorities);
+        }
+
+        throw new UsernameNotFoundException("Tài khoản hoặc cửa hàng không tồn tại");
     }
 
     public Page<AccountReponse> getAllAccounts(Pageable pageable) {
@@ -206,6 +224,7 @@ public class AccountService implements UserDetailsService {
             throw new RuntimeException("Không tìm thấy tài khoản");
         }
 
+
         String fullname = accountRequest.getFullname();
         String password = accountRequest.getPassword();
         Integer phone = accountRequest.getPhone();
@@ -285,7 +304,7 @@ public class AccountService implements UserDetailsService {
             return Collections.singletonMap("message", "Email không tồn tại.");
         }
         try {
-            emailUtil.sendForgetPasswordEmail(email);
+            emailUtil.sendSetPasswordEmail(email);
         } catch (Exception e) {
             return Collections.singletonMap("message", "Có lỗi xảy ra khi gửi email.");
         }

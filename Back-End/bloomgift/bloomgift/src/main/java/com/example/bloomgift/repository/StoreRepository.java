@@ -5,10 +5,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.example.bloomgift.model.Store;
 
-public interface StoreRepository extends JpaRepository<Store,Integer>, JpaSpecificationExecutor<Store> {
+public interface StoreRepository extends JpaRepository<Store, Integer>, JpaSpecificationExecutor<Store> {
 
     Store findByStoreName(String storeName);
 
-    
+    boolean existsByEmail(String email);
+
+    Store findByEmail(String email);
 
 }
