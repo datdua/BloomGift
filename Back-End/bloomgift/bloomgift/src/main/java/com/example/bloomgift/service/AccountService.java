@@ -304,7 +304,7 @@ public class AccountService implements UserDetailsService {
             return Collections.singletonMap("message", "Email không tồn tại.");
         }
         try {
-            emailUtil.sendForgetPasswordEmail(email);
+            emailUtil.sendSetPasswordEmail(email);
         } catch (Exception e) {
             return Collections.singletonMap("message", "Có lỗi xảy ra khi gửi email.");
         }

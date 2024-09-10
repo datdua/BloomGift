@@ -1,6 +1,7 @@
-package com.example.bloomgift.request;
+package com.example.bloomgift.reponse;
 
-public class StoreRequest {
+public class StoreResponse {
+    private Integer storeID;
     private String storeName;
     private String type;
     private String storePhone;
@@ -10,12 +11,24 @@ public class StoreRequest {
     private String bankNumber;
     private String bankAddress;
     private String taxNumber;
+    private String storeStatus;
     private String storeAvatar;
-    private String password;
     private String identityCard;
     private String identityName;
+    private String password;
+    private String roleName;
 
-    // Getters and Setters
+    public StoreResponse() {
+    }
+
+    public Integer getStoreID() {
+        return storeID;
+    }
+
+    public void setStoreID(Integer storeID) {
+        this.storeID = storeID;
+    }
+
     public String getStoreName() {
         return storeName;
     }
@@ -88,20 +101,20 @@ public class StoreRequest {
         this.taxNumber = taxNumber;
     }
 
+    public String getStoreStatus() {
+        return storeStatus;
+    }
+
+    public void setStoreStatus(String storeStatus) {
+        this.storeStatus = storeStatus;
+    }
+
     public String getStoreAvatar() {
         return storeAvatar;
     }
 
     public void setStoreAvatar(String storeAvatar) {
         this.storeAvatar = storeAvatar;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getIdentityCard() {
@@ -119,4 +132,21 @@ public class StoreRequest {
     public void setIdentityName(String identityName) {
         this.identityName = identityName;
     }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
 }

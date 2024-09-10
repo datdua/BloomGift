@@ -21,9 +21,11 @@ import org.springframework.util.StringUtils;
 
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.model.Role;
+import com.example.bloomgift.model.Store;
 import com.example.bloomgift.reponse.AuthenticationResponse;
 import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.repository.RoleRepository;
+import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.LoginRequest;
 import com.example.bloomgift.request.RegisterRequest;
 import com.example.bloomgift.utils.EmailUtil;
@@ -54,6 +56,9 @@ public class AuthenticationService {
 
     @Autowired
     private EmailUtil emailUtil;
+
+    @Autowired
+    private StoreRepository storeRepository;
 
     public AuthenticationService(AccountRepository accountRepository, RoleRepository roleRepository,
             AuthenticationManager authenticationManager, JwtUtil jwtUtil, AccountService accountService) {
@@ -175,16 +180,31 @@ public class AuthenticationService {
 
     public String verifyAccount(String email, String otp) {
         Account account = accountRepository.findByEmail(email);
+        Store store = storeRepository.findByEmail(email);
 
-        if (account.getOtp().equals(otp) && Duration.between(account.getOtp_generated_time(),
-                LocalDateTime.now()).getSeconds() < (1 * 500    )) {
-            account.setAccountStatus(true);
-            accountRepository.save(account);
-            return "OTP verify you can login";
+        if (account == null && store == null) {
+            return "Account not found";
         }
 
-        return "please regenerate otp and try again";
+        if (account != null) {
+            if (account.getOtp().equals(otp) && Duration.between(account.getOtp_generated_time(),
+                    LocalDateTime.now()).getSeconds() < (1 * 500)) {
+                account.setAccountStatus(true);
+                accountRepository.save(account);
+                return "OTP verified, you can login";
+            }
+        }
 
+        if (store != null) {
+            if (store.getOtp().equals(otp) && Duration.between(store.getOtp_generated_time(),
+                    LocalDateTime.now()).getSeconds() < (1 * 500)) {
+                store.setStoreStatus("Chờ duyệt");
+                storeRepository.save(store);
+                return "OTP verified, you can login";
+            }
+        }
+
+        return "Please regenerate OTP and try again";
     }
 
     public String generateOtp(String email) {

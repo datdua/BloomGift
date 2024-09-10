@@ -4,7 +4,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.example.bloomgift.model.Store;
 
-public class StoreSpecification{
+public class StoreSpecification {
     public static Specification<Store> hasStoreName(String storeName) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("storeName"), storeName);
     }
@@ -21,8 +21,8 @@ public class StoreSpecification{
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("storeAddress"), storeAddress);
     }
 
-    public static Specification<Store> hasStoreEmail(String storeEmail) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("storeEmail"), storeEmail);
+    public static Specification<Store> hasEmail(String email) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("email"), email);
     }
 
     public static Specification<Store> hasBankAccountName(String bankAccountName) {

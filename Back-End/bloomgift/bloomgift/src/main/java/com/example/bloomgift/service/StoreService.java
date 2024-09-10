@@ -1,7 +1,8 @@
 package com.example.bloomgift.service;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.bloomgift.model.Category;
+import com.example.bloomgift.model.Role;
 import com.example.bloomgift.model.Store;
 import com.example.bloomgift.reponse.StoreResponse;
 import com.example.bloomgift.repository.AccountRepository;
@@ -25,6 +27,7 @@ import com.example.bloomgift.utils.EmailUtil;
 import com.example.bloomgift.utils.OtpUtil;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import jakarta.mail.MessagingException;
 
 @Service
 public class StoreService {
@@ -32,27 +35,78 @@ public class StoreService {
     @Autowired
     private StoreRepository storeRepository;
 
-    public List<Store> getAllStores() {
-        return storeRepository.findAll();
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private OtpUtil otpUtil;
+
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private EmailUtil emailUtil;
+
+    private StoreResponse convertStoreToResponse(Store store) {
+        StoreResponse storeResponse = new StoreResponse();
+        storeResponse.setStoreID(store.getStoreID());
+        storeResponse.setStoreName(store.getStoreName());
+        storeResponse.setType(store.getType());
+        storeResponse.setStorePhone(store.getStorePhone());
+        storeResponse.setStoreAddress(store.getStoreAddress());
+        storeResponse.setEmail(store.getEmail());
+        storeResponse.setBankAccountName(store.getBankAccountName());
+        storeResponse.setBankNumber(store.getBankNumber());
+        storeResponse.setBankAddress(store.getBankAddress());
+        storeResponse.setTaxNumber(store.getTaxNumber());
+        storeResponse.setStoreStatus(store.getStoreStatus());
+        storeResponse.setStoreAvatar(store.getStoreAvatar());
+        storeResponse.setIdentityCard(store.getIdentityCard());
+        storeResponse.setIdentityName(store.getIdentityName());
+        storeResponse.setPassword(store.getPassword());
+        storeResponse.setRoleName(store.getRole().getRoleName());
+
+        return storeResponse;
     }
 
-    public Store getStoreByName(String storeName) {
-        return storeRepository.findByStoreName(storeName);
+    public ResponseEntity<List<StoreResponse>> getAllStores() {
+        List<Store> stores = storeRepository.findAll();
+        List<StoreResponse> storeResponses = stores.stream().map(this::convertStoreToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(storeResponses);
     }
 
-    public ResponseEntity<?> addStore(StoreRequest storeRequest) {
+    public ResponseEntity<?> getStoreByName(String storeName) {
+        Store store = storeRepository.findByStoreName(storeName);
+        if (store != null) {
+            return ResponseEntity.ok(convertStoreToResponse(store));
+        } else {
+            return ResponseEntity.badRequest().body("Không tìm thấy cửa hàng");
+        }
+    }
+
+    public ResponseEntity<?> registerStore(StoreRequest storeRequest) {
+        String otp = otpUtil.generateOtp();
+        String Email = storeRequest.getEmail();
+        if (!Email.matches("^[a-zA-Z0-9._%+-]+@gmail.com$")) {
+            return ResponseEntity.badRequest().body("Email không hợp lệ");
+        } else if (storeRepository.existsByEmail(Email) || accountRepository.existsByEmail(Email)) {
+            return ResponseEntity.badRequest().body("Email đã tồn tại");
+        } else {
+            try {
+                emailUtil.sendOtpEmail(Email, otp);
+            } catch (MessagingException e) {
+                return ResponseEntity.badRequest().body("Gửi email thất bại");
+            }
+        }
+
         Store store = new Store();
         store.setStoreName(storeRequest.getStoreName());
         store.setType(storeRequest.getType());
         store.setStoreAddress(storeRequest.getStoreAddress());
         store.setBankAccountName(storeRequest.getBankAccountName());
         store.setBankAddress(storeRequest.getBankAddress());
-
-        String storeEmail = storeRequest.getStoreEmail();
-        if (!storeEmail.matches("^[a-zA-Z0-9._%+-]+@gmail.com$")) {
-            return ResponseEntity.badRequest().body("Email không hợp lệ");
-        }
-        store.setStoreEmail(storeEmail);
+        store.setEmail(Email);
 
         String storePhone = storeRequest.getStorePhone();
         if (storePhone.length() != 10) {
@@ -79,19 +133,18 @@ public class StoreService {
         store.setIdentityCard(identityCard);
 
         store.setIdentityName(storeRequest.getIdentityName());
-        store.setStoreStatus("Chờ duyệt");
+        store.setStoreStatus("Đang xử lý");
         store.setStoreAvatar(storeRequest.getStoreAvatar());
+        store.setPassword(storeRequest.getPassword());
+        store.setOtp(otp);
+        store.setOtp_generated_time(LocalDateTime.now());
 
-        Account account = new Account();
-        account.setAccountID(storeRequest.getAccountID());
-        store.setAccount(account);
-
-        Category category = new Category();
-        category.setCategoryID(storeRequest.getCategoryID());
-        store.setCategory(category);
+        Role roleID = roleRepository.findById(3).orElseThrow();
+        store.setRole(roleID);
 
         storeRepository.save(store);
-        return ResponseEntity.ok(Collections.singletonMap("message", "Thêm cửa hàng thành công"));
+        return ResponseEntity
+                .ok(Collections.singletonMap("message", "Gửi email xác thực thành công. Vui lòng kiểm tra email"));
     }
 
     public ResponseEntity<?> updateStore(Integer storeID, StorePutRequest storePutRequest) {
@@ -107,11 +160,11 @@ public class StoreService {
         store.setBankAccountName(storePutRequest.getBankAccountName());
         store.setBankAddress(storePutRequest.getBankAddress());
 
-        String storeEmail = storePutRequest.getStoreEmail();
-        if (!storeEmail.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
+        String Email = storePutRequest.getEmail();
+        if (!Email.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
             return ResponseEntity.badRequest().body("Email không hợp lệ");
         }
-        store.setStoreEmail(storeEmail);
+        store.setEmail(Email);
 
         String storePhone = storePutRequest.getStorePhone();
         if (storePhone.length() != 10) {
@@ -140,10 +193,6 @@ public class StoreService {
         store.setIdentityName(storePutRequest.getIdentityName());
         store.setStoreStatus(storePutRequest.getStoreStatus());
         store.setStoreAvatar(storePutRequest.getStoreAvatar());
-
-        Account account = new Account();
-        account.setAccountID(storePutRequest.getAccountID());
-        store.setAccount(account);
 
         Category category = new Category();
         category.setCategoryID(storePutRequest.getCategoryID());
@@ -175,11 +224,16 @@ public class StoreService {
         }
     }
 
-    public Store getStoreById(Integer storeID) {
-        return storeRepository.findById(storeID).orElseThrow();
+    public ResponseEntity<?> getStoreById(Integer storeID) {
+        Store store = storeRepository.findById(storeID).orElse(null);
+        if (store != null) {
+            return ResponseEntity.ok(convertStoreToResponse(store));
+        } else {
+            return ResponseEntity.badRequest().body("Không tìm thấy cửa hàng");
+        }
     }
 
-    public Page<Store> getAllStoreByPage(Integer page, Integer size) {
+    public Page<StoreResponse> getAllStoreByPage(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Store> stores = storeRepository.findAll(pageable);
         return stores.map(this::convertStoreToResponse);
@@ -189,12 +243,12 @@ public class StoreService {
         return storeRepository.findByEmail(email);
     }
 
-    public Page<Store> searchStoreWithFilterPage(
+    public Page<StoreResponse> searchStoreWithFilterPage(
             String storeName,
             String type,
             String storePhone,
             String storeAddress,
-            String storeEmail,
+            String email,
             String bankAccountName,
             String bankNumber,
             String bankAddress,
@@ -222,8 +276,8 @@ public class StoreService {
         if (storeAddress != null && !storeAddress.isEmpty()) {
             spec = spec.and(StoreSpecification.hasStoreAddress(storeAddress));
         }
-        if (storeEmail != null && !storeEmail.isEmpty()) {
-            spec = spec.and(StoreSpecification.hasStoreEmail(storeEmail));
+        if (email != null && !email.isEmpty()) {
+            spec = spec.and(StoreSpecification.hasEmail(email));
         }
         if (bankAccountName != null && !bankAccountName.isEmpty()) {
             spec = spec.and(StoreSpecification.hasBankAccountName(bankAccountName));
@@ -257,7 +311,9 @@ public class StoreService {
         }
 
         Pageable pageable = PageRequest.of(page - 1, size);
-        return storeRepository.findAll(spec, pageable);
+        Page<Store> stores = storeRepository.findAll(spec, pageable);
+
+        return stores.map(this::convertStoreToResponse);
 
     }
 

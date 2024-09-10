@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.bloomgift.model.Store;
 import com.example.bloomgift.request.StoreRequest;
 import com.example.bloomgift.request.putRequest.StorePutRequest;
+import com.example.bloomgift.reponse.StoreResponse;
 import com.example.bloomgift.service.StoreService;
 
 @RestController
@@ -28,19 +29,19 @@ public class StoreController {
     private StoreService storeService;
 
     @GetMapping("/get-all")
-    public List<Store> getAllStores() {
+    public ResponseEntity<List<StoreResponse>> getAllStores() {
         return storeService.getAllStores();
     }
 
     @GetMapping("/get-by-name")
-    public Store getStoreByName(@RequestParam String storeName) {
+    public ResponseEntity<?> getStoreByName(@RequestParam String storeName) {
         return storeService.getStoreByName(storeName);
     }
 
-    @PostMapping(value = "/add", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<?> addStore(@RequestBody StoreRequest storeRequest) {
-        return storeService.addStore(storeRequest);
-    }
+    // @PostMapping(value = "/add", produces = "application/json;charset=UTF-8")
+    // public ResponseEntity<?> addStore(@RequestBody StoreRequest storeRequest) {
+    // return storeService.addStore(storeRequest);
+    // }
 
     @PutMapping(value = "/update/{storeID}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<?> updateStore(@PathVariable Integer storeID, @RequestBody StorePutRequest storePutRequest) {
@@ -53,7 +54,7 @@ public class StoreController {
     }
 
     @GetMapping(value = "/search/get-paging", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Page<Store>> searchStores(
+    public ResponseEntity<Page<StoreResponse>> searchStores(
             @RequestParam(required = false) String storeName,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String storePhone,
@@ -71,10 +72,21 @@ public class StoreController {
             @RequestParam(required = false) String categoryName,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
-        Page<Store> stores = storeService.searchStoreWithFilterPage(
+        Page<StoreResponse> stores = storeService.searchStoreWithFilterPage(
                 storeName, type, storePhone, storeAddress, storeEmail, bankAccountName, bankNumber, bankAddress,
                 taxNumber, storeStatus, storeAvatar, identityCard, identityName, accountFullName, categoryName, page,
                 size);
         return ResponseEntity.ok(stores);
+    }
+
+    @GetMapping("/get-by-id")
+    public ResponseEntity<?> getStoreById(@RequestParam Integer storeID) {
+        return storeService.getStoreById(storeID);
+    }
+
+    @GetMapping("/get-all-paging")
+    public ResponseEntity<Page<StoreResponse>> getAllStoresByPage(@RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        return ResponseEntity.ok(storeService.getAllStoreByPage(page, size));
     }
 }
