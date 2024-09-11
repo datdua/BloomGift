@@ -89,4 +89,5 @@ public class AuthenticationController {
     public ResponseEntity<?> registerStore(@RequestBody StoreRequest storeRequest) {
         return storeService.registerStore(storeRequest);
     }
+    
 }
