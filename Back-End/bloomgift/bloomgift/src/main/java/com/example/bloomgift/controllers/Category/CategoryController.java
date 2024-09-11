@@ -18,7 +18,7 @@ import com.example.bloomgift.reponse.CategoryReponse;
 import com.example.bloomgift.request.CategoryRequest;
 import com.example.bloomgift.service.CategoryService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
