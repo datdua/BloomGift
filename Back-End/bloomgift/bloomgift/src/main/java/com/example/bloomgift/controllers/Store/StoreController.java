@@ -38,10 +38,10 @@ public class StoreController {
         return storeService.getStoreByName(storeName);
     }
 
-    @PostMapping(value = "/add", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<?> addStore(@RequestBody StoreRequest storeRequest) {
-        return storeService.addStore(storeRequest);
-    }
+    // @PostMapping(value = "/add", produces = "application/json;charset=UTF-8")
+    // public ResponseEntity<?> addStore(@RequestBody StoreRequest storeRequest) {
+    // return storeService.addStore(storeRequest);
+    // }
 
     @PutMapping(value = "/update/{storeID}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<?> updateStore(@PathVariable Integer storeID, @RequestBody StorePutRequest storePutRequest) {
