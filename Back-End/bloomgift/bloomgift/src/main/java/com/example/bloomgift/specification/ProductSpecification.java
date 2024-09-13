@@ -29,22 +29,25 @@ public class ProductSpecification {
 
     public static Specification<Product> hasCategoryName(String categoryName) {
         return (root, query, criteriaBuilder) -> {
-            Join<Product,Category> categoryJoin = root.join("categoryID");
+            Join<Product, Category> categoryJoin = root.join("categoryID");
             return criteriaBuilder.equal(categoryJoin.get("categoryName"),
-            categoryName);
+                    categoryName);
         };
     }
+
     public static Specification<Product> hasProductName(String productName) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("productName"),
-        productName);
+                productName);
     }
+
     public static Specification<Product> hasSizeProduct(Integer sizeProduct) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("sizeProduct"),
-        sizeProduct);
+                sizeProduct);
     }
+
     public static Specification<Product> hasCreateDate(Date createDate) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("createDate"),
-        createDate);
+                createDate);
     }
 
     public static Specification<Product> hasStoreName(String storeName) {
@@ -53,6 +56,5 @@ public class ProductSpecification {
             return criteriaBuilder.equal(storeJoin.get("storeName"), storeName);
         };
     }
-    
-}
 
+}

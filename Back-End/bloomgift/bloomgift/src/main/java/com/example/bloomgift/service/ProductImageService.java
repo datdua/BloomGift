@@ -45,6 +45,7 @@ public class ProductImageService {
                 .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
                 .collect(Collectors.toList());
     }
+
     public void createProductImages(Integer productID, List<MultipartFile> imageFiles) {
         Product product = productService.getProductById(productID);
         if (product == null) {
@@ -81,12 +82,13 @@ public class ProductImageService {
         ProductImage image = productImageRepository.findById(imageID)
                 .orElseThrow(() -> new RuntimeException("Image not found with ID: " + imageID));
         String oldImageUrl = image.getProductImage();
-        Product product = image.getProductID(); 
+        Product product = image.getProductID();
         Store store = product.getStoreID();
-        firebaseStorageService.deleteFileFromFirebase(oldImageUrl,product.getProductName(),store.getStoreName());
+        firebaseStorageService.deleteFileFromFirebase(oldImageUrl, product.getProductName(), store.getStoreName());
         String sanitizedStoreName = store.getStoreName().replaceAll("[^a-zA-Z0-9]", "_");
 
-        String folder = "products/"+ sanitizedStoreName + "/" + product.getProductName() + "/";;
+        String folder = "products/" + sanitizedStoreName + "/" + product.getProductName() + "/";
+        ;
         String newImageUrl = firebaseStorageService.updateImagetoFireBase(newProductImage, folder);
 
         image.setProductImage(newImageUrl);
