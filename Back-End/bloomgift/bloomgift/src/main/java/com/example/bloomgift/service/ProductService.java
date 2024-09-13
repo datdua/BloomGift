@@ -1,10 +1,12 @@
 package com.example.bloomgift.service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 import com.example.bloomgift.model.Category;
 import com.example.bloomgift.model.Product;
@@ -41,6 +44,9 @@ public class ProductService {
 
     @Autowired
     private ProductImageRepository productImageRepository;
+
+    @Autowired
+    private FirebaseStorageService firebaseStorageService;
 
     public List<ProductReponse> getAllProducts() {
         List<Product> products = productRepository.findAll();
@@ -77,15 +83,13 @@ public class ProductService {
     public List<ProductReponse> ListNewProduct() {
         List<Product> products = productRepository.findAll();
 
-        // Get today's date (ignoring time)
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
 
-        // Filter products by createDate being today
+        @SuppressWarnings("deprecation")
         List<Product> todaysProducts = products.stream()
                 .filter(product -> product.getCreateDate().toLocaleString().equals(today))
                 .collect(Collectors.toList());
 
-        // Map filtered products to ProductReponse objects
         List<ProductReponse> productResponses = todaysProducts.stream()
                 .map(product -> {
                     List<ProductImageReponse> imageResponses = product.getProductImages().stream()
@@ -151,6 +155,69 @@ public class ProductService {
         return productResponses;
     }
 
+    public void quickSort(List<Product> products, int low, int high) {
+        if (low < high) {
+            int pi = partition(products, low, high);
+            quickSort(products, low, pi - 1);
+            quickSort(products, pi + 1, high);
+
+        }
+    }
+
+    private int partition(List<Product> products, int low, int high) {
+        Product pivot = products.get(high);
+        int i = (low - 1);
+        for (int j = low; j < high; j++) {
+            if (products.get(j).getSold() > pivot.getSold()) {
+                i++;
+                Product temp = products.get(i);
+                products.set(i, products.get(j));
+                products.set(j, temp);
+            }
+        }
+        Product temp = products.get(i + 1);
+        products.set(i + 1, products.get(high));
+        products.set(high, temp);
+        return i + 1;
+    }
+
+    public List<ProductReponse> getProductBySold(int top) {
+        List<Product> products = productRepository.findAll();
+        quickSort(products, 0, products.size() - 1);
+        List<Product> topSoldProducts = products.subList(0, top);
+        List<ProductReponse> productResponses = topSoldProducts.stream()
+                .map(product -> {
+                    List<ProductImageReponse> imageResponses = product.getProductImages().stream()
+                            .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
+                            .collect(Collectors.toList());
+
+                    List<SizeReponse> sizeReponses = product.getSizes().stream()
+                            .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
+                                    size.getSizeFloat()))
+                            .collect(Collectors.toList());
+
+                    return new ProductReponse(
+                            product.getProductID(),
+                            product.getDiscount(),
+                            product.getDescription(),
+                            product.getColour(),
+                            product.getPrice(),
+                            product.getFeatured(),
+                            product.getProductStatus(),
+                            product.getCreateDate(),
+                            product.getQuantity(),
+                            product.getSold(),
+                            product.getProductName(),
+                            product.getCategoryName(),
+                            product.getStoreName(),
+                            sizeReponses,
+                            imageResponses);
+                })
+                .collect(Collectors.toList());
+
+        return productResponses;
+    }
+
     public List<ProductReponse> getProductByStoreID(int storeID) {
         Store store = storeRepository.findById(storeID).orElseThrow();
         List<Product> products = productRepository.findProductByStoreID(store);
@@ -211,7 +278,69 @@ public class ProductService {
                 imageResponses);
     }
 
-    public void createProductt(ProductRequest productRequest) {
+    // public void createProductt(ProductRequest productRequest) {
+    //     checkProduct(productRequest);
+    //     Float discount = productRequest.getDiscount();
+    //     String description = productRequest.getDescription();
+    //     String colour = productRequest.getColour();
+    //     Boolean featured = productRequest.getFeatured();
+    //     Integer quantity = productRequest.getQuantity();
+    //     Float price = productRequest.getPrice();
+    //     String categoryName = productRequest.getCategoryName();
+    //     String productName = productRequest.getProductName();
+    //     Category category = categoryRepository.findByCategoryName(categoryName);
+
+    //     if (category == null) {
+    //         throw new IllegalArgumentException("Category not found");
+    //     }
+
+    //     Store store = null;
+    //     if (productRequest.getStoreID() != null) {
+    //         store = storeRepository.findById(productRequest.getStoreID()).orElse(null);
+    //     }
+    //     if (store == null) {
+    //         throw new IllegalArgumentException("Store not found");
+    //     }
+    //     Product product = new Product();
+    //     product.setDiscount(discount);
+    //     product.setDescription(description);
+    //     product.setColour(colour);
+    //     product.setFeatured(featured);
+    //     product.setProductStatus(true);
+    //     product.setProductName(productName);
+    //     product.setCreateDate(new Date());
+    //     product.setQuantity(quantity);
+    //     product.setPrice(price);
+    //     product.setCategoryID(category);
+    //     product.setSold(0);
+    //     product.setStoreID(store);
+    //     List<Size> sizes = productRequest.getSizes().stream()
+    //             .map(sizeRequest -> {
+    //                 Size size = new Size();
+    //                 size.setPrice(sizeRequest.getPrice());
+    //                 size.setText(sizeRequest.getText());
+    //                 size.setSizeFloat(sizeRequest.getSizeFloat());
+    //                 size.setProductID(product);
+    //                 return size;
+    //             })
+    //             .collect(Collectors.toList());
+    //     product.setSizes(sizes);
+    //     List<ProductImage> productImages = productRequest.getImages().stream()
+    //             .map(imageRequest -> {
+    //                 ProductImage image = new ProductImage();
+    //                 image.setProductImage(imageRequest.getProductImage());
+    //                 image.setProductID(product); // set the product reference
+    //                 return image;
+    //             })
+    //             .collect(Collectors.toList());
+
+    //     product.setProductImages(productImages);
+    //     // productImageRepository.saveAll(productImages);
+    //     productRepository.save(product);
+
+    // }
+
+    public void createProductt(ProductRequest productRequest, List<MultipartFile> imageFiles) {
         checkProduct(productRequest);
         Float discount = productRequest.getDiscount();
         String description = productRequest.getDescription();
@@ -222,18 +351,18 @@ public class ProductService {
         String categoryName = productRequest.getCategoryName();
         String productName = productRequest.getProductName();
         Category category = categoryRepository.findByCategoryName(categoryName);
-
         if (category == null) {
             throw new IllegalArgumentException("Category not found");
         }
-
         Store store = null;
         if (productRequest.getStoreID() != null) {
             store = storeRepository.findById(productRequest.getStoreID()).orElse(null);
         }
         if (store == null) {
             throw new IllegalArgumentException("Store not found");
+
         }
+
         Product product = new Product();
         product.setDiscount(discount);
         product.setDescription(description);
@@ -258,19 +387,37 @@ public class ProductService {
                 })
                 .collect(Collectors.toList());
         product.setSizes(sizes);
-        List<ProductImage> productImages = productRequest.getImages().stream()
-                .map(imageRequest -> {
+
+        List<String> imageUrls = uploadImagesByStoreAndProduct(imageFiles, store.getStoreName(),
+                product.getProductName());
+        List<ProductImage> productImages = imageUrls.stream()
+                .map(imageUrl -> {
                     ProductImage image = new ProductImage();
-                    image.setProductImage(imageRequest.getProductImage());
-                    image.setProductID(product); // set the product reference
+                    image.setProductImage(imageUrl);
+                    image.setProductID(product); 
                     return image;
                 })
                 .collect(Collectors.toList());
 
         product.setProductImages(productImages);
-        // productImageRepository.saveAll(productImages);
         productRepository.save(product);
 
+    }
+
+    public List<String> uploadImagesByStoreAndProduct(List<MultipartFile> imageFiles, String storeName,
+            String productName) {
+        List<String> imageUrls = new ArrayList<>();
+
+        for (MultipartFile imageFile : imageFiles) {
+            try {
+                String imageUrl = firebaseStorageService.uploadFileByProduct(imageFile, storeName, productName);
+                imageUrls.add(imageUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload image for product " + productName, e);
+            }
+        }
+
+        return imageUrls;
     }
 
     public void deleteProduct(Integer productID) {
