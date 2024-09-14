@@ -1,14 +1,18 @@
 package com.example.bloomgift.service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
+import org.springframework.data.domain.Pageable;
 import com.example.bloomgift.model.Category;
 import com.example.bloomgift.model.Product;
 import com.example.bloomgift.model.ProductImage;
@@ -22,6 +26,7 @@ import com.example.bloomgift.repository.ProductImageRepository;
 import com.example.bloomgift.repository.ProductRepository;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.ProductRequest;
+import com.example.bloomgift.specification.ProductSpecification;
 
 @Service
 public class ProductService {
@@ -56,6 +61,7 @@ public class ProductService {
                 product.getDiscount(),
                 product.getDescription(),
                 product.getColour(),
+                product.getPrice(),
                 product.getFeatured(),
                 product.getProductStatus(),
                 product.getCreateDate(),
@@ -66,6 +72,117 @@ public class ProductService {
                 product.getStoreName(),
                 sizeReponses,
                 imageResponses);
+    }
+
+    public List<ProductReponse> ListNewProduct() {
+        List<Product> products = productRepository.findAll();
+
+        // Get today's date (ignoring time)
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+
+        // Filter products by createDate being today
+        List<Product> todaysProducts = products.stream()
+                .filter(product -> product.getCreateDate().toLocaleString().equals(today))
+                .collect(Collectors.toList());
+
+        // Map filtered products to ProductReponse objects
+        List<ProductReponse> productResponses = todaysProducts.stream()
+                .map(product -> {
+                    List<ProductImageReponse> imageResponses = product.getProductImages().stream()
+                            .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
+                            .collect(Collectors.toList());
+                    List<SizeReponse> sizeReponses = product.getSizes().stream()
+                            .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
+                                    size.getSizeFloat()))
+                            .collect(Collectors.toList());
+                    return new ProductReponse(
+                            product.getProductID(),
+                            product.getDiscount(),
+                            product.getDescription(),
+                            product.getColour(),
+                            product.getPrice(),
+                            product.getFeatured(),
+                            product.getProductStatus(),
+                            product.getCreateDate(),
+                            product.getQuantity(),
+                            product.getSold(),
+                            product.getProductName(),
+                            product.getCategoryName(),
+                            product.getStoreName(),
+                            sizeReponses,
+                            imageResponses);
+                })
+                .collect(Collectors.toList());
+
+        return productResponses;
+    }
+
+    public List<ProductReponse> getProductByStoreAndFeatured(int storeID) {
+        Store store = storeRepository.findById(storeID).orElseThrow();
+        List<Product> products = productRepository.findProductByStoreID(store);
+        List<Product> featureProducts = products.stream().filter(Product::getFeatured).collect(Collectors.toList());
+        List<ProductReponse> productResponses = featureProducts.stream()
+                .map(product -> {
+                    List<ProductImageReponse> imageResponses = product.getProductImages().stream()
+                            .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
+                            .collect(Collectors.toList());
+                    List<SizeReponse> sizeReponses = product.getSizes().stream()
+                            .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
+                                    size.getSizeFloat()))
+                            .collect(Collectors.toList());
+                    return new ProductReponse(
+                            product.getProductID(),
+                            product.getDiscount(),
+                            product.getDescription(),
+                            product.getColour(),
+                            product.getPrice(),
+                            product.getFeatured(),
+                            product.getProductStatus(),
+                            product.getCreateDate(),
+                            product.getQuantity(),
+                            product.getSold(),
+                            product.getProductName(),
+                            product.getCategoryName(),
+                            product.getStoreName(),
+                            sizeReponses,
+                            imageResponses);
+                })
+                .collect(Collectors.toList());
+        return productResponses;
+    }
+
+    public List<ProductReponse> getProductByStoreID(int storeID) {
+        Store store = storeRepository.findById(storeID).orElseThrow();
+        List<Product> products = productRepository.findProductByStoreID(store);
+        List<ProductReponse> productResponses = products.stream()
+                .map(product -> {
+                    List<ProductImageReponse> imageResponses = product.getProductImages().stream()
+                            .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
+                            .collect(Collectors.toList());
+                    List<SizeReponse> sizeReponses = product.getSizes().stream()
+                            .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
+                                    size.getSizeFloat()))
+                            .collect(Collectors.toList());
+                    return new ProductReponse(
+                            product.getProductID(),
+                            product.getDiscount(),
+                            product.getDescription(),
+                            product.getColour(),
+                            product.getPrice(),
+                            product.getFeatured(),
+                            product.getProductStatus(),
+                            product.getCreateDate(),
+                            product.getQuantity(),
+                            product.getSold(),
+                            product.getProductName(),
+                            product.getCategoryName(),
+                            product.getStoreName(),
+                            sizeReponses,
+                            imageResponses);
+                })
+                .collect(Collectors.toList());
+        return productResponses;
+
     }
 
     private ProductReponse convertToProductReponse(Product product) {
@@ -81,6 +198,7 @@ public class ProductService {
                 product.getDiscount(),
                 product.getDescription(),
                 product.getColour(),
+                product.getPrice(),
                 product.getFeatured(),
                 product.getProductStatus(),
                 product.getCreateDate(),
@@ -100,6 +218,7 @@ public class ProductService {
         String colour = productRequest.getColour();
         Boolean featured = productRequest.getFeatured();
         Integer quantity = productRequest.getQuantity();
+        Float price = productRequest.getPrice();
         String categoryName = productRequest.getCategoryName();
         String productName = productRequest.getProductName();
         Category category = categoryRepository.findByCategoryName(categoryName);
@@ -124,6 +243,7 @@ public class ProductService {
         product.setProductName(productName);
         product.setCreateDate(new Date());
         product.setQuantity(quantity);
+        product.setPrice(price);
         product.setCategoryID(category);
         product.setSold(0);
         product.setStoreID(store);
@@ -173,6 +293,7 @@ public class ProductService {
         String categoryName = productRequest.getCategoryName();
         String productName = productRequest.getProductName();
         Boolean productStatus = productRequest.getProductStatus();
+        Float price = productRequest.getPrice();
         Category category = categoryRepository.findByCategoryName(categoryName);
         if (category == null) {
             throw new RuntimeException("Category not found");
@@ -187,26 +308,24 @@ public class ProductService {
         existingProduct.setCategoryID(category);
         existingProduct.setProductName(productName);
         existingProduct.setProductStatus(productStatus);
+        existingProduct.setPrice(price);
         // List<Size> updatedSizes = productRequest.getSizes().stream()
-        //         .map(sizeRequest -> {
-        //             Size size = existingProduct.getSizes().stream()
-        //                     .filter(s -> s.getSizeID().equals(sizeRequest.getSizeID()))
-        //                     .findFirst()
-        //                     .orElse(new Size());
-        //             size.setPrice(sizeRequest.getPrice());
-        //             size.setText(sizeRequest.getText());
-        //             size.setSizeFloat(sizeRequest.getSizeFloat());
-        //             size.setProductID(existingProduct);
-        //             return size;
-        //         })
-        //         .collect(Collectors.toList());
+        // .map(sizeRequest -> {
+        // Size size = existingProduct.getSizes().stream()
+        // .filter(s -> s.getSizeID().equals(sizeRequest.getSizeID()))
+        // .findFirst()
+        // .orElse(new Size());
+        // size.setPrice(sizeRequest.getPrice());
+        // size.setText(sizeRequest.getText());
+        // size.setSizeFloat(sizeRequest.getSizeFloat());
+        // size.setProductID(existingProduct);
+        // return size;
+        // })
+        // .collect(Collectors.toList());
         // existingProduct.setSizes(updatedSizes);
         return productRepository.save(existingProduct);
 
     }
-  
-
-  
 
     public void checkProduct(ProductRequest productRequest) {
         Float discount = productRequest.getDiscount();
@@ -216,15 +335,17 @@ public class ProductService {
         Integer quantity = productRequest.getQuantity();
         String categoryName = productRequest.getCategoryName();
         String productName = productRequest.getProductName();
+        Float price = productRequest.getPrice();
 
         if (!StringUtils.hasText(description)
                 || !StringUtils.hasText(colour)
                 || !StringUtils.hasText(categoryName)
                 || !StringUtils.hasText(productName)
-                || quantity == null) {
+                || quantity == null
+                || price == null) {
             throw new RuntimeException("Vui lòng nhập đầy đủ thông tin");
         }
-        if (discount < 0 || quantity < 0) {
+        if (discount < 0 || quantity < 0 || price < 0) {
             throw new RuntimeException("Vui lòng nhập đung thông tin");
 
         }
@@ -233,10 +354,49 @@ public class ProductService {
 
     public Product getProductById(Integer productID) {
         return productRepository.findById(productID)
-                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productID));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm: " + productID));
     }
 
+    public Page<Product> searhProductWithFilterPage(
+            String descriptionProduct,
+            String colourProduct,
+            Float priceProduct,
+            String productName,
+            String categoryName,
+            Date createDate,
+            String storeName,
+            Integer sizeProduct,
+            int page,
+            int size) {
+        Specification<Product> spec = Specification.where(null);
+        if (descriptionProduct != null && !descriptionProduct.isEmpty()) {
+            spec = spec.and(ProductSpecification.hasDescriptionProduct(descriptionProduct));
+        }
+        if (colourProduct != null && !colourProduct.isEmpty()) {
+            spec = spec.and(ProductSpecification.hasColourProduct(colourProduct));
+        }
+        if (priceProduct != null) {
+            spec = spec.and(ProductSpecification.hasPriceProduct(priceProduct));
+        }
+        if (productName != null && !colourProduct.isEmpty()) {
+            spec = spec.and(ProductSpecification.hasProductName(productName));
+        }
+        if (categoryName != null && !categoryName.isEmpty()) {
+            spec = spec.and(ProductSpecification.hasCategoryName(categoryName));
+        }
+        if (createDate != null) {
+            spec = spec.and(ProductSpecification.hasCreateDate(createDate));
+        }
+        if (storeName != null && !storeName.isEmpty()) {
+            spec = spec.and(ProductSpecification.hasStoreName(storeName));
+        }
+        if (sizeProduct != null) {
+            spec = spec.and(ProductSpecification.hasSizeProduct(sizeProduct));
+        }
 
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findAll(spec, pageable);
 
+    }
 
 }

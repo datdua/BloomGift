@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.bloomgift.reponse.AuthenticationResponse;
 import com.example.bloomgift.request.LoginRequest;
 import com.example.bloomgift.request.RegisterRequest;
+import com.example.bloomgift.request.StoreRequest;
 import com.example.bloomgift.service.AccountService;
 import com.example.bloomgift.service.AuthenticationService;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import com.example.bloomgift.service.StoreService;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -29,6 +29,9 @@ public class AuthenticationController {
     // private AccountService accountService;
     @Autowired
     private AuthenticationService authenticationService;
+
+    @Autowired
+    private StoreService storeService;
 
     @Autowired
     private AccountService accountService;
@@ -48,7 +51,6 @@ public class AuthenticationController {
     public ResponseEntity<?> createAuthenticationToken(@RequestBody LoginRequest loginRequest) throws Exception {
         return authenticationService.authenticate(loginRequest);
     }
-    
 
     @PutMapping("/verify-account")
     public ResponseEntity<String> verifyAccount(
@@ -58,7 +60,7 @@ public class AuthenticationController {
 
     }
 
-    @PutMapping("/regenetate-otp")
+    @PutMapping("/regenerate-otp")
     public ResponseEntity<String> regenetateOtp(
             @RequestParam String email) {
 
@@ -81,5 +83,10 @@ public class AuthenticationController {
     public ResponseEntity<Map<String, Object>> loginWithGoogle(OAuth2AuthenticationToken oAuth2AuthenticationToken) {
         Map<String, Object> attributes = authenticationService.loginWithGoogle(oAuth2AuthenticationToken);
         return ResponseEntity.ok(attributes);
+    }
+
+    @PostMapping("/store/register")
+    public ResponseEntity<?> registerStore(@RequestBody StoreRequest storeRequest) {
+        return storeService.registerStore(storeRequest);
     }
 }

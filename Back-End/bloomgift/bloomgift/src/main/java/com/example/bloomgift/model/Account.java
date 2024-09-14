@@ -6,6 +6,8 @@ import java.util.Set;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -63,9 +65,6 @@ public class Account {
     @ManyToOne
     @JoinColumn(name = "roleID")
     private Role roleID;
-
-    @OneToMany(mappedBy = "account")
-    private Set<Store> stores;
 
     public Account() {
 
@@ -207,11 +206,4 @@ public class Account {
         return roleID != null ? roleID.getRoleName() : null;
     }
 
-    public Set<Store> getStores() {
-        return stores;
-    }
-
-    public void setStores(Set<Store> stores) {
-        this.stores = stores;
-    }
 }

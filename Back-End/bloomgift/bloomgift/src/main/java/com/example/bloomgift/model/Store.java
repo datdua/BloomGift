@@ -1,6 +1,11 @@
 package com.example.bloomgift.model;
 
+import java.time.LocalDateTime;
 import java.util.Set;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,14 +18,15 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Store")
+@Table(name = "Store")
 public class Store {
-    @Id 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "storeID") 
-    private Integer storeID; 
-    
+    @Column(name = "storeID")
+    private Integer storeID;
+
     @OneToMany(mappedBy = "storeID")
+    @JsonIgnore
     private Set<Product> products;
 
     @Column(name = "storeName")
@@ -35,8 +41,8 @@ public class Store {
     @Column(name = "storeAddress")
     private String storeAddress;
 
-    @Column(name = "storeEmail")
-    private String storeEmail;
+    @Column(name = "email")
+    private String email;
 
     @Column(name = "bankAccountName")
     private String bankAccountName;
@@ -62,25 +68,33 @@ public class Store {
     @Column(name = "identityName")
     private String identityName;
 
-    @ManyToOne
-    @JoinColumn(name = "accountID", nullable = true)
-    private Account account;
+    @Column(name = "password")
+    private String password;
+
+    @Column(name = "otp")
+    private String otp;
+
+    @Column(name = "otp_generated_time")
+    private LocalDateTime otp_generated_time;
 
     @ManyToOne
-    @JoinColumn(name = "categoryID", nullable = true)
-    private Category category;
+    @JoinColumn(name = "roleID", nullable = false)
+    private Role role;
 
     public Store() {
     }
 
-    public Store(Integer storeID, Set<Product> products, String storeName, String type, String storePhone, String storeAddress, String storeEmail, String bankAccountName, String bankNumber, String bankAddress, String taxNumber, String storeStatus, String storeAvatar, String identityCard, String identityName, Account account, Category category) {
+    public Store(Integer storeID, Set<Product> products, String storeName, String type, String storePhone,
+            String storeAddress, String email, String bankAccountName, String bankNumber, String bankAddress,
+            String taxNumber, String storeStatus, String storeAvatar, String identityCard, String identityName,
+            String password, String otp, LocalDateTime otp_generated_time, Role role) {
         this.storeID = storeID;
         this.products = products;
         this.storeName = storeName;
         this.type = type;
         this.storePhone = storePhone;
         this.storeAddress = storeAddress;
-        this.storeEmail = storeEmail;
+        this.email = email;
         this.bankAccountName = bankAccountName;
         this.bankNumber = bankNumber;
         this.bankAddress = bankAddress;
@@ -89,8 +103,10 @@ public class Store {
         this.storeAvatar = storeAvatar;
         this.identityCard = identityCard;
         this.identityName = identityName;
-        this.account = account;
-        this.category = category;
+        this.password = password;
+        this.otp = otp;
+        this.otp_generated_time = otp_generated_time;
+        this.role = role;
     }
 
     public Integer getStoreID() {
@@ -141,12 +157,12 @@ public class Store {
         this.storeAddress = storeAddress;
     }
 
-    public String getStoreEmail() {
-        return storeEmail;
+    public String getEmail() {
+        return email;
     }
 
-    public void setStoreEmail(String storeEmail) {
-        this.storeEmail = storeEmail;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getBankAccountName() {
@@ -205,27 +221,45 @@ public class Store {
         this.identityCard = identityCard;
     }
 
-    public Account getAccount() {
-        return account;
+    public String getIdentityName() {
+        return identityName;
     }
 
-    public void setAccount(Account account) {
-        this.account = account;
+    public void setIdentityName(String identityName) {
+        this.identityName = identityName;
     }
 
-    public Category getCategory() {
-        return category;
+    public String getPassword() {
+        return password;
     }
 
-    public void setCategory(Category category) {
-        this.category = category;
+    public void setPassword(String password) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        this.password = passwordEncoder.encode(password);
     }
 
-    public void setIdentityName(String identityName2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setIdentityName'");
+    public Role getRole() {
+        return role;
     }
-    
 
-    
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public String getOtp() {
+        return otp;
+    }
+
+    public void setOtp(String otp) {
+        this.otp = otp;
+    }
+
+    public LocalDateTime getOtp_generated_time() {
+        return otp_generated_time;
+    }
+
+    public void setOtp_generated_time(LocalDateTime otp_generated_time) {
+        this.otp_generated_time = otp_generated_time;
+    }
+
 }

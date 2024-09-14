@@ -2,13 +2,14 @@ package com.example.bloomgift.request;
 
 import java.util.Date;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public class AccountRequest {
     private String fullname; 
     private String email ; 
     private String password; 
     private String address; 
     private String gender; 
-    private String avatar ; 
     private Date birthday ; 
     private int phone ; 
     private Boolean accountStatus; 
@@ -16,14 +17,14 @@ public class AccountRequest {
     public AccountRequest(){
 
     }
-    public AccountRequest(String fullname, String email, String password, String address, String gender, String avatar,
+
+    public AccountRequest(String fullname, String email, String password, String address, String gender,
             Date birthday, int phone, Boolean accountStatus, String roleName) {
         this.fullname = fullname;
         this.email = email;
         this.password = password;
         this.address = address;
         this.gender = gender;
-        this.avatar = avatar;
         this.birthday = birthday;
         this.phone = phone;
         this.accountStatus = accountStatus;
@@ -59,12 +60,7 @@ public class AccountRequest {
     public void setGender(String gender) {
         this.gender = gender;
     }
-    public String getAvatar() {
-        return avatar;
-    }
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
+ 
     public Date getBirthday() {
         return birthday;
     }

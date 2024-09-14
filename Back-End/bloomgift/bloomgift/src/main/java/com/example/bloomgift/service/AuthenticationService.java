@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -22,9 +21,11 @@ import org.springframework.util.StringUtils;
 
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.model.Role;
+import com.example.bloomgift.model.Store;
 import com.example.bloomgift.reponse.AuthenticationResponse;
 import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.repository.RoleRepository;
+import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.LoginRequest;
 import com.example.bloomgift.request.RegisterRequest;
 import com.example.bloomgift.utils.EmailUtil;
@@ -56,6 +57,9 @@ public class AuthenticationService {
     @Autowired
     private EmailUtil emailUtil;
 
+    @Autowired
+    private StoreRepository storeRepository;
+
     public AuthenticationService(AccountRepository accountRepository, RoleRepository roleRepository,
             AuthenticationManager authenticationManager, JwtUtil jwtUtil, AccountService accountService) {
         this.accountRepository = accountRepository;
@@ -73,22 +77,39 @@ public class AuthenticationService {
             return ResponseEntity.status(401).body(Collections.singletonMap("message", "Sai email hoặc mật khẩu"));
         }
 
-        final UserDetails userDetails = accountService.loadUserByUsername(loginRequest.getEmail());
-        final Account account = accountService.findByEmail(loginRequest.getEmail());
+        // Tìm thông tin người dùng trong cả Account và Store
+        final UserDetails userDetails = accountService.loadUserByEmail(loginRequest.getEmail());
 
-        if (account == null || !account.getAccountStatus(true)) {
+        // Kiểm tra trạng thái tài khoản
+        Account account = accountRepository.findByEmail(loginRequest.getEmail());
+        Store store = storeRepository.findByEmail(loginRequest.getEmail());
+
+        if (account != null && !account.getAccountStatus(true)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Collections.singletonMap("message",
                             "Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email để kích hoạt tài khoản."));
         }
 
-        final String jwt = jwtUtil.generateToken(account);
+        if (store != null && !store.getStoreStatus().equals("Đã kích hoạt")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Collections.singletonMap("message",
+                            "Cửa hàng chưa được kích hoạt. Vui lòng liên hệ quản lý."));
+        }
+
+        // Tạo JWT cho tài khoản hoặc cửa hàng
+        final String jwt = account != null ? jwtUtil.generateToken(account) : jwtUtil.generateToken(store);
 
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
 
     public Map<String, String> register(RegisterRequest registerRequest) {
         checkvalidateRegister(registerRequest);
+        String email = registerRequest.getEmail();
+        Account existingAccount = accountRepository.findByEmail(email);
+
+        if (existingAccount != null && !existingAccount.getAccountStatus(true)) {
+            accountRepository.delete(existingAccount);
+        }
         String otp = otpUtil.generateOtp();
         try {
             emailUtil.sendOtpEmail(registerRequest.getEmail(), otp);
@@ -96,7 +117,7 @@ public class AuthenticationService {
             throw new RuntimeException("unble");
         }
         String fullname = registerRequest.getFullname();
-        String email = registerRequest.getEmail();
+        // String email = registerRequest.getEmail();
         Integer phone = registerRequest.getPhone();
         String password = registerRequest.getPassword();
         String address = registerRequest.getAddress();
@@ -117,7 +138,7 @@ public class AuthenticationService {
         account.setOtp(otp);
         account.setOtp_generated_time(LocalDateTime.now());
         accountRepository.save(account);
-        return Collections.singletonMap("messag e", "check mail and input OTP");
+        return Collections.singletonMap("messag e", "kiểm tra mail và nhập OTP");
     }
 
     public void checkvalidateRegister(RegisterRequest registerRequest) {
@@ -132,17 +153,13 @@ public class AuthenticationService {
             throw new RuntimeException("Invalid email format");
         }
 
-        // Check if email already exists
         Account existingEmail = accountRepository.findByEmail(email);
         if (existingEmail != null) {
-            // If account exists and is active
-            if (existingEmail.getAccountStatus(true) != null && existingEmail.getAccountStatus(true)) {
-                throw new RuntimeException("Account already exists");
-            }
+            throw new RuntimeException("Account already exists");
         }
         Account existingPhone = accountRepository.findByPhone(phone);
         if (existingPhone != null) {
-            if (existingEmail.getAccountStatus(true) != null && existingEmail.getAccountStatus(true)) {
+            if (existingPhone.getAccountStatus(true) != null && existingPhone.getAccountStatus(true)) {
                 throw new RuntimeException("Account already exists");
             }
         }
@@ -163,31 +180,50 @@ public class AuthenticationService {
 
     public String verifyAccount(String email, String otp) {
         Account account = accountRepository.findByEmail(email);
+        Store store = storeRepository.findByEmail(email);
 
-        if (account.getOtp().equals(otp) && Duration.between(account.getOtp_generated_time(),
-                LocalDateTime.now()).getSeconds() < (1 * 300)) {
-            account.setAccountStatus(true);
-            accountRepository.save(account);
-            return "OTP verify you can login";
+        if (account == null && store == null) {
+            return "Account not found";
         }
 
-        return "please regenerate otp and try again";
+        if (account != null) {
+            if (account.getOtp().equals(otp) && Duration.between(account.getOtp_generated_time(),
+                    LocalDateTime.now()).getSeconds() < (1 * 500)) {
+                account.setAccountStatus(true);
+                accountRepository.save(account);
+                return "OTP verified, you can login";
+            }
+        }
 
+        if (store != null) {
+            if (store.getOtp().equals(otp) && Duration.between(store.getOtp_generated_time(),
+                    LocalDateTime.now()).getSeconds() < (1 * 500)) {
+                store.setStoreStatus("Chờ duyệt");
+                storeRepository.save(store);
+                return "OTP verified, you can login";
+            }
+        }
+
+        return "Please regenerate OTP and try again";
     }
 
     public String generateOtp(String email) {
         Account account = accountRepository.findByEmail(email);
-
-        String otp = otpUtil.generateOtp();
-        try {
-            emailUtil.sendOtpEmail(email, otp);
-        } catch (MessagingException e) {
-            throw new RuntimeException("unble");
+        
+        if (!account.getAccountStatus(true)) {  // Assuming accountStatus is a boolean field
+            String otp = otpUtil.generateOtp();
+            try {
+                emailUtil.sendOtpEmail(email, otp);
+            } catch (MessagingException e) {
+                throw new RuntimeException("Unable to send OTP email.");
+            }
+            account.setOtp(otp);
+            account.setOtp_generated_time(LocalDateTime.now());
+            accountRepository.save(account);
+            return "Email sent. Please verify your account within 1 minute.";
+        } else {
+            return "Account is already active.";
         }
-        account.setOtp(otp);
-        account.setOtp_generated_time(LocalDateTime.now());
-        accountRepository.save(account);
-        return "Email sent ..... please veryfi account within 1 minute";
     }
 
     public Map<String, Object> loginWithGoogle(OAuth2AuthenticationToken oAuth2AuthenticationToken) {
@@ -217,18 +253,12 @@ public class AuthenticationService {
         }
 
         // Generate JWT token
-        final String jwt = jwtUtil.generateToken(account);
+        String jwt = jwtUtil.generateToken(account);
 
-        // Set authentication context
-        UserDetails userDetails = accountService.loadUserByUsername(email);
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        // Create a new modifiable map and copy attributes
+        Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
+        attributes.put("jwt", jwt);
 
-        // Put token to user attributes
-        Map<String, Object> response = new HashMap<>(oAuth2User.getAttributes());
-        response.put("token", jwt);
-
-        return response;
+        return attributes;
     }
 }

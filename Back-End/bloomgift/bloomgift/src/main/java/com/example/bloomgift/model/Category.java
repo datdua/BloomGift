@@ -2,6 +2,8 @@ package com.example.bloomgift.model;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,10 +24,8 @@ public class Category {
     private String categoryName;
 
     @OneToMany(mappedBy = "categoryID")
+    @JsonManagedReference
     private Set<Product> products;
-
-    @OneToMany(mappedBy = "category")
-    private Set<Store> stores;
 
     public Integer getCategoryID() {
         return categoryID;
@@ -51,11 +51,4 @@ public class Category {
         this.products = products;
     }
 
-    public Set<Store> getStores() {
-        return stores;
-    }
-
-    public void setStores(Set<Store> stores) {
-        this.stores = stores;
-    }
 }

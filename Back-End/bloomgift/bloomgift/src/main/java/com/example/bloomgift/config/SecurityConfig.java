@@ -41,13 +41,14 @@ public class SecurityConfig {
             "/swagger-ui.html",
             "/api-docs/**",
             "/api/auth/**",
+            "/api/store/**",
     };
 
     private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**" };
 
     private static final String[] ADMIN_URL = { "/api/admin/**", "/api/google-sheets/**"};
 
-    private static final String[] CUSTOMER_URL = { "/api/customer/**", "/api/store/**" };
+    private static final String[] CUSTOMER_URL = { "/api/customer/**", "/api/promotion/**", "/api/store/**" };
 
     private static final String[] MANAGER_URL = { "/api/manager/**" };
 
@@ -74,6 +75,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(SWAGGER_URL).permitAll()
                         .requestMatchers(CUSTOMER_URL).hasRole("CUSTOMER")
+                        .requestMatchers(ADMIN_URL).hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
