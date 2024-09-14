@@ -20,7 +20,6 @@ import { useToasts } from "react-toast-notifications";
 import VerifyAccount from "../../components/modal/verifyAccount";
 import ForgetPasswordForm from "../../components/form/forgetPassword";
 import ResetPasswordForm from "../../components/form/resetPassword";
-import { GoogleLogin } from "react-google-login";
 import "./LoginRegister.css";
 
 const LoginRegister = ({ location }) => {
