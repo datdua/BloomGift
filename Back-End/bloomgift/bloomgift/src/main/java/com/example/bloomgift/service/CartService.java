@@ -71,15 +71,15 @@ public class CartService {
     public Map<String, Object> getCart(Account account) {
     String key = "CART:" + account.getAccountID();
     Map<Integer, Map<String, Object>> cartItems = hashOperations.entries(key);
-    double totalPrice = 0.0;
+    double totalPriceCart = 0.0;
     for (Map<String, Object> item : cartItems.values()) {
         Float price = (Float) item.get("price");
         int quantity = (int) item.get("quantity");
-        totalPrice += price * quantity;
+        totalPriceCart += price * quantity;
     }
     Map<String, Object> cartResponse = new HashMap<>();
     cartResponse.put("cartItems", cartItems);
-    cartResponse.put("totalPrice", totalPrice);
+    cartResponse.put("totalPriceCart", totalPriceCart);
 
     return cartResponse;
 }
@@ -92,17 +92,15 @@ public class CartService {
     public void updateCart(Account account, Product product, int newQuantity) {
         String key = CART_KEY + ":" + account.getAccountID();
         
-        // Retrieve the product map from the cart
         Map<String, Object> productMap = (Map<String, Object>) hashOperations.get(key, product.getProductID());
         
         if (productMap != null) {
-            // Convert the immutable map to a mutable map
             Map<String, Object> mutableProductMap = new HashMap<>(productMap);
             
-            // Update the quantity
             mutableProductMap.put("quantity", newQuantity);
-            
-            // Save the updated map back to the cart
+            Float price = (Float) mutableProductMap.get("price");
+            double newTotalPrice = price * newQuantity;
+            mutableProductMap.put("totlePrice", newTotalPrice);
             hashOperations.put(key, product.getProductID(), mutableProductMap);
         } else {
             System.out.println("Product not found in the cart");
