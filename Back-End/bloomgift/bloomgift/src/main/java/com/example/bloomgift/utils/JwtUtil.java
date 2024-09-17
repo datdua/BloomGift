@@ -1,7 +1,6 @@
 
 package com.example.bloomgift.utils;
 
-import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,12 +10,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.example.bloomgift.model.Account;
+import com.example.bloomgift.model.Store;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtUtil {
@@ -43,12 +41,22 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(Account account) {
-        Map<String, Object> claims = new HashMap<>();
+    public String generateToken(Object user) {
+    Map<String, Object> claims = new HashMap<>();
+    if (user instanceof Account) {
+        Account account = (Account) user;
         claims.put("accountID", account.getAccountID());
         claims.put("role", account.getRoleID().getRoleName());
         return createToken(claims, account.getEmail());
+    } else if (user instanceof Store) {
+        Store store = (Store) user;
+        claims.put("storeID", store.getStoreID());
+        claims.put("role", store.getRole().getRoleName());
+        return createToken(claims, store.getEmail());
     }
+    return null;
+}
+
 
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))

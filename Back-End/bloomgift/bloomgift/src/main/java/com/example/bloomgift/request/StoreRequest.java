@@ -5,14 +5,13 @@ public class StoreRequest {
     private String type;
     private String storePhone;
     private String storeAddress;
-    private String storeEmail;
+    private String email;
     private String bankAccountName;
     private String bankNumber;
     private String bankAddress;
     private String taxNumber;
     private String storeAvatar;
-    private Integer accountID;
-    private Integer categoryID;
+    private String password;
     private String identityCard;
     private String identityName;
 
@@ -49,12 +48,12 @@ public class StoreRequest {
         this.storeAddress = storeAddress;
     }
 
-    public String getStoreEmail() {
-        return storeEmail;
+    public String getEmail() {
+        return email;
     }
 
-    public void setStoreEmail(String storeEmail) {
-        this.storeEmail = storeEmail;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getBankAccountName() {
@@ -89,7 +88,6 @@ public class StoreRequest {
         this.taxNumber = taxNumber;
     }
 
-
     public String getStoreAvatar() {
         return storeAvatar;
     }
@@ -98,20 +96,12 @@ public class StoreRequest {
         this.storeAvatar = storeAvatar;
     }
 
-    public Integer getAccountID() {
-        return accountID;
+    public String getPassword() {
+        return password;
     }
 
-    public void setAccountID(Integer accountID) {
-        this.accountID = accountID;
-    }
-
-    public Integer getCategoryID() {
-        return categoryID;
-    }
-
-    public void setCategoryID(Integer categoryID) {
-        this.categoryID = categoryID;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getIdentityCard() {

@@ -71,16 +71,11 @@ public class Product {
     private List<Size> sizes = new ArrayList<>();
 
     @OneToMany(mappedBy = "productID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ProductImage> productImages= new ArrayList<>();
+    private List<ProductImage> productImages = new ArrayList<>();
 
     public Product() {
 
     }
-
-
-
-
-
 
     public Product(Integer productID, Float discount, String description, String colour, Boolean featured,
             Boolean productStatus, Date createDate, Integer quantity, Integer sold, String productName, Float price,
@@ -101,11 +96,6 @@ public class Product {
         this.sizes = sizes;
         this.productImages = productImages;
     }
-
-
-
-
-
 
     public Integer getProductID() {
         return productID;
@@ -227,25 +217,12 @@ public class Product {
         this.sizes = sizes;
     }
 
-
-
-
-
-
     public Float getPrice() {
         return price;
     }
-
-
-
-
-
 
     public void setPrice(Float price) {
         this.price = price;
     }
 
-
-
- 
 }
