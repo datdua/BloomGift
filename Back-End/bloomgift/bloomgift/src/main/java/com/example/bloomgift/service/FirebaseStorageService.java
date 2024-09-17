@@ -1,5 +1,6 @@
 package com.example.bloomgift.service;
 
+import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
@@ -46,6 +47,33 @@ public class FirebaseStorageService {
         }
 
     }
+//     public String uploadFileByAdmin(MultipartFile file, String email) throws IOException {
+//     Storage storage = StorageOptions.getDefaultInstance().getService();
+//     Bucket bucket = storage.get(BUCKET_NAME);
+
+//     String sanitizedEmail = email.replaceAll("[@.]", "_");
+//     String folderPath = "authen/" + "user-admin/" + "avatar/" + sanitizedEmail + "/";
+//     String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
+//     String fullPath = folderPath + fileName;
+
+//     try {
+//         Blob blob = bucket.create(fullPath, file.getBytes(),
+//                 file.getContentType() != null ? file.getContentType() : "application/octet-stream");
+
+//         // Thiết lập file là công khai
+//         blob.createAcl(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
+
+//         logger.info("File " + fullPath + " uploaded successfully to bucket: " + BUCKET_NAME);
+
+//         // Trả về URL công khai
+//         String publicUrl = "https://storage.googleapis.com/" + BUCKET_NAME + "/" + fullPath;
+//         return publicUrl;
+
+//     } catch (IOException e) {
+//         logger.log(Level.SEVERE, "Error uploading file", e);
+//         throw new IOException("Failed to upload file", e);
+//     }
+// }
 
     public String uploadFileByCustomer(MultipartFile file, String email) throws IOException {
         Storage storage = StorageOptions.getDefaultInstance().getService();

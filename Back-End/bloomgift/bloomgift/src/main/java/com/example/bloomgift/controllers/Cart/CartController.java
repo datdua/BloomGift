@@ -1,5 +1,6 @@
 package com.example.bloomgift.controllers.Cart;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ public class CartController {
     private AccountRepository accountRepository;
     @Autowired
     private SizeRepository sizeRepository;
+
     @PostMapping("/add")
     public ResponseEntity<String> addToCart(@RequestParam Integer accountId, @RequestParam Integer productId,
             @RequestParam int quantity) {
@@ -50,22 +52,21 @@ public class CartController {
         cartService.addToCart(account, product, quantity);
         return ResponseEntity.ok("Thêm vào giỏ hàng thành công.");
     }
+
     @PostMapping("/add-with-size")
     public ResponseEntity<String> addToCartWithSize(@RequestParam Integer accountId, @RequestParam Integer productId,
-            @RequestParam int quantity,@RequestParam int sizeID) {
+            @RequestParam int quantity, @RequestParam int sizeID) {
         Account account = accountRepository.findById(accountId).orElseThrow();
         Product product = productRepository.findById(productId).orElseThrow();
         Size size = sizeRepository.findById(sizeID).orElse(null);
         if (product == null) {
             return ResponseEntity.badRequest().body("Sản phẩm không tồn tại.");
         }
-    
-        // Check if the size exists and belongs to the product
+
         if (size == null || !product.getSizes().contains(size)) {
             return ResponseEntity.badRequest().body("Kích cỡ không tồn tại hoặc không thuộc về sản phẩm.");
         }
-    
-        // Add to cart if the size is valid
+
         cartService.addToCartWithSize(account, product, quantity, size);
         return ResponseEntity.ok("Thêm vào giỏ hàng thành công.");
     }
@@ -83,6 +84,7 @@ public class CartController {
         cartService.DeteleCart(account, product);
         return ResponseEntity.ok("Đã xóa sản phẩm khỏi giỏ hàng.");
     }
+
     @PutMapping("/update-quantity")
     public ResponseEntity<String> updateCartQuantity(
             @RequestParam Integer accountId,
@@ -93,9 +95,23 @@ public class CartController {
         Account account = accountRepository.findById(accountId).orElseThrow();
         Product product = productRepository.findById(productId).orElseThrow();
 
-     
         cartService.updateCart(account, product, quantity);
 
         return ResponseEntity.ok("update thanh công");
+    }
+
+    @PostMapping("/checkout-selected")
+    public ResponseEntity<Map<String, Object>> checkoutSelectedProducts(
+            @RequestParam Integer accountId,
+            @RequestParam List<Integer> selectedProductIds) {
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+
+        // Calculate the total for the selected products
+        Map<String, Object> checkoutDetails = cartService.calculateTotalForSelectedProducts(account,
+                selectedProductIds);
+
+        return ResponseEntity.ok(checkoutDetails);
     }
 }

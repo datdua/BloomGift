@@ -54,6 +54,64 @@ public class ProductService {
         return products.stream().map(this::convertToProductReponse).collect(Collectors.toList());
     }
 
+    private ProductReponse convertToProductReponse(Product product) {
+        List<ProductImageReponse> imageResponses = product.getProductImages().stream()
+                .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
+                .collect(Collectors.toList());
+        List<SizeReponse> sizeReponses = product.getSizes().stream()
+                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeFloat()))
+                .collect(Collectors.toList());
+
+        return new ProductReponse(
+                product.getProductID(),
+                product.getDiscount(),
+                product.getDescription(),
+                product.getColour(),
+                product.getPrice(),
+                product.getFeatured(),
+                product.getProductStatus(),
+                product.getCreateDate(),
+                product.getQuantity(),
+                product.getSold(),
+                product.getProductName(),
+                product.getCategoryName(),
+                product.getStoreName(),
+                sizeReponses,
+                imageResponses);
+    }
+    public List<ProductReponse> getAllProductByCustomer(){
+        List<Product> products = productRepository.findAll();
+
+        return products.stream().map(this::convertToProductReponseByCustomer).collect(Collectors.toList());
+    }
+    private ProductReponse convertToProductReponseByCustomer(Product product) {
+        ProductImageReponse firstImageResponse = product.getProductImages().stream()
+                .findFirst()  
+                .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
+                .orElse(null); 
+        List<SizeReponse> sizeReponses = product.getSizes().stream()
+                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeFloat()))
+                .collect(Collectors.toList());
+    
+        return new ProductReponse(
+                product.getProductID(),
+                product.getDiscount(),
+                product.getDescription(),
+                product.getColour(),
+                product.getPrice(),
+                product.getFeatured(),
+                product.getProductStatus(),
+                product.getCreateDate(),
+                product.getQuantity(),
+                product.getSold(),
+                product.getProductName(),
+                product.getCategoryName(),
+                product.getStoreName(),
+                sizeReponses,
+                firstImageResponse != null ? List.of(firstImageResponse) : List.of()  // Wrap the first image in a list
+        );
+    }
+
     public ProductReponse getProductByID(int productID) {
         Product product = productRepository.findById(productID).orElseThrow();
         List<ProductImageReponse> imageResponses = product.getProductImages().stream()
@@ -252,31 +310,7 @@ public class ProductService {
 
     }
 
-    private ProductReponse convertToProductReponse(Product product) {
-        List<ProductImageReponse> imageResponses = product.getProductImages().stream()
-                .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
-                .collect(Collectors.toList());
-        List<SizeReponse> sizeReponses = product.getSizes().stream()
-                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeFloat()))
-                .collect(Collectors.toList());
-
-        return new ProductReponse(
-                product.getProductID(),
-                product.getDiscount(),
-                product.getDescription(),
-                product.getColour(),
-                product.getPrice(),
-                product.getFeatured(),
-                product.getProductStatus(),
-                product.getCreateDate(),
-                product.getQuantity(),
-                product.getSold(),
-                product.getProductName(),
-                product.getCategoryName(),
-                product.getStoreName(),
-                sizeReponses,
-                imageResponses);
-    }
+  
 
     // public void createProductt(ProductRequest productRequest) {
     //     checkProduct(productRequest);

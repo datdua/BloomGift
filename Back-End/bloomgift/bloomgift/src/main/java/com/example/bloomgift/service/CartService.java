@@ -1,6 +1,7 @@
 package com.example.bloomgift.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.checkerframework.checker.units.qual.A;
@@ -42,47 +43,48 @@ public class CartService {
         String key = "CART:" + account.getAccountID();
         Map<String, Object> productMap = Map.of(
                 "productID", product.getProductID(),
+                "storeName", product.getStoreName(),
                 "productName", product.getProductName(),
                 "price", product.getPrice(),
                 "quantity", quantity,
-                "totlePrice", product.getPrice()*quantity);
+                "totlePrice", product.getPrice() * quantity);
         hashOperations.put(key, product.getProductID(), productMap);
     }
 
-    public void addToCartWithSize(Account account,Product product,int quantity,Size size){
+    public void addToCartWithSize(Account account, Product product, int quantity, Size size) {
         String key = "CART:" + account.getAccountID();
-        Map<String,Object> productMap = Map.of(
+        Map<String, Object> productMap = Map.of(
                 "storeName", product.getStoreName(),
                 "productID", product.getProductID(),
                 "productName", product.getProductName(),
                 "price", size.getPrice(),
                 "productSize", size.getSizeFloat(),
                 "quantity", quantity,
-                "totlePrice", size.getPrice()*quantity
+                "totlePrice", size.getPrice() * quantity
 
         );
         hashOperations.put(key, product.getProductID(), productMap);
     }
 
     // public Map<Integer, Map<String, Object>> getCart(Account account) {
-    //     String key = CART_KEY + ":" + account.getAccountID();
-    //     return hashOperations.entries(key);
+    // String key = CART_KEY + ":" + account.getAccountID();
+    // return hashOperations.entries(key);
     // }
     public Map<String, Object> getCart(Account account) {
-    String key = "CART:" + account.getAccountID();
-    Map<Integer, Map<String, Object>> cartItems = hashOperations.entries(key);
-    double totalPriceCart = 0.0;
-    for (Map<String, Object> item : cartItems.values()) {
-        Float price = (Float) item.get("price");
-        int quantity = (int) item.get("quantity");
-        totalPriceCart += price * quantity;
-    }
-    Map<String, Object> cartResponse = new HashMap<>();
-    cartResponse.put("cartItems", cartItems);
-    cartResponse.put("totalPriceCart", totalPriceCart);
+        String key = "CART:" + account.getAccountID();
+        Map<Integer, Map<String, Object>> cartItems = hashOperations.entries(key);
+        double totalPriceCart = 0.0;
+        for (Map<String, Object> item : cartItems.values()) {
+            Float price = (Float) item.get("price");
+            int quantity = (int) item.get("quantity");
+            totalPriceCart += price * quantity;
+        }
+        Map<String, Object> cartResponse = new HashMap<>();
+        cartResponse.put("cartItems", cartItems);
+        cartResponse.put("totalPriceCart", totalPriceCart);
 
-    return cartResponse;
-}
+        return cartResponse;
+    }
 
     public void DeteleCart(Account account, Product product) {
         String key = CART_KEY + ":" + account.getAccountID();
@@ -91,12 +93,12 @@ public class CartService {
 
     public void updateCart(Account account, Product product, int newQuantity) {
         String key = CART_KEY + ":" + account.getAccountID();
-        
+
         Map<String, Object> productMap = (Map<String, Object>) hashOperations.get(key, product.getProductID());
-        
+
         if (productMap != null) {
             Map<String, Object> mutableProductMap = new HashMap<>(productMap);
-            
+
             mutableProductMap.put("quantity", newQuantity);
             Float price = (Float) mutableProductMap.get("price");
             double newTotalPrice = price * newQuantity;
@@ -106,5 +108,32 @@ public class CartService {
             System.out.println("Product not found in the cart");
             throw new IllegalArgumentException("Product not found in the cart.");
         }
+    }
+
+    public Map<String, Object> calculateTotalForSelectedProducts(Account account, List<Integer> selectedProductIds) {
+        String key = "CART:" + account.getAccountID();
+        Map<Integer, Map<String, Object>> cartItems = hashOperations.entries(key);
+        
+        double totalPriceForSelected = 0.0;
+        Map<Integer, Map<String, Object>> selectedItems = new HashMap<>();
+        
+        for (Integer productId : selectedProductIds) {
+            Map<String, Object> item = cartItems.get(productId);
+            
+            if (item != null) {
+                Float price = (Float) item.get("price");
+                int quantity = (int) item.get("quantity");
+                double itemTotal = price * quantity;
+                
+                totalPriceForSelected += itemTotal;
+                selectedItems.put(productId, item);  
+            }
+        }
+    
+        Map<String, Object> response = new HashMap<>();
+        response.put("selectedItems", selectedItems);
+        response.put("totalPrice", totalPriceForSelected);
+    
+        return response;
     }
 }
