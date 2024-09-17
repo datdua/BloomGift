@@ -6,6 +6,7 @@ import {
   signInWithGoogle,
 } from "../../redux/actions/authenticationActions";
 import PropTypes from "prop-types";
+import { jwtDecode } from 'jwt-decode';
 import React, { Fragment, useState, useEffect } from "react";
 import MetaTags from "react-meta-tags";
 import { Link, useHistory } from "react-router-dom";
@@ -115,7 +116,12 @@ const LoginRegister = ({ location }) => {
         }
         if (response && response.token) {
           localStorage.setItem("token", response.token);
-          history.push("/home-fashion");
+          const decodedToken = jwtDecode(response.token);
+          if (decodedToken.role === "ROLE_SELLER") {
+            history.push("/dashboard");
+          } else {
+            history.push("/home-fashion");
+          }
         }
       })
       .catch((error) => {

@@ -9,6 +9,11 @@ import { BreadcrumbsProvider } from "react-breadcrumbs-dynamic";
 import ForgetPasswordForm from "./components/form/forgetPassword";
 import ResetPasswordForm from "./components/form/resetPassword";
 import SignInWithGoogle from "./pages/other/SignInWithGoogle";
+import SalerSidebar from "./components/sidebar/Sidebar";
+import Dashboard from "./components/sidebar/DashBoard";
+import ShopManagement from "./components/sidebar/ShopManagement";
+import Header from "./components/sidebar/HeaderSidebar";
+
 
 // home pages
 const HomeFashion = lazy(() => import("./pages/home/HomeFashion"));
@@ -441,6 +446,12 @@ const App = (props) => {
                   path={publicUrl + "/not-found"}
                   component={NotFound}
                 />
+                <SalerSidebar>
+                  <Switch>
+                    <Route path="/dashboard" component={Dashboard} />
+                    <Route path="/shop-management" component={ShopManagement} />
+                  </Switch>
+                </SalerSidebar>
 
                 <Route exact component={NotFound} />
                 <Route exact path="/not-found" component={NotFound} />
