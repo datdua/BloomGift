@@ -33,7 +33,7 @@ public class ProfileService {
                 account.getBirthday(),
                 account.getPhone());
     }
-      public ProfileReponse updateProfile(int accountID, ProfileRequest profileRequest) {
+      public ProfileRequest updateProfile(int accountID, ProfileRequest profileRequest) {
         Account account = accountRepository.findById(accountID)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
@@ -49,14 +49,12 @@ public class ProfileService {
         // Save updated account
         account = accountRepository.save(account);
 
-        return new ProfileReponse(
-                account.getAccountID(),
+        return new ProfileRequest(
                 account.getFullname(),
                 account.getEmail(),
-                account.getPassword(), // Be cautious about exposing password
+                account.getPassword(), 
                 account.getAddress(),
                 account.getGender(),
-                account.getAvatar(),
                 account.getBirthday(),
                 account.getPhone());
     }

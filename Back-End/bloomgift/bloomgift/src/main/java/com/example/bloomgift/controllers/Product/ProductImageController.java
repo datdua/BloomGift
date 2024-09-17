@@ -1,6 +1,8 @@
 package com.example.bloomgift.controllers.Product;
 
+import java.io.IOException;
 import java.util.List;
+import org.springframework.http.MediaType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.bloomgift.model.ProductImage;
 import com.example.bloomgift.reponse.ProductImageReponse;
 import com.example.bloomgift.service.ProductImageService;
-
 
 @RestController
 @RequestMapping("/api/products-image")
@@ -31,21 +33,33 @@ public class ProductImageController {
         List<ProductImageReponse> productImageResponses = productImageService.getListImagesByProductID(productID);
         return ResponseEntity.ok(productImageResponses);
     }
-    @PostMapping("/{productId}/create-images")
-    public void createProductImages(@PathVariable Integer productId, @RequestBody List<String> imageUrls) {
-        productImageService.createProductImage(productId, imageUrls);
+
+    @PostMapping(value ="/{productId}/create-images-mutiple",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> createImageProduct(
+            @RequestParam("productID") Integer productID,
+            @RequestParam("imageFiles") List<MultipartFile> imageFiles) {
+        try {
+            // Gọi service để tạo sản phẩm và upload hình ảnh
+            productImageService.createProductImages(productID, imageFiles);
+            return ResponseEntity.ok("Product and images uploaded successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } 
     }
-    @PutMapping("/update-images/{imageID}")
+
+
+    @PutMapping(value="/update-images/{imageID}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> updateProductImage(
             @PathVariable Integer imageID,
-            @RequestParam String newImageUrl) {
+            @RequestParam("newImageFile") MultipartFile newImageFile) throws IOException {
         try {
-            productImageService.updateImageByImageId(imageID, newImageUrl);
+            productImageService.updateImageByImageId(imageID, newImageFile);
             return new ResponseEntity<>("Image updated successfully", HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
     @DeleteMapping("/delete-images/{imageID}")
     public ResponseEntity<String> deleteProductImage(@PathVariable Integer imageID) {
         try {
@@ -55,5 +69,5 @@ public class ProductImageController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
-    
+
 }

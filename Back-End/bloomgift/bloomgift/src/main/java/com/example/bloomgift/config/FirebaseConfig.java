@@ -14,7 +14,7 @@
 
 // @Configuration
 // public class FirebaseConfig {
-//     private static final String SERCURITY_FIREBASE = "/serviceAccountKey.json";
+//     private static final String SERCURITY_FIREBASE = "serviceAccountKey.json";
 
 //     @SuppressWarnings("deprecation")
 //     @Bean
@@ -23,7 +23,6 @@
         
 //         FirebaseOptions options = new FirebaseOptions.Builder()
 //                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-            
 //                 .build();
 
 //         return FirebaseApp.initializeApp(options);
