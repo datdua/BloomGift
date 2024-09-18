@@ -15,7 +15,6 @@ public class ProductRequest {
     private Boolean productStatus;
     private Float price;
     private List<SizeRequest> sizes;
-    private List<ProductImageRequest> images;
     public ProductRequest(){
 
     }
@@ -31,7 +30,7 @@ public class ProductRequest {
 
     public ProductRequest(Float discount, String description, String colour, String productName, Boolean featured,
             Integer quantity, String categoryName, Integer storeID, Boolean productStatus, Float price,
-            List<SizeRequest> sizes, List<ProductImageRequest> images) {
+            List<SizeRequest> sizes) {
         this.discount = discount;
         this.description = description;
         this.colour = colour;
@@ -43,7 +42,6 @@ public class ProductRequest {
         this.productStatus = productStatus;
         this.price = price;
         this.sizes = sizes;
-        this.images = images;
     }
 
 
@@ -56,8 +54,7 @@ public class ProductRequest {
 
 
     public ProductRequest(Float discount, String description, String colour, String productName, Boolean featured,
-            Integer quantity, String categoryName, Integer storeID, Boolean productStatus, List<SizeRequest> sizes,
-            List<ProductImageRequest> images) {
+            Integer quantity, String categoryName, Integer storeID, Boolean productStatus, List<SizeRequest> sizes) {
         this.discount = discount;
         this.description = description;
         this.colour = colour;
@@ -68,7 +65,7 @@ public class ProductRequest {
         this.storeID = storeID;
         this.productStatus = productStatus;
         this.sizes = sizes;
-        this.images = images;
+
     }
 
 
@@ -153,21 +150,6 @@ public class ProductRequest {
     public void setProductName(String productName) {
         this.productName = productName;
     }
-
-
-
-    public List<ProductImageRequest> getImages() {
-        return images;
-    }
-
-
-
-    public void setImages(List<ProductImageRequest> images) {
-        this.images = images;
-    }
-
-
-
 
 
 

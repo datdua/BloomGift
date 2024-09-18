@@ -40,9 +40,7 @@ public class SecurityConfig {
             "/webjars/**",
             "/swagger-ui.html",
             "/api-docs/**",
-            "/api/auth/**",
-            "/api/store/**",
-    };
+            "/api/auth/**",};
 
     private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**" };
 
@@ -51,7 +49,9 @@ public class SecurityConfig {
     private static final String[] CUSTOMER_URL = { "/api/customer/**", "/api/promotion/**", "/api/store/**" };
 
     private static final String[] MANAGER_URL = { "/api/manager/**" };
-
+    
+    
+    private static final String[] SELLER_URL ={ "/api/seller/**"};
     private static final String[] ADMIN_MANAGER_URL = {};
 
     private static final String[] ADMIN_MANAGER_SALE_STAFF_URL = {};
@@ -76,12 +76,14 @@ public class SecurityConfig {
                         .requestMatchers(SWAGGER_URL).permitAll()
                         .requestMatchers(CUSTOMER_URL).hasRole("CUSTOMER")
                         .requestMatchers(ADMIN_URL).hasRole("ADMIN")
+                        .requestMatchers(SELLER_URL).hasRole("SELLER")
+                        .requestMatchers(SELLER_URL).hasRole("SELLER")
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("http://localhost:8080/oauth2/authorization/google")
-                        .defaultSuccessUrl("http://localhost:3000/signInWithGoogle", true))
+                        .defaultSuccessUrl("http://localhost:8080/api/auth/signInWithGoogle", true))
                 .formLogin(Customizer.withDefaults());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

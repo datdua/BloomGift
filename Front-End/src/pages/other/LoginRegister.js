@@ -6,6 +6,7 @@ import {
   signInWithGoogle,
 } from "../../redux/actions/authenticationActions";
 import PropTypes from "prop-types";
+import { jwtDecode } from 'jwt-decode';
 import React, { Fragment, useState, useEffect } from "react";
 import MetaTags from "react-meta-tags";
 import { Link, useHistory } from "react-router-dom";
@@ -20,6 +21,7 @@ import { useToasts } from "react-toast-notifications";
 import VerifyAccount from "../../components/modal/verifyAccount";
 import ForgetPasswordForm from "../../components/form/forgetPassword";
 import ResetPasswordForm from "../../components/form/resetPassword";
+import { fetchSellerInfo } from "../../redux/actions/storeActions";
 import "./LoginRegister.css";
 
 const LoginRegister = ({ location }) => {
@@ -114,8 +116,25 @@ const LoginRegister = ({ location }) => {
           document.cookie = `userPassword=${userData.password}; max-age=31536000; path=/`; // Save for 1 year
         }
         if (response && response.token) {
+          const decodedToken = jwtDecode(response.token);
           localStorage.setItem("token", response.token);
-          history.push("/home-fashion");
+          localStorage.setItem("accountID", decodedToken.accountID);
+          localStorage.setItem("role", decodedToken.role);
+          localStorage.setItem("storeID", decodedToken.storeID);
+
+          if (decodedToken.role === "ROLE_SELLER") {
+            // Lưu trữ thông tin seller
+            dispatch(fetchSellerInfo(decodedToken.storeID))
+              .then((storeData) => {
+                console.log("Store data fetch thành công", storeData);
+              })
+              .catch((error) => {
+                console.error("Lỗi fetching store data:", error);
+              });
+            history.push("/seller/dashboard");
+          } else {
+            history.push("/home-fashion");
+          }
         }
       })
       .catch((error) => {
