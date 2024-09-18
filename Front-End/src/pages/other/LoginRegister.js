@@ -220,7 +220,7 @@ const LoginRegister = ({ location }) => {
                                     onClick={() => window.location.href = 'http://localhost:8080/oauth2/authorization/google'}
                                     className="ml-5"
                                   >
-                                    Đăng nhập Google
+                                    Đăng nhập với Google
                                   </button>
                                 </div>
                               </form>
