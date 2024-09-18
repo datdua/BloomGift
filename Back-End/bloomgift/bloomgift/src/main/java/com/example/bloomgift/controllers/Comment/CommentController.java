@@ -2,6 +2,8 @@ package com.example.bloomgift.controllers.Comment;
 
 import com.example.bloomgift.service.CommentService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +18,10 @@ public class CommentController {
     private CommentService commentService;
 
     @PostMapping("/add-comment")
-    public String addComment(@RequestParam Integer accountID, @RequestParam Integer productID,
+    public String addComment(HttpServletRequest request,@RequestParam Integer accountID, @RequestParam Integer productID,
             @RequestParam String commentContent,@RequestParam Integer rating) {
         try {
+            
             commentService.addCommentToSheet(accountID, productID, commentContent,rating);
             return "Comment added successfully";
         } catch (Exception e) {
