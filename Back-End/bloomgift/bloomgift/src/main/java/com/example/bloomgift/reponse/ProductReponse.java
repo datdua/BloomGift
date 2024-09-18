@@ -3,6 +3,8 @@ package com.example.bloomgift.reponse;
 import java.util.Date;
 import java.util.List;
 
+import com.example.bloomgift.model.Product;
+
 
 public class ProductReponse {
     
@@ -216,6 +218,10 @@ public class ProductReponse {
     public void setPrice(Float price) {
         this.price = price;
     }
+
+
+
+
 
 
 

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import com.example.bloomgift.model.Product;
+import com.example.bloomgift.model.ProductImage;
 import com.example.bloomgift.model.Promotion;
 import com.example.bloomgift.model.Store;
 
@@ -17,8 +18,8 @@ import com.example.bloomgift.model.Store;
 public interface ProductRepository extends JpaRepository<Product,Integer> , JpaSpecificationExecutor<Product>{
 
     List<Product> findProductByStoreID(Store storeID);
+
     
-    // @Query("SELECT p FROM Product p WHERE p.storeID = :storeID, p.featured = 'true'")
-    // List<Product> findProductByStoreIDandFeatured(@Param("storeID") int storeID);
+ 
   
 }
