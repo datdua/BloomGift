@@ -3,18 +3,43 @@ import { Navbar, NavDropdown, Dropdown } from 'react-bootstrap';
 import { PersonCircle, Gear, BoxArrowRight } from 'react-bootstrap-icons';
 import { useHistory } from 'react-router-dom';
 import './HeaderSidebar.css';
+import axios from 'axios';
 
 const Header = ({ username, avatarUrl }) => {
-    const [showDropdown, setShowDropdown] = useState(false);
+    const [storeName, setStoreName] = useState('');
+    const [storeAvatar, setStoreAvatar] = useState('');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
     const history = useHistory();
 
     useEffect(() => {
-
         const token = localStorage.getItem("token");
+        const storeID = localStorage.getItem("storeID");
+
+        if (token && storeID) {
+            fetchStoreData(storeID);
+        }
 
         setIsLoggedIn(!!token);
     }, []);
+
+    const fetchStoreData = async (storeID) => {
+        try {
+            const response = await axios.get(`http://localhost:8080/api/seller/store/store-management/get-by-id?storeID=${storeID}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    }
+                }
+            );
+            const storeData = response.data;
+            setStoreName(storeData.storeName);
+            setStoreAvatar(storeData.storeAvatar);
+            console.log("Store data:", storeData);
+        } catch (error) {
+            console.error("Lỗi fetching store data:", error);
+        }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -23,7 +48,7 @@ const Header = ({ username, avatarUrl }) => {
     };
 
     return (
-        <Navbar bg="white" expand="lg" className="py-2 px-4 shadow-sm" style={{ height: '64px', width: '100%', maxWidth: '100%' }}>
+        <Navbar bg="white" expand="lg" className="py-2 px-4 shadow-sm" style={{ height: '64px', width: '100%', maxWidth: '100%', marginBottom: '20px' }}>
             <div className="d-flex justify-content-between align-items-center w-100">
                 <Navbar.Brand href="#home" className="d-flex align-items-center">
                     <img
@@ -36,17 +61,17 @@ const Header = ({ username, avatarUrl }) => {
                     <span className="ml-2">BloomGift</span>
                 </Navbar.Brand>
                 <div className="d-flex align-items-center">
-                    <span className="mr-2">{username}</span>
+                    <span className="mr-2">{storeName}</span>
                     <NavDropdown
                         title={
                             <div className="d-inline-block">
-                                {avatarUrl ? (
+                                {storeAvatar ? (
                                     <img
-                                        src={avatarUrl}
+                                        src={storeAvatar}
                                         width="32"
                                         height="32"
                                         className="rounded-circle"
-                                        alt={username}
+                                        alt={storeName}
                                     />
                                 ) : (
                                     <PersonCircle size={32} />

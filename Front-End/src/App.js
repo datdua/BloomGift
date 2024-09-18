@@ -12,6 +12,7 @@ import SignInWithGoogle from "./pages/other/SignInWithGoogle";
 import SalerSidebar from "./components/sidebar/Sidebar";
 import Dashboard from "./components/sidebar/DashBoard";
 import ShopManagement from "./components/sidebar/ShopManagement";
+import StoreProfile from "./components/sidebar/ProductManager/StoreProfile";
 import Header from "./components/sidebar/HeaderSidebar";
 
 
@@ -446,13 +447,15 @@ const App = (props) => {
                   path={publicUrl + "/not-found"}
                   component={NotFound}
                 />
-                <SalerSidebar>
-                  <Switch>
-                    <Route path="/dashboard" component={Dashboard} />
-                    <Route path="/shop-management" component={ShopManagement} />
-                  </Switch>
-                </SalerSidebar>
-
+                <Route path="/seller">
+                  <SalerSidebar>
+                    <Switch>
+                      <Route path="/seller/dashboard" component={Dashboard} />
+                      <Route path="/seller/shop-management" component={ShopManagement} />
+                      <Route path="/seller/shop-profile" component={StoreProfile} />
+                    </Switch>
+                  </SalerSidebar>
+                </Route>
                 <Route exact component={NotFound} />
                 <Route exact path="/not-found" component={NotFound} />
               </Switch>

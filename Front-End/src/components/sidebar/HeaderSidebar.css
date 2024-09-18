@@ -1,6 +1,6 @@
 /* Căn chỉnh khung dropdown */
 .navbar .dropdown-menu {
-    left: -50px; 
+    left: -100px; 
     top: 50px; 
     border-radius: 8px;
     padding: 10px;
