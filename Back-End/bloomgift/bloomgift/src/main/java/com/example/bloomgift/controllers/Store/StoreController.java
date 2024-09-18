@@ -22,7 +22,7 @@ import com.example.bloomgift.reponse.StoreResponse;
 import com.example.bloomgift.service.StoreService;
 
 @RestController
-@RequestMapping("/api/store/store-management")
+@RequestMapping("/api/seller/store/store-management")
 public class StoreController {
 
     @Autowired
