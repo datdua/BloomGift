@@ -2,27 +2,26 @@ import PropTypes from "prop-types";
 import React, { Fragment } from "react";
 import { Link } from "react-router-dom";
 import { useToasts } from "react-toast-notifications";
-import { getDiscountPrice } from "../../../helpers/product";
 
 const MenuCart = ({ cartData, currency, deleteFromCart }) => {
   let cartTotalPrice = 0;
   const { addToast } = useToasts();
+
   return (
     <div className="shopping-cart-content">
       {cartData && cartData.length > 0 ? (
         <Fragment>
           <ul>
             {cartData.map((single, key) => {
-              const discountedPrice = getDiscountPrice(
-                single.price,
-                single.discount
-              );
+              const discountedPrice = single.discount > 0
+                ? single.price * (1 - single.discount / 100)
+                : null;
               const finalProductPrice = (
                 single.price * currency.currencyRate
               ).toFixed(2);
-              const finalDiscountedPrice = (
-                discountedPrice * currency.currencyRate
-              ).toFixed(2);
+              const finalDiscountedPrice = discountedPrice
+                ? (discountedPrice * currency.currencyRate).toFixed(2)
+                : null;
 
               discountedPrice != null
                 ? (cartTotalPrice += finalDiscountedPrice * single.quantity)
@@ -31,21 +30,20 @@ const MenuCart = ({ cartData, currency, deleteFromCart }) => {
               return (
                 <li className="single-shopping-cart" key={key}>
                   <div className="shopping-cart-img">
-                    <Link to={process.env.PUBLIC_URL + "/product/" + single.id}>
+                    <Link to={`${process.env.PUBLIC_URL}/product/${single.productID}`}>
                       <img
-                        alt=""
-                        src={process.env.PUBLIC_URL + single.image[0]}
+                        alt={single.productName}
+                        src={single.images && single.images.length > 0
+                          ? single.images[0].productImage // Correct access to productImage
+                          : `${process.env.PUBLIC_URL}/assets/img/product/fashion/1.jpg`}
                         className="img-fluid"
                       />
                     </Link>
                   </div>
                   <div className="shopping-cart-title">
                     <h4>
-                      <Link
-                        to={process.env.PUBLIC_URL + "/product/" + single.id}
-                      >
-                        {" "}
-                        {single.name}{" "}
+                      <Link to={`${process.env.PUBLIC_URL}/product/${single.productID}`}>
+                        {single.productName}
                       </Link>
                     </h4>
                     <h6>Qty: {single.quantity}</h6>
@@ -54,15 +52,12 @@ const MenuCart = ({ cartData, currency, deleteFromCart }) => {
                         ? currency.currencySymbol + finalDiscountedPrice
                         : currency.currencySymbol + finalProductPrice}
                     </span>
-                    {single.selectedProductColor &&
-                    single.selectedProductSize ? (
+                    {single.colour && single.sizes && single.sizes.length > 0 ? (
                       <div className="cart-item-variation">
-                        <span>Color: {single.selectedProductColor}</span>
-                        <span>Size: {single.selectedProductSize}</span>
+                        <span>Color: {single.colour}</span>
+                        <span>Size: {single.sizes[0]}</span>
                       </div>
-                    ) : (
-                      ""
-                    )}
+                    ) : null}
                   </div>
                   <div className="shopping-cart-delete">
                     <button onClick={() => deleteFromCart(single, addToast)}>
@@ -75,7 +70,7 @@ const MenuCart = ({ cartData, currency, deleteFromCart }) => {
           </ul>
           <div className="shopping-cart-total">
             <h4>
-              Total :{" "}
+              Total:{" "}
               <span className="shop-total">
                 {currency.currencySymbol + cartTotalPrice.toFixed(2)}
               </span>
@@ -83,13 +78,13 @@ const MenuCart = ({ cartData, currency, deleteFromCart }) => {
           </div>
           <div className="shopping-cart-btn btn-hover text-center">
             <Link className="default-btn" to={process.env.PUBLIC_URL + "/cart"}>
-              view cart
+              View Cart
             </Link>
             <Link
               className="default-btn"
               to={process.env.PUBLIC_URL + "/checkout"}
             >
-              checkout
+              Checkout
             </Link>
           </div>
         </Fragment>
@@ -103,7 +98,7 @@ const MenuCart = ({ cartData, currency, deleteFromCart }) => {
 MenuCart.propTypes = {
   cartData: PropTypes.array,
   currency: PropTypes.object,
-  deleteFromCart: PropTypes.func
+  deleteFromCart: PropTypes.func,
 };
 
 export default MenuCart;

@@ -19,7 +19,6 @@ function SignInWithGoogle() {
           history.push("/home-fashion");
         } else {
           console.error("Google login failed:", result.error);
-          addToast("Đăng nhập bằng Google thất bại.", { appearance: "error", autoDismiss: true });
           history.push("/login");
         }
       } catch (error) {
