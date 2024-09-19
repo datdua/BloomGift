@@ -2,7 +2,7 @@ import { produce } from 'immer';
 import { SELLER_INFO } from "../actions/storeActions";
 
 const initialState = {
-    store: null,
+    sellerInfo: null,
     isAuthenticated: false,
     loading: false,
     error: null,
@@ -11,12 +11,13 @@ const initialState = {
 const storeReducer = (state = initialState, action) => {
     switch (action.type) {
         case SELLER_INFO:
-            return produce(state, draft => {
-                draft.store = action.payload;
-                draft.isAuthenticated = true;
-                draft.loading = false;
-                draft.error = null;
-            });
+            return {
+                ...state,
+                sellerInfo: action.payload,
+                isAuthenticated: true,
+                loading: false,
+                error: null,
+            }
         default:
             return state;
     }
