@@ -1,5 +1,4 @@
 package com.example.bloomgift.config;
-package com.example.bloomgift.config;
 
 import com.example.bloomgift.BloomgiftApplication;
 import com.google.auth.oauth2.GoogleCredentials;

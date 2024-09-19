@@ -1,4 +1,5 @@
 import { FETCH_PRODUCTS_SUCCESS } from "../actions/productActions";
+import { getAllProducts } from "../actions/productActions";
 
 const initState = {
   products: []
@@ -14,5 +15,6 @@ const productReducer = (state = initState, action) => {
 
   return state;
 };
+
 
 export default productReducer;

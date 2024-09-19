@@ -52,7 +52,7 @@ const Compare = ({
                             <th className="title-column">Product Info</th>
                             {compareItems.map((compareItem, key) => {
                               const cartItem = cartItems.filter(
-                                item => item.id === compareItem.id
+                                item => item.id === compareItem.productID
                               )[0];
                               return (
                                 <td className="product-image-title" key={key}>
@@ -69,17 +69,18 @@ const Compare = ({
                                     to={
                                       process.env.PUBLIC_URL +
                                       "/product/" +
-                                      compareItem.id
+                                      compareItem.productID
                                     }
                                     className="image"
                                   >
                                     <img
                                       className="img-fluid"
                                       src={
-                                        process.env.PUBLIC_URL +
-                                        compareItem.image[0]
+                                        compareItem.images && compareItem.images.length > 0 
+                                        ? process.env.PUBLIC_URL + compareItem.images[0].productImage
+                                        : process.env.PUBLIC_URL + "/assets/img/product/fashion/1.jpg"
                                       }
-                                      alt=""
+                                      alt={compareItem.productName}
                                     />
                                   </Link>
                                   <div className="product-title">
@@ -87,10 +88,10 @@ const Compare = ({
                                       to={
                                         process.env.PUBLIC_URL +
                                         "/product/" +
-                                        compareItem.id
+                                        compareItem.productID
                                       }
                                     >
-                                      {compareItem.name}
+                                      {compareItem.productName}
                                     </Link>
                                   </div>
                                   <div className="compare-btn">

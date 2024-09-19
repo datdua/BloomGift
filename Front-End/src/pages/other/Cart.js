@@ -92,16 +92,17 @@ const Cart = ({
                                     to={
                                       process.env.PUBLIC_URL +
                                       "/product/" +
-                                      cartItem.id
+                                      cartItem.productID
                                     }
                                   >
                                     <img
                                       className="img-fluid"
                                       src={
-                                        process.env.PUBLIC_URL +
-                                        cartItem.image[0]
+                                        cartItem.images && cartItem.images.length > 0 
+                                        ? process.env.PUBLIC_URL + cartItem.images[0].productImage
+                                        : process.env.PUBLIC_URL + "/assets/img/product/fashion/1.jpg"
                                       }
-                                      alt=""
+                                      alt={cartItem.productName}
                                     />
                                   </Link>
                                 </td>
@@ -111,10 +112,10 @@ const Cart = ({
                                     to={
                                       process.env.PUBLIC_URL +
                                       "/product/" +
-                                      cartItem.id
+                                      cartItem.productID
                                     }
                                   >
-                                    {cartItem.name}
+                                    {cartItem.productName}
                                   </Link>
                                   {cartItem.selectedProductColor &&
                                   cartItem.selectedProductSize ? (

@@ -83,7 +83,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("http://localhost:8080/oauth2/authorization/google")
-                        .defaultSuccessUrl("http://localhost:8080/api/auth/signInWithGoogle", true))
+                        .defaultSuccessUrl("http://localhost:3000/signInWithGoogle", true))
                 .formLogin(Customizer.withDefaults());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

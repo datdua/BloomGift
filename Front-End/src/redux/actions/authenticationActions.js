@@ -166,3 +166,38 @@ export const signInWithGoogle = (addToast) => {
         }
     };
 }
+
+export const registerStoreAccount = (storeData, addToast) => {
+    return async (dispatch) => {
+        try {
+            const response = await axios.post('http://localhost:8080/api/auth/store/register', {
+                storeName: storeData.storeName,
+                email: storeData.email,
+                type: storeData.type,
+                storePhone: storeData.storePhone,
+                storeAddress: storeData.storeAddress,               
+                password: storeData.password,
+                bankAccountName: storeData.bankAccountName,
+                bankNumber: storeData.bankNumber,
+                bankAddress: storeData.bankAddress,
+                taxNumber: storeData.taxNumber,
+                storeAvatar: storeData.storeAvatar,
+                identityCard: storeData.identityCard,
+                identityName: storeData.identityName
+            });
+
+            dispatch({
+                type: REGISTER,
+                payload: response.data
+            });
+            if (addToast) addToast("Đăng ký thành công! Vui lòng xác thực tài khoản.", { appearance: "success", autoDismiss: true });
+
+            return Promise.resolve();
+        } catch (error) {
+            console.error("Registration failed:", error);
+            if (addToast) addToast("Đăng ký thất bại.", { appearance: "error", autoDismiss: true });
+
+            return Promise.reject(error);
+        }
+    }
+}  

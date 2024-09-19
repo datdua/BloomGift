@@ -17,3 +17,60 @@
   .gender-birthday-container .form-group .form-control {
     width: 100%;
   }
+  .card {
+    max-width: 400px;
+    margin: 40px auto; /* Adds top and bottom gap */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .dropzone {
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+  }
+  
+  .avatar-wrapper {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 20px auto; 
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    border-radius: 50%;
+  }
+  
+  .empty-avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    font-size: 16px;
+    color: #777;
+  }
+  
+  .instruction-text {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  

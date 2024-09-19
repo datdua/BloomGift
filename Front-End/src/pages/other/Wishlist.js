@@ -81,33 +81,27 @@ const Wishlist = ({
                             return (
                               <tr key={key}>
                                 <td className="product-thumbnail">
-                                  <Link
-                                    to={
-                                      process.env.PUBLIC_URL +
-                                      "/product/" +
-                                      wishlistItem.id
-                                    }
-                                  >
+                                  <Link to={process.env.PUBLIC_URL + "/product/" + wishlistItem.id}>
                                     <img
                                       className="img-fluid"
                                       src={
-                                        process.env.PUBLIC_URL +
-                                        wishlistItem.image[0]
+                                        wishlistItem.images && wishlistItem.images.length > 0
+                                          ? process.env.PUBLIC_URL + wishlistItem.images[0].productImage
+                                          : process.env.PUBLIC_URL + "/assets/img/product/flowers/1.jpg" // Fallback image if no image exists
                                       }
-                                      alt=""
+                                      alt={wishlistItem.productName}
                                     />
                                   </Link>
                                 </td>
-
                                 <td className="product-name text-center">
                                   <Link
                                     to={
                                       process.env.PUBLIC_URL +
                                       "/product/" +
-                                      wishlistItem.id
+                                      wishlistItem.productID
                                     }
                                   >
-                                    {wishlistItem.name}
+                                    {wishlistItem.productName}
                                   </Link>
                                 </td>
 
@@ -156,7 +150,7 @@ const Wishlist = ({
                                       }
                                       className={
                                         cartItem !== undefined &&
-                                        cartItem.quantity > 0
+                                          cartItem.quantity > 0
                                           ? "active"
                                           : ""
                                       }
@@ -171,7 +165,7 @@ const Wishlist = ({
                                       }
                                     >
                                       {cartItem !== undefined &&
-                                      cartItem.quantity > 0
+                                        cartItem.quantity > 0
                                         ? "Added"
                                         : "Add to cart"}
                                     </button>

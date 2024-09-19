@@ -4,9 +4,9 @@ import {
   registerAccount,
   verifyAccount,
   signInWithGoogle,
+  registerStoreAccount,
 } from "../../redux/actions/authenticationActions";
 import PropTypes from "prop-types";
-import { jwtDecode } from 'jwt-decode';
 import React, { Fragment, useState, useEffect } from "react";
 import MetaTags from "react-meta-tags";
 import { Link, useHistory } from "react-router-dom";
@@ -18,10 +18,11 @@ import Breadcrumb from "../../wrappers/breadcrumb/Breadcrumb";
 import Button from "react-bootstrap/Button";
 import { useDispatch } from "react-redux";
 import { useToasts } from "react-toast-notifications";
+import { useDropzone } from 'react-dropzone';
 import VerifyAccount from "../../components/modal/verifyAccount";
 import ForgetPasswordForm from "../../components/form/forgetPassword";
 import ResetPasswordForm from "../../components/form/resetPassword";
-import { fetchSellerInfo } from "../../redux/actions/storeActions";
+
 import "./LoginRegister.css";
 
 const LoginRegister = ({ location }) => {
@@ -40,6 +41,17 @@ const LoginRegister = ({ location }) => {
   const [showResetPasswordForm, setShowResetPasswordForm] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [activeSubTab, setActiveSubTab] = useState("customer");
+  const [storeName, setStoreName] = useState('');
+  const [storePhone, setStorePhone] = useState('');
+  const [storeAddress, setStoreAddress] = useState('');
+  const [storeAvatar, setStoreAvatar] = useState(null);
+  const [bankAccountName, setBankAccountName] = useState('');
+  const [bankNumber, setBankNumber] = useState('');
+  const [bankAddress, setBankAddress] = useState('');
+  const [identityCard, setIdentityCard] = useState('');
+  const [identityName, setIdentityName] = useState('');
+  const [image, setImage] = useState(null);
 
   useEffect(() => {
     let timer;
@@ -102,6 +114,49 @@ const LoginRegister = ({ location }) => {
       });
   };
 
+  const handleStoreRegister = (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+
+    const storeData = {
+      storeName: formData.get("store-name"),
+      type: formData.get("store-type"),
+      storePhone: formData.get("store-phone"),
+      storeAddress: formData.get("store-store-address"),
+      email: formData.get("store-email"),
+      bankAccountName: formData.get("store-bank-account-name"),
+      bankNumber: formData.get("store-bank-number"),
+      bankAddress: formData.get("store-bank-address"),
+      taxNumber: formData.get("store-tax-number"),
+      storeAvatar: formData.get("store-store-avatar") || null, 
+      password: formData.get("store-password"),
+      identityCard: formData.get("store-identity-card"),
+      identityName: formData.get("store-identity-name"),
+    };
+
+    if (storeData.password !== formData.get("store-confirm-password")) {
+      addToast("Mật khẩu xác nhận không khớp!", { appearance: "error", autoDismiss: true });
+      return;
+    }
+
+    dispatch(registerStoreAccount(storeData, addToast))
+      .then(() => {
+        setEmail(storeData.email);
+        setCountdown(60);
+        setShowVerifyButton(true);
+        setShowRegenerateButton(false);
+        setRegistrationSuccess(true);
+      })
+      .catch((error) => {
+        console.error("Registration error:", error);
+        setShowVerifyButton(false);
+        setShowRegenerateButton(false);
+        setRegistrationSuccess(false);
+      });
+  };
+
+
   const handleLogin = (e) => {
     e.preventDefault();
     const userData = {
@@ -116,25 +171,8 @@ const LoginRegister = ({ location }) => {
           document.cookie = `userPassword=${userData.password}; max-age=31536000; path=/`; // Save for 1 year
         }
         if (response && response.token) {
-          const decodedToken = jwtDecode(response.token);
           localStorage.setItem("token", response.token);
-          localStorage.setItem("accountID", decodedToken.accountID);
-          localStorage.setItem("role", decodedToken.role);
-          localStorage.setItem("storeID", decodedToken.storeID);
-
-          if (decodedToken.role === "ROLE_SELLER") {
-            // Lưu trữ thông tin seller
-            dispatch(fetchSellerInfo(decodedToken.storeID))
-              .then((storeData) => {
-                console.log("Store data fetch thành công", storeData);
-              })
-              .catch((error) => {
-                console.error("Lỗi fetching store data:", error);
-              });
-            history.push("/seller/dashboard");
-          } else {
-            history.push("/home-fashion");
-          }
+          history.push("/home-fashion");
         }
       })
       .catch((error) => {
@@ -183,6 +221,25 @@ const LoginRegister = ({ location }) => {
 
   const handleCloseModal = () => {
     setShowModal(false);
+  };
+
+  const onDrop = (acceptedFiles) => {
+    const file = acceptedFiles[0];
+    setStoreAvatar(file);
+    setImage(Object.assign(file, {
+      preview: URL.createObjectURL(file)
+    }));
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: 'image/*',
+    multiple: false
+  });
+
+  const handleDeleteImage = () => {
+    setStoreAvatar(null);
+    setImage(null);
   };
 
   return (
@@ -258,49 +315,152 @@ const LoginRegister = ({ location }) => {
                         </div>
                       </Tab.Pane>
                       <Tab.Pane eventKey="register">
+                        <Nav variant="tabs" className="mb-3">
+                          <Nav.Item>
+                            <Nav.Link active={activeSubTab === "customer"} onClick={() => setActiveSubTab("customer")}>
+                              Khách hàng
+                            </Nav.Link>
+                          </Nav.Item>
+                          <Nav.Item>
+                            <Nav.Link active={activeSubTab === "store"} onClick={() => setActiveSubTab("store")}>
+                              Cửa hàng
+                            </Nav.Link>
+                          </Nav.Item>
+                        </Nav>
                         <div className="login-form-container">
                           <div className="login-register-form">
-                            <form onSubmit={handleRegister}>
-                              <input name="user-fullname" placeholder="Họ tên" type="text" required />
-                              <input name="user-email" placeholder="Email" type="email" required />
-                              <input name="user-phone" placeholder="Số điện thoại" type="tel" required />
-                              <input name="user-address" placeholder="Địa chỉ" type="text" required />
-                              <div className="gender-birthday-container">
-                                <div className="form-group">
-                                  <label htmlFor="user-gender">Giới tính</label>
-                                  <select id="user-gender" name="user-gender" className="form-control" required>
-                                    <option value="Male">Nam</option>
-                                    <option value="Female">Nữ</option>
-                                    <option value="Other">Khác</option>
-                                  </select>
+                            {activeSubTab === "customer" ? (
+                              <form onSubmit={handleRegister}>
+                                <input name="user-fullname" placeholder="Họ tên" type="text" required />
+                                <input name="user-email" placeholder="Email" type="email" required />
+                                <input name="user-phone" placeholder="Số điện thoại" type="tel" required />
+                                <input name="user-address" placeholder="Địa chỉ" type="text" required />
+                                <div className="gender-birthday-container">
+                                  <div className="form-group">
+                                    <label htmlFor="user-gender">Giới tính</label>
+                                    <select id="user-gender" name="user-gender" className="form-control" required>
+                                      <option value="Male">Nam</option>
+                                      <option value="Female">Nữ</option>
+                                      <option value="Other">Khác</option>
+                                    </select>
+                                  </div>
+                                  <div className="form-group">
+                                    <label htmlFor="user-birthday">Ngày sinh</label>
+                                    <input
+                                      id="user-birthday"
+                                      name="user-birthday"
+                                      placeholder="Ngày sinh"
+                                      type="date"
+                                      className="form-control"
+                                      required
+                                    />
+                                  </div>
                                 </div>
-                                <div className="form-group">
-                                  <label htmlFor="user-birthday">Ngày sinh</label>
-                                  <input
-                                    id="user-birthday"
-                                    name="user-birthday"
-                                    placeholder="Ngày sinh"
-                                    type="date"
-                                    className="form-control"
-                                    required
-                                  />
+                                <input name="user-password" placeholder="Mật khẩu" type="password" required />
+                                <input
+                                  name="user-confirm-password"
+                                  placeholder="Xác nhận mật khẩu"
+                                  type="password"
+                                  required
+                                />
+                                {!registrationSuccess && (
+                                  <div className="button-box">
+                                    <button type="submit">
+                                      <span>Đăng ký</span>
+                                    </button>
+                                  </div>
+                                )}
+                              </form>
+                            ) : (
+                              <form onSubmit={handleStoreRegister}>
+                                <input name="store-name" placeholder="Tên cửa hàng" type="text" required />
+                                <label htmlFor="store-type">Loại cửa hàng</label>
+                                <select placeholder="Loại cửa hàng" name="store-type" className="form-control mb-5">
+                                  <option value="Hoa">Hoa</option>
+                                  <option value="Quà">Quà tặng</option>
+                                  <option value="Hoa và quà">Hoa và quà</option>
+                                </select>
+                                <input name="store-phone" placeholder="Số điện thoại" type="tel" required />
+                                <input name="store-store-address" placeholder="Địa chỉ cửa hàng" type="text" required />
+                                <input name="store-email" placeholder="Email" type="email" required />
+                                <div className="card">
+                                  <div className="bank-card-form">
+                                    <h3>Thông tin tài khoản ngân hàng</h3>
+                                    <div className="bank-card">
+                                      <div className="bank-card-field">
+                                        <label htmlFor="store-bank-account-name">Tên chủ tài khoản</label>
+                                        <input name="store-bank-account-name" placeholder="Số CMND/CCCD" type="text" required />
+                                      </div>
+                                      <div className="bank-card-field">
+                                        <label htmlFor="store-bank-number">Số tài khoản</label>
+                                        <input name="store-bank-number" placeholder="Tên chủ tài khoản" type="text" required />
+                                      </div>
+                                      <div className="bank-card-field">
+                                        <label htmlFor="store-bank-address">Chi nhánh</label>
+                                        <input name="store-bank-address" placeholder="Chi nhánh" type="text" required />
+                                        </div>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                              <input name="user-password" placeholder="Mật khẩu" type="password" required />
-                              <input
-                                name="user-confirm-password"
-                                placeholder="Xác nhận mật khẩu"
-                                type="password"
-                                required
-                              />
-                              {!registrationSuccess && (
-                                <div className="button-box">
-                                  <button type="submit">
-                                    <span>Đăng ký</span>
-                                  </button>
+                                <div className="card">
+                                  <div className="identity-card-form">
+                                    <div className="identity-card">
+                                      <div className="identity-card-header">
+                                        <h4>Thông tin CMND/CCCD</h4>
+                                      </div>
+                                      <div className="identity-card-body">
+                                        <div className="identity-card-field">
+                                          <label htmlFor="store-identity-card">Số CMND/CCCD</label>
+                                          <input name="store-identity-card" placeholder="Số CMND/CCCD" type="text" required />
+                                        </div>
+                                        <div className="identity-card-field">
+                                          <label htmlFor="store-identity-name">Tên chủ CMND/CCCD</label>
+                                          <input name="store-identity-name" placeholder="Tên chủ CMND/CCCD" type="text" required />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
-                              )}
-                            </form>
+
+                                <div className="card">
+                                  <h2 className="card-title">Chọn avatar</h2>
+                                  <div {...getRootProps()} className="dropzone">
+                                    <input {...getInputProps()} name="store-avatar" />
+
+                                    {image ? (
+                                      <div className="avatar-wrapper">
+                                        <img src={image.preview} alt="Avatar" className="avatar-image" />
+                                      </div>
+                                    ) : (
+                                      <div className="avatar-wrapper">
+                                        <div className="empty-avatar">
+                                          <span>Chọn file</span>
+                                        </div>
+                                      </div>
+                                    )}
+                                    {image && (
+                                      <Button variant="danger" onClick={handleDeleteImage} className="delete-image-button mb-3">Xoá</Button>
+                                    )}
+                                    <p className="instruction-text">Kéo & thả ảnh vào đây, hoặc nhấn để chọn hình ảnh</p>
+                                  </div>
+                                </div>
+                                <input name="store-tax-number" placeholder="Mã số thuế" type="text" required />
+                                <input name="store-password" placeholder="Mật khẩu" type="password" required />
+                                <input
+                                  name="store-confirm-password"
+                                  placeholder="Xác nhận mật khẩu"
+                                  type="password"
+                                  required
+                                />
+                                {!registrationSuccess && (
+                                  <div className="button-box">
+                                    <button type="submit">
+                                      <span>Đăng ký</span>
+                                    </button>
+                                  </div>
+                                )}
+                              </form>
+                            )}
                             {showVerifyButton && registrationSuccess && (
                               <div className="verify-account-container mt-3">
                                 <p>
