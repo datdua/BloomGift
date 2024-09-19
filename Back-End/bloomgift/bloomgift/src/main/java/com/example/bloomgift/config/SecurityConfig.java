@@ -40,18 +40,19 @@ public class SecurityConfig {
             "/webjars/**",
             "/swagger-ui.html",
             "/api-docs/**",
-            "/api/auth/**",};
+            "/api/auth/**",
+            "/api/store/**",
+            "/api/product/**"
+    };
 
     private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**" };
 
-    private static final String[] ADMIN_URL = { "/api/admin/**", "/api/google-sheets/**"};
+    private static final String[] ADMIN_URL = { "/api/admin/**", "/api/google-sheets/**" };
 
     private static final String[] CUSTOMER_URL = { "/api/customer/**", "/api/promotion/**", "/api/store/**" };
 
     private static final String[] MANAGER_URL = { "/api/manager/**" };
-    
-    
-    private static final String[] SELLER_URL ={ "/api/seller/**"};
+
     private static final String[] ADMIN_MANAGER_URL = {};
 
     private static final String[] ADMIN_MANAGER_SALE_STAFF_URL = {};
@@ -76,8 +77,6 @@ public class SecurityConfig {
                         .requestMatchers(SWAGGER_URL).permitAll()
                         .requestMatchers(CUSTOMER_URL).hasRole("CUSTOMER")
                         .requestMatchers(ADMIN_URL).hasRole("ADMIN")
-                        .requestMatchers(SELLER_URL).hasRole("SELLER")
-                        .requestMatchers(SELLER_URL).hasRole("SELLER")
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
