@@ -42,11 +42,12 @@ public class SecurityConfig {
             "/api-docs/**",
             "/api/auth/**",
             "/api/store/**",
+            "/api/product/**"
     };
 
     private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**" };
 
-    private static final String[] ADMIN_URL = { "/api/admin/**", "/api/google-sheets/**"};
+    private static final String[] ADMIN_URL = { "/api/admin/**", "/api/google-sheets/**" };
 
     private static final String[] CUSTOMER_URL = { "/api/customer/**", "/api/promotion/**", "/api/store/**" };
 

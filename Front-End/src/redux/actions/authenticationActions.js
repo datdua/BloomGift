@@ -145,17 +145,24 @@ export const regenerateOTP = (email, addToast) => {
 export const signInWithGoogle = (addToast) => {
     return async (dispatch) => {
         try {
-            const response = await axios.get("http://localhost:8080/api/auth/signInWithGoogle");
-
+            const response = await axios.get("http://localhost:8080/api/auth/signInWithGoogle", { withCredentials: true });
+            
             dispatch({
                 type: LOGIN_GOOGLE,
                 payload: response.data
             });
 
+            if (response.data && response.data.token) {
+                localStorage.setItem("token", response.data.token);
+            }
+
             if (addToast) addToast("Đăng nhập thành công!", { appearance: "success", autoDismiss: true });
+            
+            return { ok: true, data: response.data };
         } catch (error) {
             console.error("Google login failed:", error);
             if (addToast) addToast("Đăng nhập thất bại!", { appearance: "error", autoDismiss: true });
+            return { ok: false, error };
         }
     };
 }

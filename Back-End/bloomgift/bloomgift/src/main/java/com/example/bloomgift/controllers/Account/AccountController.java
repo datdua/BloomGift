@@ -15,7 +15,7 @@ import com.example.bloomgift.reponse.AccountReponse;
 import com.example.bloomgift.service.AccountService;
 
 @RestController
-@RequestMapping("/api/customer")
+@RequestMapping("/api/accounts")
 public class AccountController {
 
     @Autowired

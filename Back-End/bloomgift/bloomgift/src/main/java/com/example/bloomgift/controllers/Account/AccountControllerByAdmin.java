@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-
 import org.springframework.http.HttpStatus;
 
 import com.example.bloomgift.model.Account;
@@ -23,6 +22,7 @@ import com.example.bloomgift.request.CategoryRequest;
 import com.example.bloomgift.service.AccountService;
 import com.example.bloomgift.service.CategoryService;
 import com.example.bloomgift.service.ProductService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -46,33 +46,37 @@ public class AccountControllerByAdmin {
         this.accountService = accountService;
     }
 
-    @PostMapping(value = "/create-account", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Map<String, String>> createAccountbyAdmin(
-            @RequestBody AccountRequest accountRequest) {
-        try {
-            accountService.createAccount(accountRequest);
-            return ResponseEntity.ok(Collections.singletonMap("message", "Tạo tài khoản thành công"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("message",
-                    e.getMessage()));
-        }
-
-    }
-
-    // @PostMapping(value = "/create-account", consumes =
-    // MediaType.MULTIPART_FORM_DATA_VALUE)
-    // public ResponseEntity<String> createAccount(
-    // @RequestPart("accountRequest") AccountRequest accountRequest,
-    // @RequestPart("avatarFile") MultipartFile avatarFile) {
-
+    // @PostMapping(value = "/create-account", produces =
+    // "application/json;charset=UTF-8")
+    // public ResponseEntity<Map<String, String>> createAccountbyAdmin(
+    // @RequestBody AccountRequest accountRequest) {
     // try {
-    // accountService.createAccount(accountRequest, avatarFile);
-    // return ResponseEntity.ok("Account created successfully");
+    // accountService.createAccount(accountRequest);
+    // return ResponseEntity.ok(Collections.singletonMap("message", "Tạo tài khoản
+    // thành công"));
     // } catch (Exception e) {
-    // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " +
-    // e.getMessage());
+    // return ResponseEntity.badRequest().body(Collections.singletonMap("message",
+    // e.getMessage()));
     // }
+
     // }
+
+    @PostMapping(value = "/create-account", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> createAccount(
+            @RequestParam("accountRequest") String accountRequestJson,
+            @RequestParam("avatarFile") MultipartFile avatarFile) {
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            AccountRequest accountRequest = objectMapper.readValue(accountRequestJson,
+                    AccountRequest.class);
+            accountService.createAccount(accountRequest, avatarFile);
+            return ResponseEntity.ok("Account created successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " +
+                    e.getMessage());
+        }
+    }
 
     // @GetMapping("/list-all-account")
     // public ResponseEntity<List<AccountReponse>> getAllAccounts() {
