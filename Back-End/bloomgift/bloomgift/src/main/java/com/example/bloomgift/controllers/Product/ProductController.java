@@ -114,23 +114,23 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/product/{storeID}")
-    public ResponseEntity<List<ProductReponse>> getProductsByStoreID(@PathVariable int storeID) {
-        List<ProductReponse> products = productService.getProductByStoreID(storeID);
-        return ResponseEntity.ok(products);
-    }
+    // @GetMapping("/product/{storeID}")
+    // public ResponseEntity<List<ProductReponse>> getProductsByStoreID(@PathVariable int storeID) {
+    //     List<ProductReponse> products = productService.getProductByStoreID(storeID);
+    //     return ResponseEntity.ok(products);
+    // }
 
-    @GetMapping("/product-feature-true/{storeID}")
-    public ResponseEntity<List<ProductReponse>> getProductsByStorIdAndFeaEntity(@PathVariable int storeID) {
-        List<ProductReponse> products = productService.getProductByStoreID(storeID);
-        return ResponseEntity.ok(products);
-    }
+    // @GetMapping("/product-feature-true/{storeID}")
+    // public ResponseEntity<List<ProductReponse>> getProductsByStorIdAndFeaEntity(@PathVariable int storeID) {
+    //     List<ProductReponse> products = productService.getProductByStoreID(storeID);
+    //     return ResponseEntity.ok(products);
+    // }
 
-    @GetMapping("/product-best-seller/{storeID}")
-    public ResponseEntity<List<ProductReponse>> getProductsBestSeller(@RequestParam int top) {
-        List<ProductReponse> products = productService.getProductBySold(top);
-        return ResponseEntity.ok(products);
-    }
+    // @GetMapping("/product-best-seller/{storeID}")
+    // public ResponseEntity<List<ProductReponse>> getProductsBestSeller(@RequestParam int top) {
+    //     List<ProductReponse> products = productService.getProductBySold(top);
+    //     return ResponseEntity.ok(products);
+    // }
 
     @GetMapping("/search")
     public ResponseEntity<Page<Product>> searchProductWithFilters(
