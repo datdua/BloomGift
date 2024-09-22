@@ -36,7 +36,7 @@ public class CartService {
     @Autowired
     public CartService(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
-        this.hashOperations = redisTemplate.opsForHash(); // Khởi tạo HashOperations từ RedisTemplate
+        this.hashOperations = redisTemplate.opsForHash(); 
     }
 
     public void addToCart(Account account, Product product, int quantity) {
