@@ -14,6 +14,7 @@ import Dashboard from "./components/sidebar/DashBoard";
 import ShopManagement from "./components/sidebar/ShopManagement";
 import StoreProfile from "./components/sidebar/ProductManager/StoreProfile";
 import Header from "./components/sidebar/HeaderSidebar";
+import ProductList from "./components/sidebar/ProductManager/ProductList";
 
 
 // home pages
@@ -453,6 +454,7 @@ const App = (props) => {
                       <Route path="/seller/dashboard" component={Dashboard} />
                       <Route path="/seller/shop-management" component={ShopManagement} />
                       <Route path="/seller/shop-profile" component={StoreProfile} />
+                      <Route path="/seller/all-products" component={ProductList} />
                     </Switch>
                   </SalerSidebar>
                 </Route>
