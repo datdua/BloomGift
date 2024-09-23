@@ -58,7 +58,7 @@ public class CartService {
                 "productID", product.getProductID(),
                 "productName", product.getProductName(),
                 "price", size.getPrice(),
-                "productSize", size.getSizeFloat(),
+                "sizeText", size.getText(),
                 "quantity", quantity,
                 "totlePrice", size.getPrice() * quantity
 

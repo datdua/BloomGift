@@ -10,15 +10,15 @@ public class SizeReponse {
     private Integer sizeID; 
     private Float price; 
     private String text;
-    private Float sizeFloat;
+    private Integer sizeQuantity;
     public SizeReponse(){
 
     }
-    public SizeReponse(Integer sizeID, Float price, String text, Float sizeFloat) {
+    public SizeReponse(Integer sizeID, Float price, String text, Integer sizeQuantity) {
         this.sizeID = sizeID;
         this.price = price;
         this.text = text;
-        this.sizeFloat = sizeFloat;
+        this.sizeQuantity = sizeQuantity;
     }
     public Integer getSizeID() {
         return sizeID;
@@ -38,12 +38,12 @@ public class SizeReponse {
     public void setText(String text) {
         this.text = text;
     }
-    public Float getSizeFloat() {
-        return sizeFloat;
+    public Integer getSizeQuantity() {
+        return sizeQuantity;
     }
-    public void setSizeFloat(Float sizeFloat) {
-        this.sizeFloat = sizeFloat;
+    public void setSizeQuantity(Integer sizeQuantity) {
+        this.sizeQuantity = sizeQuantity;
     }
-    
+   
 
 }

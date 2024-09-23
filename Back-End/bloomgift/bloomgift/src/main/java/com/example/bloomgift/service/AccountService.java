@@ -20,16 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageException;
-import com.google.cloud.storage.StorageOptions;
-import org.springframework.core.io.ByteArrayResource;
 
-import java.util.logging.Level;
-
-import java.util.logging.Logger;
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.model.Store;
 import com.example.bloomgift.reponse.AccountReponse;
@@ -38,8 +29,7 @@ import com.example.bloomgift.repository.RoleRepository;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.AccountRequest;
 import com.example.bloomgift.utils.EmailUtil;
-import com.example.bloomgift.utils.OtpUtil;
-import com.google.firebase.FirebaseApp;
+
 
 @Service
 public class AccountService implements UserDetailsService {

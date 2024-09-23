@@ -27,6 +27,7 @@ import com.example.bloomgift.reponse.SizeReponse;
 import com.example.bloomgift.repository.CategoryRepository;
 import com.example.bloomgift.repository.ProductImageRepository;
 import com.example.bloomgift.repository.ProductRepository;
+import com.example.bloomgift.repository.SizeRepository;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.ProductRequest;
 import com.example.bloomgift.specification.ProductSpecification;
@@ -48,6 +49,11 @@ public class ProductService {
     @Autowired
     private FirebaseStorageService firebaseStorageService;
 
+    @Autowired
+    private SizeRepository sizeRepository;
+
+  
+
     public List<ProductReponse> getAllProducts() {
         List<Product> products = productRepository.findAll();
 
@@ -59,7 +65,7 @@ public class ProductService {
                 .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
                 .collect(Collectors.toList());
         List<SizeReponse> sizeReponses = product.getSizes().stream()
-                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeFloat()))
+                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeQuantity()))
                 .collect(Collectors.toList());
 
         return new ProductReponse(
@@ -90,7 +96,7 @@ public class ProductService {
                 .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
                 .orElse(null); 
         List<SizeReponse> sizeReponses = product.getSizes().stream()
-                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeFloat()))
+                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeQuantity()))
                 .collect(Collectors.toList());
     
         return new ProductReponse(
@@ -118,7 +124,7 @@ public class ProductService {
                 .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
                 .collect(Collectors.toList());
         List<SizeReponse> sizeReponses = product.getSizes().stream()
-                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeFloat()))
+                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeQuantity()))
                 .collect(Collectors.toList());
         return new ProductReponse(
                 product.getProductID(),
@@ -155,7 +161,7 @@ public class ProductService {
                             .collect(Collectors.toList());
                     List<SizeReponse> sizeReponses = product.getSizes().stream()
                             .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
-                                    size.getSizeFloat()))
+                                    size.getSizeQuantity()))
                             .collect(Collectors.toList());
                     return new ProductReponse(
                             product.getProductID(),
@@ -190,7 +196,7 @@ public class ProductService {
                             .collect(Collectors.toList());
                     List<SizeReponse> sizeReponses = product.getSizes().stream()
                             .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
-                                    size.getSizeFloat()))
+                                    size.getSizeQuantity()))
                             .collect(Collectors.toList());
                     return new ProductReponse(
                             product.getProductID(),
@@ -222,7 +228,7 @@ public class ProductService {
                             .collect(Collectors.toList());
                     List<SizeReponse> sizeReponses = product.getSizes().stream()
                             .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
-                                    size.getSizeFloat()))
+                                    size.getSizeQuantity()))
                             .collect(Collectors.toList());
                     return new ProductReponse(
                             product.getProductID(),
@@ -263,7 +269,7 @@ public class ProductService {
                             .collect(Collectors.toList());
                     List<SizeReponse> sizeReponses = product.getSizes().stream()
                             .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
-                                    size.getSizeFloat()))
+                                    size.getSizeQuantity()))
                             .collect(Collectors.toList());
                     return new ProductReponse(
                             product.getProductID(),
@@ -316,7 +322,7 @@ public class ProductService {
 
                     List<SizeReponse> sizeReponses = product.getSizes().stream()
                             .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
-                                    size.getSizeFloat()))
+                                    size.getSizeQuantity()))
                             .collect(Collectors.toList());
 
                     return new ProductReponse(
@@ -351,7 +357,7 @@ public class ProductService {
                             .collect(Collectors.toList());
                     List<SizeReponse> sizeReponses = product.getSizes().stream()
                             .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
-                                    size.getSizeFloat()))
+                                    size.getSizeQuantity()))
                             .collect(Collectors.toList());
                     return new ProductReponse(
                             product.getProductID(),
@@ -417,7 +423,7 @@ public class ProductService {
                     Size size = new Size();
                     size.setPrice(sizeRequest.getPrice());
                     size.setText(sizeRequest.getText());
-                    size.setSizeFloat(sizeRequest.getSizeFloat());
+                    size.setSizeQuantity(sizeRequest.getSizeQuanity());
                     size.setProductID(product);
                     return size;
                 })
@@ -458,6 +464,16 @@ public class ProductService {
 
     public void deleteProduct(Integer productID) {
         Product existingProduct = productRepository.findById(productID).orElseThrow();
+        Size size = sizeRepository.findByProductID(existingProduct);
+        if (size != null) {
+            sizeRepository.delete(size);
+        }
+    
+        ProductImage productImage = productImageRepository.findByProductID(existingProduct);
+        if (productImage != null) {
+            productImageRepository.delete(productImage);
+        }
+
         productRepository.delete(existingProduct);
     }
 

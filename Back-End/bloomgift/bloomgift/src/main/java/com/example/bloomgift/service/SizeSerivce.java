@@ -23,11 +23,11 @@ public class SizeSerivce {
         }
         Float price = sizeRequest.getPrice();
         String text = sizeRequest.getText();
-        Float sizeDFloat = sizeRequest.getSizeFloat();
+        Integer sizeQuantity = sizeRequest.getSizeQuanity();
         Size size = new Size();
         size.setPrice(price);
         size.setText(text);
-        size.setSizeFloat(sizeDFloat);
+        size.setSizeQuantity(sizeQuantity);
         size.setProductID(product);
         sizeRepository.save(size);
     }
@@ -35,7 +35,7 @@ public class SizeSerivce {
         Size size = sizeRepository.findById(SizeID).orElseThrow(); 
         size.setPrice(sizeRequest.getPrice());
         size.setText(sizeRequest.getText());
-        size.setSizeFloat(sizeRequest.getSizeFloat());
+        size.setSizeQuantity(sizeRequest.getSizeQuanity());
         sizeRepository.save(size);
 
     }

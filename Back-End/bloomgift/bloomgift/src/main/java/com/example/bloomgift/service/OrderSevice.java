@@ -92,11 +92,16 @@ public class OrderSevice {
             float productTotalPrice;
             if (size.getSizeID() != null) {
                 productTotalPrice = size.getPrice() * orderDetailRequests.getQuantity();
+                if(size.getSizeQuantity() < quantity){
+                    throw new RuntimeException("Khuyến mãi đã hết hạn");
+                }else{
 
+                }
             } else {
                 productTotalPrice = product.getPrice() * orderDetailRequests.getQuantity();
 
             }
+            
             totalProductPrice += productTotalPrice;
             orderDetail.setProductTotalPrice(productTotalPrice);
             orderDetail.setSizeID(null);
@@ -106,10 +111,15 @@ public class OrderSevice {
             orderDetail.setSizeID(size);
             orderDetail.setOrderID(order);
             orderDetail.setStoreID(store);
-
-            Integer newProductQuantity = product.getQuantity() - quantity;
+            Integer newProductQuantity;
+            if(size.getSizeID() != null){
+                newProductQuantity = size.getSizeQuantity() - quantity;
+            }else{
+             newProductQuantity = product.getQuantity() - quantity;
+            }
+            Integer newSold = product.getSold()+quantity;
             product.setQuantity(newProductQuantity);
-            product.setSold(quantity);
+            product.setSold(newSold);
             orderDetails.add(orderDetail);
         }
 
@@ -123,7 +133,7 @@ public class OrderSevice {
         order.setPoint(point);
         float promotionValue = promotion.getPromotionDiscount().floatValue();
         float orderPrice = totalProductPrice - point - promotionValue;
-        order.setOrderPrice(orderPrice); // Use float
+        order.setOrderPrice(orderPrice); 
         order.setDeliveryDateTime(orderRequest.getDeliveryDateTime());
         order.setOrderDetail(orderDetails);
         Integer newPoint = account.getPoint() - point;
@@ -144,7 +154,7 @@ public class OrderSevice {
                                     orderDetail.getQuantity(),
                                     orderDetail.getProductID().getProductName(),
                                     orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID().getSizeFloat()))
+                                    orderDetail.getSizeID().getText()))
                             .collect(Collectors.toList());
 
                     return new OrderReponse(
@@ -178,7 +188,7 @@ public class OrderSevice {
                                     orderDetail.getQuantity(),
                                     orderDetail.getProductID().getProductName(),
                                     orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID().getSizeFloat()))
+                                    orderDetail.getSizeID().getText()))
                             .collect(Collectors.toList());
 
                     return new OrderReponse(
@@ -215,7 +225,7 @@ public class OrderSevice {
                                     orderDetail.getQuantity(),
                                     orderDetail.getProductID().getProductName(),
                                     orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getSizeFloat() : null))
+                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null))
                             .collect(Collectors.toList());
 
                     return new OrderReponse(

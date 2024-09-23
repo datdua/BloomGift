@@ -3,17 +3,15 @@ package com.example.bloomgift.request;
 public class SizeRequest {
     private Float price; 
     private String text;
-    private Float sizeFloat;
+    private Integer sizeQuanity;
     public SizeRequest(){
 
     }
-    
-    public SizeRequest(Float price, String text, Float sizeFloat) {
+    public SizeRequest(Float price, String text, Integer sizeQuanity) {
         this.price = price;
         this.text = text;
-        this.sizeFloat = sizeFloat;
+        this.sizeQuanity = sizeQuanity;
     }
-
     public Float getPrice() {
         return price;
     }
@@ -26,12 +24,14 @@ public class SizeRequest {
     public void setText(String text) {
         this.text = text;
     }
-    public Float getSizeFloat() {
-        return sizeFloat;
+    public Integer getSizeQuanity() {
+        return sizeQuanity;
     }
-    public void setSizeFloat(Float sizeFloat) {
-        this.sizeFloat = sizeFloat;
+    public void setSizeQuanity(Integer sizeQuanity) {
+        this.sizeQuanity = sizeQuanity;
     }
+    
+    
 
     
 }
