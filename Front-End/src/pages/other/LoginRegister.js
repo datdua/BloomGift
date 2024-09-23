@@ -235,7 +235,7 @@ const LoginRegister = ({ location }) => {
                                     <span>Đăng Nhập</span>
                                   </button>
                                   <button
-                                    onClick={() => window.location.href = 'http://localhost:8080/oauth2/authorization/google'}
+                                    onClick={() => window.location.href = 'https://bloomgift.lemonhill-6b585cc3.eastasia.azurecontainerapps.io/oauth2/authorization/google'}
                                     className="ml-5"
                                   >
                                     Đăng nhập với Google
