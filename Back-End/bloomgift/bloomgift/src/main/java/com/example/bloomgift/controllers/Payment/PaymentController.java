@@ -97,4 +97,26 @@ public class PaymentController {
             return ResponseEntity.status(500).body("Error processing payment webhook");
         }
     }
+    @PostMapping("/confirm")
+    public ResponseEntity<String> confirmPayment(@RequestParam Integer paymentID) {
+        // Tìm giao dịch dựa trên ID
+        Payment payment = paymentRepository.findById(paymentID).orElseThrow();
+        
+        if (payment == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Giao dịch không tồn tại");
+        }
+
+        try {
+            boolean isConfirmed = paymentService.confirmPaymentWithBank(payment);
+            if (isConfirmed) {
+                paymentService.updatePaymentStatus(paymentID);
+                return ResponseEntity.ok("Xác nhận thanh toán thành công");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Giao dịch chưa được xác nhận");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi xác nhận thanh toán");
+        }
+    }
 }
