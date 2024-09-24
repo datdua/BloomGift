@@ -20,7 +20,7 @@ const HeroSliderOneSingle = ({ data, sliderClassName }) => {
                   className="animated"
                   to={process.env.PUBLIC_URL + '/shop-grid-full-width'}
                 >
-                  SHOP NOW
+                  MUA NGAY
                 </Link>
               </div>
             </div>

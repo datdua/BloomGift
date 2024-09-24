@@ -1,20 +1,46 @@
-import { FETCH_PRODUCTS_SUCCESS } from "../actions/productActions";
-import { getAllProducts } from "../actions/productActions";
+import { 
+  FETCH_PRODUCTS_SUCCESS, 
+  SEARCH_PRODUCT, 
+  GET_PRODUCT_DETAIL, 
+  GET_NEW_PRODUCT 
+} from "../actions/productActions";
 
 const initState = {
-  products: []
+  products: [],
+  productDetail: null,
+  newProducts: [],
+  searchResults: []
 };
 
 const productReducer = (state = initState, action) => {
-  if (action.type === FETCH_PRODUCTS_SUCCESS) {
-    return {
-      ...state,
-      products: action.payload
-    };
+  switch (action.type) {
+    case FETCH_PRODUCTS_SUCCESS:
+      return {
+        ...state,
+        products: action.payload
+      };
+    
+    case SEARCH_PRODUCT:
+      return {
+        ...state,
+        searchResults: action.payload
+      };
+    
+    case GET_PRODUCT_DETAIL:
+      return {
+        ...state,
+        productDetail: action.payload
+      };
+    
+    case GET_NEW_PRODUCT:
+      return {
+        ...state,
+        newProducts: action.payload
+      };
+
+    default:
+      return state;
   }
-
-  return state;
 };
-
 
 export default productReducer;
