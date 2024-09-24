@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.model.Order;
 import com.example.bloomgift.model.OrderDetail;
+import com.example.bloomgift.model.Payment;
 import com.example.bloomgift.model.Product;
 import com.example.bloomgift.model.Promotion;
 import com.example.bloomgift.model.Size;
@@ -30,6 +31,7 @@ import com.example.bloomgift.reponse.ProductReponse;
 import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.repository.OrderDetailRepository;
 import com.example.bloomgift.repository.OrderRepository;
+import com.example.bloomgift.repository.PaymentRepository;
 import com.example.bloomgift.repository.ProductRepository;
 import com.example.bloomgift.repository.PromotionRepository;
 import com.example.bloomgift.repository.SizeRepository;
@@ -66,6 +68,9 @@ public class OrderSevice {
     @Autowired
     private OrderDetailRepository orderDetailRepository;
 
+    @Autowired
+    private PaymentRepository paymentRepository;
+
     public void createOrder(Integer accountID, OrderRequest orderRequest) {
         checkOrder(orderRequest);
         Account account = accountRepository.findById(accountID).orElseThrow();
@@ -75,6 +80,7 @@ public class OrderSevice {
         String deliveryDistrict = orderRequest.getDeliveryDistrict();
         String deliveryWard = orderRequest.getDeliveryWard();
         String specificAddress = orderRequest.getSpecificAddress();
+        Boolean transfer = orderRequest.getTransfer();
         String deliveryAddress;
         
         deliveryAddress = specificAddress + ", " + deliveryWard + ", " + deliveryDistrict + ", " + deliveryProvince;
@@ -103,12 +109,16 @@ public class OrderSevice {
         Order order = new Order();
         List<OrderDetail> orderDetails = new ArrayList<>();
         float totalProductPrice = 0.0f;
+        Store firstStore = null; 
         for (OrderDetailRequest orderDetailRequests : orderRequest.getOrderDetailRequests()) {
             Product product = productRepository.findById(orderDetailRequests.getProductID()).orElseThrow();
             if (product.getQuantity() < orderDetailRequests.getQuantity()) {
                 throw new RuntimeException("hết sản phẩm");
             }
             Store store = storeRepository.findByProducts(product);
+            if (firstStore == null) {
+                firstStore = store;  
+            }
             Integer sizeID = orderDetailRequests.getSizeID();
             Integer quantity = orderDetailRequests.getQuantity();
             OrderDetail orderDetail = new OrderDetail();
@@ -138,6 +148,7 @@ public class OrderSevice {
             } else {
                 product.setQuantity(product.getQuantity() - quantity);
             }
+            
 
             totalProductPrice += productTotalPrice;
             orderDetail.setProductTotalPrice(productTotalPrice);
@@ -151,6 +162,7 @@ public class OrderSevice {
             Integer newSold = product.getSold() + quantity;
             product.setSold(newSold);
             orderDetails.add(orderDetail);
+          
         }
 
         order.setAccountID(account);
@@ -166,9 +178,28 @@ public class OrderSevice {
         order.setOrderPrice(orderPrice);
         order.setDeliveryDateTime(orderRequest.getDeliveryDateTime());
         order.setOrderDetail(orderDetails);
+        order.setTransfer(transfer);
         Integer newPoint = account.getPoint() - point;
         account.setPoint(newPoint);
         orderRepository.save(order);
+        if(transfer == true){   
+            Payment payment = new Payment();
+            payment.setOrderID(order);
+            payment.setAccountID(accountID);
+            payment.setMethod("chuyen khoản");
+            payment.setStoreID(firstStore);
+            payment.setBankName(firstStore.getBankAddress());
+            payment.setPaymentStatus(false);
+            payment.setTotalPrice(orderPrice);
+            payment.setBankNumber(firstStore.getBankNumber());
+            payment.setMomoNumber(firstStore.getStorePhone());
+            payment.setPaymentCode();
+            payment.setBankAccountName(firstStore.getBankAccountName());
+            payment.setFormat("text");
+            payment.setTemplate("compact");
+            payment.setAcqId(firstStore.getAcqId());
+            paymentRepository.save(payment);
+        }
     }
 
     public List<OrderReponse> getAllOrder() {

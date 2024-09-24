@@ -15,6 +15,7 @@ public class OrderRequest {
     private Date deliveryDateTime;
     private int promotionID ; 
     private int point ; 
+    private Boolean transfer;
     private List<OrderDetailRequest> orderDetailRequests;
     public OrderRequest(){
         
@@ -84,5 +85,11 @@ public class OrderRequest {
     }
     public void setSpecificAddress(String specificAddress) {
         this.specificAddress = specificAddress;
+    }
+    public Boolean getTransfer() {
+        return transfer;
+    }
+    public void setTransfer(Boolean transfer) {
+        this.transfer = transfer;
     }
 }

@@ -18,23 +18,12 @@ import com.example.bloomgift.repository.StoreRepository;
 
 @Service
 public class RevenueService {
-    @Autowired
-    private AccountRepository accountRepository;
-
-    @Autowired
-    private ProductRepository productRepository;
 
     @Autowired
     private StoreRepository storeRepository;
 
     @Autowired
-    private PromotionRepository promotionRepository;
-
-    @Autowired
     private OrderRepository orderRepository;
-
-    @Autowired
-    private SizeRepository sizeRepository;
 
     @Autowired
     private OrderDetailRepository orderDetailRepository;
