@@ -41,11 +41,13 @@ public class CartService {
 
     public void addToCart(Account account, Product product, int quantity) {
         String key = "CART:" + account.getAccountID();
+        float discount = product.getDiscount() != null ? product.getDiscount() : 0;
+        float discountedPrice = product.getPrice() * (1 - discount / 100);
         Map<String, Object> productMap = Map.of(
                 "productID", product.getProductID(),
                 "storeName", product.getStoreName(),
                 "productName", product.getProductName(),
-                "price", product.getPrice(),
+                "price", discountedPrice,
                 "quantity", quantity,
                 "totlePrice", product.getPrice() * quantity);
         hashOperations.put(key, product.getProductID(), productMap);

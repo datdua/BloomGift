@@ -1,8 +1,10 @@
 package com.example.bloomgift.service;
 
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -33,6 +36,10 @@ import com.example.bloomgift.repository.SizeRepository;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.OrderDetailRequest;
 import com.example.bloomgift.request.OrderRequest;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Scanner;
+import java.net.URLEncoder;
 
 import ch.qos.logback.core.util.StringUtil;
 
@@ -64,14 +71,34 @@ public class OrderSevice {
         Account account = accountRepository.findById(accountID).orElseThrow();
         Integer promotionID = orderRequest.getPromotionID();
         Integer point = orderRequest.getPoint();
+        String deliveryProvince = orderRequest.getDeliveryProvince();
+        String deliveryDistrict = orderRequest.getDeliveryDistrict();
+        String deliveryWard = orderRequest.getDeliveryWard();
+        String specificAddress = orderRequest.getSpecificAddress();
+        String deliveryAddress;
+        
+        deliveryAddress = specificAddress + ", " + deliveryWard + ", " + deliveryDistrict + ", " + deliveryProvince;
+        if (isValidAddress(deliveryAddress)) {
+            throw new RuntimeException("Invalid delivery address");
+        }
         if (point > account.getPoint()) {
             throw new RuntimeException("Insufficient points");
         }
+        Promotion promotion = null;
+        float promotionValue = 0.0f;
+        if (promotionID != null && promotionID != 0) {
+            promotion = promotionRepository.findById(promotionID)
+                    .orElseThrow(() -> new RuntimeException("Khuyến mãi không tồn tại"));
 
-        Promotion promotion = promotionRepository.findById(promotionID).orElseThrow();
-        LocalDateTime currentDate = LocalDateTime.now();
-        if (promotion.getEndDate().isBefore(currentDate)) {
-            throw new RuntimeException("Khuyến mãi đã hết hạn");
+            LocalDateTime currentDate = LocalDateTime.now();
+            if (promotion.getEndDate().isBefore(currentDate)) {
+                throw new RuntimeException("Khuyến mãi đã hết hạn");
+            }
+
+            promotionValue = promotion.getPromotionDiscount().floatValue();
+
+            Integer newPromotionQuantity = promotion.getQuantity() - 1;
+            promotion.setQuantity(newPromotionQuantity);
         }
         Order order = new Order();
         List<OrderDetail> orderDetails = new ArrayList<>();
@@ -79,67 +106,68 @@ public class OrderSevice {
         for (OrderDetailRequest orderDetailRequests : orderRequest.getOrderDetailRequests()) {
             Product product = productRepository.findById(orderDetailRequests.getProductID()).orElseThrow();
             if (product.getQuantity() < orderDetailRequests.getQuantity()) {
-                throw new RuntimeException("Khuyến mãi đã hết hạn");
+                throw new RuntimeException("hết sản phẩm");
             }
             Store store = storeRepository.findByProducts(product);
-
+            Integer sizeID = orderDetailRequests.getSizeID();
             Integer quantity = orderDetailRequests.getQuantity();
             OrderDetail orderDetail = new OrderDetail();
-            Size size = sizeRepository.findById(orderDetailRequests.getSizeID()).orElseThrow();
-            if (size.getProductID() != product) {
-                throw new RuntimeException("Khuyến mãi đã hết hạn");
-            }
-            float productTotalPrice;
-            if (size.getSizeID() != null) {
-                productTotalPrice = size.getPrice() * orderDetailRequests.getQuantity();
-                if(size.getSizeQuantity() < quantity){
-                    throw new RuntimeException("Khuyến mãi đã hết hạn");
-                }else{
+            float productTotalPrice = 0.0f;
+            Size size = null;
 
+            if (sizeID != null && sizeID != 0) {
+                size = sizeRepository.findById(sizeID)
+                        .orElseThrow(() -> new RuntimeException("Không tồn tại size này"));
+
+                if (!size.getProductID().equals(product)) {
+                    throw new RuntimeException("Size không khớp với sản phẩm");
                 }
-            } else {
-                productTotalPrice = product.getPrice() * orderDetailRequests.getQuantity();
 
+                if (size.getSizeQuantity() < quantity) {
+                    throw new RuntimeException("Hết size này");
+                }
+
+                productTotalPrice = size.getPrice() * orderDetailRequests.getQuantity();
+            } else {
+                float discount = product.getDiscount() != null ? product.getDiscount() : 0;
+                productTotalPrice = (product.getPrice() * (1 - discount / 100)) * orderDetailRequests.getQuantity();
             }
-            
+
+            if (size != null) {
+                size.setSizeQuantity(size.getSizeQuantity() - quantity);
+            } else {
+                product.setQuantity(product.getQuantity() - quantity);
+            }
+
             totalProductPrice += productTotalPrice;
             orderDetail.setProductTotalPrice(productTotalPrice);
-            orderDetail.setSizeID(null);
+            orderDetail.setSizeID(size);
             orderDetail.setAccountID(account);
             orderDetail.setProductID(product);
             orderDetail.setQuantity(quantity);
             orderDetail.setSizeID(size);
             orderDetail.setOrderID(order);
             orderDetail.setStoreID(store);
-            Integer newProductQuantity;
-            if(size.getSizeID() != null){
-                newProductQuantity = size.getSizeQuantity() - quantity;
-            }else{
-             newProductQuantity = product.getQuantity() - quantity;
-            }
-            Integer newSold = product.getSold()+quantity;
-            product.setQuantity(newProductQuantity);
+            Integer newSold = product.getSold() + quantity;
             product.setSold(newSold);
             orderDetails.add(orderDetail);
         }
 
         order.setAccountID(account);
         order.setOrderStatus("Xác nhận đơn hàng");
-        order.setDeliveryAddress(orderRequest.getDeliveryAddress());
+        order.setDeliveryAddress(deliveryAddress);
         order.setNote(orderRequest.getNote());
         order.setBanner(orderRequest.getBanner());
         order.setPromotionID(promotion);
         order.setStartDate(new Date());
         order.setPoint(point);
-        float promotionValue = promotion.getPromotionDiscount().floatValue();
+        order.setPhone(orderRequest.getPhone());
         float orderPrice = totalProductPrice - point - promotionValue;
-        order.setOrderPrice(orderPrice); 
+        order.setOrderPrice(orderPrice);
         order.setDeliveryDateTime(orderRequest.getDeliveryDateTime());
         order.setOrderDetail(orderDetails);
         Integer newPoint = account.getPoint() - point;
         account.setPoint(newPoint);
-        Integer newPromotionQuantity = promotion.getQuantity() - 1;
-        promotion.setQuantity(newPromotionQuantity);
         orderRepository.save(order);
     }
 
@@ -169,6 +197,7 @@ public class OrderSevice {
                             order.getDeliveryAddress(),
                             order.getAccountID().getFullname(),
                             order.getPromotionID().getPromotionCode(),
+                            order.getPhone(),
                             orderDetailReponses);
                 }).collect(Collectors.toList());
 
@@ -203,6 +232,7 @@ public class OrderSevice {
                             order.getDeliveryAddress(),
                             order.getAccountID().getFullname(),
                             order.getPromotionID().getPromotionCode(),
+                            order.getPhone(),
                             orderDetailReponses);
                 }).collect(Collectors.toList());
 
@@ -213,8 +243,8 @@ public class OrderSevice {
         Store stores = storeRepository.findById(storeID).orElseThrow();
         List<OrderDetail> orderDetails = orderDetailRepository.findByStoreID(stores);
         Set<Order> orders = orderDetails.stream()
-                .map(OrderDetail::getOrderID) 
-                .collect(Collectors.toSet()); 
+                .map(OrderDetail::getOrderID)
+                .collect(Collectors.toSet());
 
         List<OrderReponse> orderReponses = orders.stream()
                 .map(order -> {
@@ -240,17 +270,64 @@ public class OrderSevice {
                             order.getDeliveryAddress(),
                             order.getAccountID().getFullname(),
                             order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
+                            order.getPhone(),
                             orderDetailReponses);
                 }).collect(Collectors.toList());
 
         return orderReponses;
     }
 
+    public boolean isValidAddress(String address) {
+        String apiKey = "AIzaSyCRtENA_fhaXoBIos56K0BVZYGlhMVE8Xc"; // Thay thế bằng API Key của bạn
+        try {
+            String encodedAddress = URLEncoder.encode(address, "UTF-8");
+            String urlString = "https://maps.googleapis.com/maps/api/geocode/json?address=" + encodedAddress + "&key=" + apiKey;
+    
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.connect();
+    
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                Scanner sc = new Scanner(url.openStream());
+                StringBuilder inline = new StringBuilder();
+                while (sc.hasNext()) {
+                    inline.append(sc.nextLine());
+                }
+                sc.close();
+    
+                JSONObject jsonResponse = new JSONObject(inline.toString());
+                return jsonResponse.getString("status").equals("OK");
+            } else {
+                throw new RuntimeException("Failed to validate address: " + responseCode);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public void checkOrder(OrderRequest orderRequest) {
-        String deliveryAddress = orderRequest.getDeliveryAddress();
         Date deliveryDateTime = orderRequest.getDeliveryDateTime();
-        if (!StringUtils.hasText(deliveryAddress)
-                || deliveryDateTime == null) {
+        String deliveryProvince = orderRequest.getDeliveryProvince();
+        String specificAddress = orderRequest.getSpecificAddress();
+        String deliveryDistrict = orderRequest.getDeliveryDistrict();
+        Integer phone = orderRequest.getPhone();
+        List<String> validDistricts = Arrays.asList("Quận 1", "Quận 2", "Quận 3", "Quận 4", "Quận 5", "Quận 6",
+                "Quận 7", "Quận 8", "Quận 9", "Quận 10", "Quận 11",
+                "Quận 12", "Quận Bình Thạnh", "Quận Gò Vấp", "Quận Phú Nhuận",
+                "Quận Tân Bình", "Quận Tân Phú", "Quận Bình Tân",
+                "Huyện Củ Chi", "Huyện Hóc Môn", "Huyện Bình Chánh", "Huyện Nhà Bè",
+                "Huyện Cần Giờ", "Thành phố Thủ Đức");
+        // if (!validDistricts.contains(deliveryDistrict)) {
+        // throw new RuntimeException("Invalid district for Hồ Chí Minh");
+        // }
+        if (!StringUtils.hasText(deliveryProvince)
+                || !StringUtils.hasText(specificAddress)
+                || !StringUtils.hasText(deliveryDistrict)
+                || deliveryDateTime == null
+                || phone == null) {
             throw new RuntimeException("Vui lòng nhập đầy đủ thông tin");
         }
 

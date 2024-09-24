@@ -47,6 +47,9 @@ public class Order {
     @Column(name = "startDate")
     private Date startDate;
 
+    @Column(name = "phone")
+    private Integer phone;
+
     @Column(name = "deliveryDateTime")
     private Date deliveryDateTime;
 
@@ -71,7 +74,7 @@ public class Order {
 
     public Order(Integer orderID, Float orderPrice, String orderStatus, int point, String deliveryAddress, String note,
             String banner, Date startDate, Date deliveryDateTime, Account accountID, Promotion promotionID,
-            List<OrderDetail> orderDetail) {
+            List<OrderDetail> orderDetail,Integer phone) {
         this.orderID = orderID;
         this.orderPrice = orderPrice;
         this.orderStatus = orderStatus;
@@ -84,6 +87,7 @@ public class Order {
         this.accountID = accountID;
         this.promotionID = promotionID;
         this.orderDetail = orderDetail;
+        this.phone = phone;
     }
 
     public Integer getOrderID() {
@@ -180,6 +184,14 @@ public class Order {
 
     public void setOrderDetail(List<OrderDetail> orderDetail) {
         this.orderDetail = orderDetail;
+    }
+
+    public Integer getPhone() {
+        return phone;
+    }
+
+    public void setPhone(Integer phone) {
+        this.phone = phone;
     }
 
 }

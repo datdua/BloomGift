@@ -18,6 +18,7 @@ public class OrderReponse {
     private String deliveryAddress;
     private String accountName;
     private String promotionCode;
+    private Integer phone;
     private List<OrderDetailReponse> orderDetails;
 
   
@@ -144,9 +145,19 @@ public class OrderReponse {
     }
 
 
+    public Integer getPhone() {
+        return phone;
+    }
+
+
+    public void setPhone(Integer phone) {
+        this.phone = phone;
+    }
+
+
     public OrderReponse(Integer orderID, Float oderPrice, String orderStatus, Integer point, String banner, String note,
             Date startDate, Date deliveryDateTime, String deliveryAddress, String accountName, String promotionCode,
-            List<OrderDetailReponse> orderDetails) {
+            Integer phone, List<OrderDetailReponse> orderDetails) {
         this.orderID = orderID;
         this.oderPrice = oderPrice;
         this.orderStatus = orderStatus;
@@ -158,6 +169,7 @@ public class OrderReponse {
         this.deliveryAddress = deliveryAddress;
         this.accountName = accountName;
         this.promotionCode = promotionCode;
+        this.phone = phone;
         this.orderDetails = orderDetails;
     }
 
