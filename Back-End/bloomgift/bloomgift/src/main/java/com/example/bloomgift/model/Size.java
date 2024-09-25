@@ -29,8 +29,8 @@ public class Size {
     @Column(name = "text")
     private String text;
 
-    @Column(name = "sizeFloat")
-    private Float sizeFloat;
+    @Column(name = "sizeQuantity")
+    private Integer sizeQuantity;
 
     @ManyToOne
     @JoinColumn(name = "productID")
@@ -43,12 +43,14 @@ public class Size {
 
     }
 
-    public Size(Integer sizeID, Float price, String text, Float sizeFloat, Product productID) {
+    public Size(Integer sizeID, Float price, String text, Integer sizeQuantity, Product productID,
+            List<OrderDetail> orderDetails) {
         this.sizeID = sizeID;
         this.price = price;
         this.text = text;
-        this.sizeFloat = sizeFloat;
+        this.sizeQuantity = sizeQuantity;
         this.productID = productID;
+        this.orderDetails = orderDetails;
     }
 
     public Integer getSizeID() {
@@ -75,12 +77,12 @@ public class Size {
         this.text = text;
     }
 
-    public Float getSizeFloat() {
-        return sizeFloat;
+    public Integer getSizeQuantity() {
+        return sizeQuantity;
     }
 
-    public void setSizeFloat(Float sizeFloat) {
-        this.sizeFloat = sizeFloat;
+    public void setSizeQuantity(Integer sizeQuantity) {
+        this.sizeQuantity = sizeQuantity;
     }
 
     public Product getProductID() {
@@ -89,6 +91,14 @@ public class Size {
 
     public void setProductID(Product productID) {
         this.productID = productID;
+    }
+
+    public List<OrderDetail> getOrderDetails() {
+        return orderDetails;
+    }
+
+    public void setOrderDetails(List<OrderDetail> orderDetails) {
+        this.orderDetails = orderDetails;
     }
 
 }

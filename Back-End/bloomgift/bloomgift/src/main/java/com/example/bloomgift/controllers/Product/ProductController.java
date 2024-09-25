@@ -140,29 +140,6 @@ public class ProductController {
         return productService.getProductsByProductStatus(productStatus);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<Page<Product>> searchProductWithFilters(
-            @RequestParam(required = false) String descriptionProduct,
-            @RequestParam(required = false) String colourProduct,
-            @RequestParam(required = false) Float priceProduct,
-            @RequestParam(required = false) String productName,
-            @RequestParam(required = false) String categoryName,
-            @RequestParam(required = false) Date createDate,
-            @RequestParam(required = false) String storeName,
-            @RequestParam(required = false) Integer sizeProduct,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
-        Page<Product> products = productService.searhProductWithFilterPage(
-                descriptionProduct, colourProduct, priceProduct, productName,
-                categoryName, createDate, storeName, sizeProduct, page, size);
-
-        return ResponseEntity.ok(products);
-    }
-
-    @GetMapping("/new-product")
-    public List<ProductReponse> listNewProducts() {
-        return productService.ListNewProduct();
-    }
+  
 
 }

@@ -9,19 +9,9 @@ public class OrderDetailReponse {
     private Integer quantity;
     private String productName;
     private String storeName;
-    private Float sizeFloat;
+    private String  sizeText;
 
     public OrderDetailReponse() {
-    }
-
-    public OrderDetailReponse(Integer orderDetailID, Float productTotalPrice, Integer quantity, String productName,
-            String storeName, Float sizeFloat) {
-        this.orderDetailID = orderDetailID;
-        this.productTotalPrice = productTotalPrice;
-        this.quantity = quantity;
-        this.productName = productName;
-        this.storeName = storeName;
-        this.sizeFloat = sizeFloat;
     }
 
     public Integer getOrderDetailID() {
@@ -64,13 +54,25 @@ public class OrderDetailReponse {
         this.storeName = storeName;
     }
 
-    public Float getSizeFloat() {
-        return sizeFloat;
+    public String getSizeText() {
+        return sizeText;
     }
 
-    public void setSizeFloat(Float sizeFloat) {
-        this.sizeFloat = sizeFloat;
+    public void setSizeText(String sizeText) {
+        this.sizeText = sizeText;
     }
+
+    public OrderDetailReponse(Integer orderDetailID, Float productTotalPrice, Integer quantity, String productName,
+            String storeName, String sizeText) {
+        this.orderDetailID = orderDetailID;
+        this.productTotalPrice = productTotalPrice;
+        this.quantity = quantity;
+        this.productName = productName;
+        this.storeName = storeName;
+        this.sizeText = sizeText;
+    }
+
+    
 
   
    

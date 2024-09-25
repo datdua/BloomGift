@@ -47,6 +47,12 @@ public class Order {
     @Column(name = "startDate")
     private Date startDate;
 
+    @Column(name = "phone")
+    private Integer phone;
+
+    @Column(name = "transfer")
+    private Boolean transfer;
+
     @Column(name = "deliveryDateTime")
     private Date deliveryDateTime;
 
@@ -60,7 +66,8 @@ public class Order {
     @JsonBackReference
     private Promotion promotionID;
 
-
+    @OneToMany(mappedBy = "orderID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Payment> payments = new ArrayList<>();
 
     @OneToMany(mappedBy = "orderID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetail = new ArrayList<>();
@@ -70,8 +77,8 @@ public class Order {
     }
 
     public Order(Integer orderID, Float orderPrice, String orderStatus, int point, String deliveryAddress, String note,
-            String banner, Date startDate, Date deliveryDateTime, Account accountID, Promotion promotionID,
-            List<OrderDetail> orderDetail) {
+            String banner, Date startDate, Integer phone, Boolean transfer, Date deliveryDateTime, Account accountID,
+            Promotion promotionID, List<Payment> payments, List<OrderDetail> orderDetail) {
         this.orderID = orderID;
         this.orderPrice = orderPrice;
         this.orderStatus = orderStatus;
@@ -80,11 +87,16 @@ public class Order {
         this.note = note;
         this.banner = banner;
         this.startDate = startDate;
+        this.phone = phone;
+        this.transfer = transfer;
         this.deliveryDateTime = deliveryDateTime;
         this.accountID = accountID;
         this.promotionID = promotionID;
+        this.payments = payments;
         this.orderDetail = orderDetail;
     }
+
+    
 
     public Integer getOrderID() {
         return orderID;
@@ -180,6 +192,30 @@ public class Order {
 
     public void setOrderDetail(List<OrderDetail> orderDetail) {
         this.orderDetail = orderDetail;
+    }
+
+    public Integer getPhone() {
+        return phone;
+    }
+
+    public void setPhone(Integer phone) {
+        this.phone = phone;
+    }
+
+    public List<Payment> getPayments() {
+        return payments;
+    }
+
+    public void setPayments(List<Payment> payments) {
+        this.payments = payments;
+    }
+
+    public Boolean getTransfer() {
+        return transfer;
+    }
+
+    public void setTransfer(Boolean transfer) {
+        this.transfer = transfer;
     }
 
 }
