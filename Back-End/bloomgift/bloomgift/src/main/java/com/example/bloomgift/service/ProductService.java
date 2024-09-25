@@ -52,8 +52,6 @@ public class ProductService {
     @Autowired
     private SizeRepository sizeRepository;
 
-  
-
     public List<ProductReponse> getAllProducts() {
         List<Product> products = productRepository.findAll();
 
@@ -85,20 +83,22 @@ public class ProductService {
                 sizeReponses,
                 imageResponses);
     }
-    public List<ProductReponse> getAllProductByCustomer(){
+
+    public List<ProductReponse> getAllProductByCustomer() {
         List<Product> products = productRepository.findAll();
 
         return products.stream().map(this::convertToProductReponseByCustomer).collect(Collectors.toList());
     }
+
     private ProductReponse convertToProductReponseByCustomer(Product product) {
         ProductImageReponse firstImageResponse = product.getProductImages().stream()
-                .findFirst()  
+                .findFirst()
                 .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
-                .orElse(null); 
+                .orElse(null);
         List<SizeReponse> sizeReponses = product.getSizes().stream()
                 .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeQuantity()))
                 .collect(Collectors.toList());
-    
+
         return new ProductReponse(
                 product.getProductID(),
                 product.getDiscount(),
@@ -114,7 +114,7 @@ public class ProductService {
                 product.getCategoryName(),
                 product.getStoreName(),
                 sizeReponses,
-                firstImageResponse != null ? List.of(firstImageResponse) : List.of()  // Wrap the first image in a list
+                firstImageResponse != null ? List.of(firstImageResponse) : List.of() // Wrap the first image in a list
         );
     }
 
@@ -218,6 +218,7 @@ public class ProductService {
                 .collect(Collectors.toList());
         return productResponses;
     }
+
     public List<ProductReponse> getProductFeatured() {
         List<Product> products = productRepository.findAll();
         List<Product> featureProducts = products.stream().filter(Product::getFeatured).collect(Collectors.toList());
@@ -290,7 +291,7 @@ public class ProductService {
                 })
                 .collect(Collectors.toList());
         return productResponses;
-        
+
     }
 
     private int partition(List<Product> products, int low, int high) {
@@ -381,7 +382,6 @@ public class ProductService {
 
     }
 
-
     public void createProduct(ProductRequest productRequest, List<MultipartFile> imageFiles) {
         checkProduct(productRequest);
         Float discount = productRequest.getDiscount();
@@ -436,7 +436,7 @@ public class ProductService {
                 .map(imageUrl -> {
                     ProductImage image = new ProductImage();
                     image.setProductImage(imageUrl);
-                    image.setProductID(product); 
+                    image.setProductID(product);
                     return image;
                 })
                 .collect(Collectors.toList());
@@ -468,7 +468,7 @@ public class ProductService {
         if (size != null) {
             sizeRepository.delete(size);
         }
-    
+
         ProductImage productImage = productImageRepository.findByProductID(existingProduct);
         if (productImage != null) {
             productImageRepository.delete(productImage);
@@ -556,7 +556,7 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm: " + productID));
     }
 
-    public Page<Product> searhProductWithFilterPage(
+    public Page<Product> searchProductWithFilterPage(
             String descriptionProduct,
             String colourProduct,
             Float priceProduct,
@@ -564,10 +564,11 @@ public class ProductService {
             String categoryName,
             Date createDate,
             String storeName,
-            Integer sizeProduct,
             int page,
             int size) {
+
         Specification<Product> spec = Specification.where(null);
+
         if (descriptionProduct != null && !descriptionProduct.isEmpty()) {
             spec = spec.and(ProductSpecification.hasDescriptionProduct(descriptionProduct));
         }
@@ -577,7 +578,7 @@ public class ProductService {
         if (priceProduct != null) {
             spec = spec.and(ProductSpecification.hasPriceProduct(priceProduct));
         }
-        if (productName != null && !colourProduct.isEmpty()) {
+        if (productName != null && !productName.isEmpty()) {
             spec = spec.and(ProductSpecification.hasProductName(productName));
         }
         if (categoryName != null && !categoryName.isEmpty()) {
@@ -589,13 +590,9 @@ public class ProductService {
         if (storeName != null && !storeName.isEmpty()) {
             spec = spec.and(ProductSpecification.hasStoreName(storeName));
         }
-        if (sizeProduct != null) {
-            spec = spec.and(ProductSpecification.hasSizeProduct(sizeProduct));
-        }
 
         Pageable pageable = PageRequest.of(page, size);
         return productRepository.findAll(spec, pageable);
-
     }
 
 }
