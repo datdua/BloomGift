@@ -212,6 +212,38 @@ public class ProductService {
                 .collect(Collectors.toList());
         return productResponses;
     }
+    public List<ProductReponse> getProductFeatured() {
+        List<Product> products = productRepository.findAll();
+        List<Product> featureProducts = products.stream().filter(Product::getFeatured).collect(Collectors.toList());
+        List<ProductReponse> productResponses = featureProducts.stream()
+                .map(product -> {
+                    List<ProductImageReponse> imageResponses = product.getProductImages().stream()
+                            .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
+                            .collect(Collectors.toList());
+                    List<SizeReponse> sizeReponses = product.getSizes().stream()
+                            .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
+                                    size.getSizeFloat()))
+                            .collect(Collectors.toList());
+                    return new ProductReponse(
+                            product.getProductID(),
+                            product.getDiscount(),
+                            product.getDescription(),
+                            product.getColour(),
+                            product.getPrice(),
+                            product.getFeatured(),
+                            product.getProductStatus(),
+                            product.getCreateDate(),
+                            product.getQuantity(),
+                            product.getSold(),
+                            product.getProductName(),
+                            product.getCategoryName(),
+                            product.getStoreName(),
+                            sizeReponses,
+                            imageResponses);
+                })
+                .collect(Collectors.toList());
+        return productResponses;
+    }
 
     public void quickSort(List<Product> products, int low, int high) {
         if (low < high) {
@@ -220,6 +252,39 @@ public class ProductService {
             quickSort(products, pi + 1, high);
 
         }
+    }
+
+    public List<ProductReponse> getProductsByProductStatus(Boolean productStatus) {
+        List<Product> products = productRepository.findByProductStatus(productStatus);
+        List<ProductReponse> productResponses = products.stream()
+                .map(product -> {
+                    List<ProductImageReponse> imageResponses = product.getProductImages().stream()
+                            .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
+                            .collect(Collectors.toList());
+                    List<SizeReponse> sizeReponses = product.getSizes().stream()
+                            .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
+                                    size.getSizeFloat()))
+                            .collect(Collectors.toList());
+                    return new ProductReponse(
+                            product.getProductID(),
+                            product.getDiscount(),
+                            product.getDescription(),
+                            product.getColour(),
+                            product.getPrice(),
+                            product.getFeatured(),
+                            product.getProductStatus(),
+                            product.getCreateDate(),
+                            product.getQuantity(),
+                            product.getSold(),
+                            product.getProductName(),
+                            product.getCategoryName(),
+                            product.getStoreName(),
+                            sizeReponses,
+                            imageResponses);
+                })
+                .collect(Collectors.toList());
+        return productResponses;
+        
     }
 
     private int partition(List<Product> products, int low, int high) {
@@ -310,71 +375,8 @@ public class ProductService {
 
     }
 
-  
 
-    // public void createProductt(ProductRequest productRequest) {
-    //     checkProduct(productRequest);
-    //     Float discount = productRequest.getDiscount();
-    //     String description = productRequest.getDescription();
-    //     String colour = productRequest.getColour();
-    //     Boolean featured = productRequest.getFeatured();
-    //     Integer quantity = productRequest.getQuantity();
-    //     Float price = productRequest.getPrice();
-    //     String categoryName = productRequest.getCategoryName();
-    //     String productName = productRequest.getProductName();
-    //     Category category = categoryRepository.findByCategoryName(categoryName);
-
-    //     if (category == null) {
-    //         throw new IllegalArgumentException("Category not found");
-    //     }
-
-    //     Store store = null;
-    //     if (productRequest.getStoreID() != null) {
-    //         store = storeRepository.findById(productRequest.getStoreID()).orElse(null);
-    //     }
-    //     if (store == null) {
-    //         throw new IllegalArgumentException("Store not found");
-    //     }
-    //     Product product = new Product();
-    //     product.setDiscount(discount);
-    //     product.setDescription(description);
-    //     product.setColour(colour);
-    //     product.setFeatured(featured);
-    //     product.setProductStatus(true);
-    //     product.setProductName(productName);
-    //     product.setCreateDate(new Date());
-    //     product.setQuantity(quantity);
-    //     product.setPrice(price);
-    //     product.setCategoryID(category);
-    //     product.setSold(0);
-    //     product.setStoreID(store);
-    //     List<Size> sizes = productRequest.getSizes().stream()
-    //             .map(sizeRequest -> {
-    //                 Size size = new Size();
-    //                 size.setPrice(sizeRequest.getPrice());
-    //                 size.setText(sizeRequest.getText());
-    //                 size.setSizeFloat(sizeRequest.getSizeFloat());
-    //                 size.setProductID(product);
-    //                 return size;
-    //             })
-    //             .collect(Collectors.toList());
-    //     product.setSizes(sizes);
-    //     List<ProductImage> productImages = productRequest.getImages().stream()
-    //             .map(imageRequest -> {
-    //                 ProductImage image = new ProductImage();
-    //                 image.setProductImage(imageRequest.getProductImage());
-    //                 image.setProductID(product); // set the product reference
-    //                 return image;
-    //             })
-    //             .collect(Collectors.toList());
-
-    //     product.setProductImages(productImages);
-    //     // productImageRepository.saveAll(productImages);
-    //     productRepository.save(product);
-
-    // }
-
-    public void createProductt(ProductRequest productRequest, List<MultipartFile> imageFiles) {
+    public void createProduct(ProductRequest productRequest, List<MultipartFile> imageFiles) {
         checkProduct(productRequest);
         Float discount = productRequest.getDiscount();
         String description = productRequest.getDescription();

@@ -194,9 +194,7 @@ public class StoreService {
         store.setStoreStatus(storePutRequest.getStoreStatus());
         store.setStoreAvatar(storePutRequest.getStoreAvatar());
 
-        Category category = new Category();
-        category.setCategoryID(storePutRequest.getCategoryID());
-
+        storeRepository.save(store);
         return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật cửa hàng thành công"));
 
     }

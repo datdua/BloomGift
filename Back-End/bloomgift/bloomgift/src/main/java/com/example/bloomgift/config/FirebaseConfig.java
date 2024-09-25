@@ -1,24 +1,21 @@
 package com.example.bloomgift.config;
 
-import com.example.bloomgift.BloomgiftApplication;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
-import com.google.firebase.database.FirebaseDatabase;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.database.FirebaseDatabase;
 
 @Configuration
 public class FirebaseConfig {
     private static final String SERCURITY_FIREBASE = "serviceAccountKey.json";
     private static final String DATABASE_URL = "https://bloom-gift-67f83-default-rtdb.firebaseio.com";
-
 
     @SuppressWarnings("deprecation")
     @Bean

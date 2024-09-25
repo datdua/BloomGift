@@ -84,7 +84,7 @@ const Header = ({ username, avatarUrl }) => {
                         onMouseLeave={() => setShowDropdown(false)}
                         align="end"
                     >
-                        <Dropdown.Item href="#profile" className="d-flex align-items-center">
+                        <Dropdown.Item href="shop-profile" className="d-flex align-items-center">
                             <PersonCircle className="mr-2" /> Hồ Sơ Shop
                         </Dropdown.Item>
                         <Dropdown.Item href="#settings" className="d-flex align-items-center">

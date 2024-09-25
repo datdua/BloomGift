@@ -18,8 +18,7 @@ import com.example.bloomgift.model.Store;
 public interface ProductRepository extends JpaRepository<Product,Integer> , JpaSpecificationExecutor<Product>{
 
     List<Product> findProductByStoreID(Store storeID);
-
     
- 
+    List<Product> findByProductStatus(Boolean productStatus);
   
 }

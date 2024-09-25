@@ -1,28 +1,34 @@
 package com.example.bloomgift.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Size")
 public class Size {
-    @Id 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "sizeID") 
-    private Integer sizeID; 
+    @Column(name = "sizeID")
+    private Integer sizeID;
 
     @Column(name = "price")
-    private Float price; 
+    private Float price;
 
     @Column(name = "text")
     private String text;
-    
+
     @Column(name = "sizeFloat")
     private Float sizeFloat;
 
@@ -30,10 +36,12 @@ public class Size {
     @JoinColumn(name = "productID")
     private Product productID;
 
-    public Size(){
+    @OneToMany(mappedBy = "sizeID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderDetail> orderDetails = new ArrayList<>();
+
+    public Size() {
 
     }
-    
 
     public Size(Integer sizeID, Float price, String text, Float sizeFloat, Product productID) {
         this.sizeID = sizeID;
@@ -42,7 +50,6 @@ public class Size {
         this.sizeFloat = sizeFloat;
         this.productID = productID;
     }
-
 
     public Integer getSizeID() {
         return sizeID;
@@ -83,5 +90,5 @@ public class Size {
     public void setProductID(Product productID) {
         this.productID = productID;
     }
-    
+
 }
