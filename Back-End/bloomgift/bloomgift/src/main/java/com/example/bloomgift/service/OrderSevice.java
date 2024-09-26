@@ -1,14 +1,15 @@
 package com.example.bloomgift.service;
 
-import java.math.BigDecimal;
 import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,6 @@ import com.example.bloomgift.model.Size;
 import com.example.bloomgift.model.Store;
 import com.example.bloomgift.reponse.OrderDetailReponse;
 import com.example.bloomgift.reponse.OrderReponse;
-import com.example.bloomgift.reponse.ProductReponse;
 import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.repository.OrderDetailRepository;
 import com.example.bloomgift.repository.OrderRepository;
@@ -38,12 +38,6 @@ import com.example.bloomgift.repository.SizeRepository;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.OrderDetailRequest;
 import com.example.bloomgift.request.OrderRequest;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Scanner;
-import java.net.URLEncoder;
-
-import ch.qos.logback.core.util.StringUtil;
 
 @Service
 public class OrderSevice {
@@ -196,7 +190,7 @@ public class OrderSevice {
             payment.setBankAccountName(firstStore.getBankAccountName());
             payment.setFormat("text");
             payment.setTemplate("compact");
-            //payment.setacqId(firstStore.getAcqIdStore());
+            payment.setAcqId(firstStore.getAcqId());
             paymentRepository.save(payment);
         }
     }
