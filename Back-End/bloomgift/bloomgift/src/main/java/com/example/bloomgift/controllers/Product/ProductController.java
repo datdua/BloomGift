@@ -25,6 +25,7 @@ import com.example.bloomgift.model.Product;
 import com.example.bloomgift.reponse.ProductReponse;
 import com.example.bloomgift.request.ProductRequest;
 import com.example.bloomgift.service.ProductService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -84,27 +85,33 @@ public class ProductController {
         return ResponseEntity.ok(productResponses);
     }
 
-    @DeleteMapping("/{productID}")
-    public ResponseEntity<String> deleteProduct(@PathVariable("productID") Integer productID) {
+    @DeleteMapping("/delete-product/{productID}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Integer productID) {
         try {
             productService.deleteProduct(productID);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Account deleted successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        }
-    }
-
-    @PutMapping(value = "/update-product/{productID}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<?> updateProduct(
-            @PathVariable Integer productID,
-            @RequestBody ProductRequest productRequest) {
-        try {
-            Product prodcut = productService.updateProduct(productID, productRequest);
-            return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật thành công"));
+            return ResponseEntity.ok(Collections.singletonMap("message", "Sản phẩm đã được xóa thành công"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("message", e.getMessage()));
         }
+    }
 
+    @PutMapping(value = "/update-product/{productID}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = "application/json;charset=UTF-8")
+    public ResponseEntity<?> updateProduct(
+            @PathVariable Integer productID,
+            @RequestPart("productRequest") String productRequestJson,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ProductRequest productRequest = objectMapper.readValue(productRequestJson, ProductRequest.class);
+
+            Product product = productService.updateProduct(productID, productRequest, images);
+            return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật thành công"));
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.badRequest()
+                    .body(Collections.singletonMap("message", "Lỗi xử lý dữ liệu JSON: " + e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("message", e.getMessage()));
+        }
     }
 
     @GetMapping("/{productId}")
@@ -118,28 +125,29 @@ public class ProductController {
     }
 
     // @GetMapping("/product/{storeID}")
-    // public ResponseEntity<List<ProductReponse>> getProductsByStoreID(@PathVariable int storeID) {
-    //     List<ProductReponse> products = productService.getProductByStoreID(storeID);
-    //     return ResponseEntity.ok(products);
+    // public ResponseEntity<List<ProductReponse>>
+    // getProductsByStoreID(@PathVariable int storeID) {
+    // List<ProductReponse> products = productService.getProductByStoreID(storeID);
+    // return ResponseEntity.ok(products);
     // }
 
     // @GetMapping("/product-feature-true/{storeID}")
-    // public ResponseEntity<List<ProductReponse>> getProductsByStorIdAndFeaEntity(@PathVariable int storeID) {
-    //     List<ProductReponse> products = productService.getProductByStoreID(storeID);
-    //     return ResponseEntity.ok(products);
+    // public ResponseEntity<List<ProductReponse>>
+    // getProductsByStorIdAndFeaEntity(@PathVariable int storeID) {
+    // List<ProductReponse> products = productService.getProductByStoreID(storeID);
+    // return ResponseEntity.ok(products);
     // }
 
     // @GetMapping("/product-best-seller/{storeID}")
-    // public ResponseEntity<List<ProductReponse>> getProductsBestSeller(@RequestParam int top) {
-    //     List<ProductReponse> products = productService.getProductBySold(top);
-    //     return ResponseEntity.ok(products);
+    // public ResponseEntity<List<ProductReponse>>
+    // getProductsBestSeller(@RequestParam int top) {
+    // List<ProductReponse> products = productService.getProductBySold(top);
+    // return ResponseEntity.ok(products);
     // }
 
     @GetMapping("/products/status")
     public List<ProductReponse> getProductsByProductStatus(@RequestParam Boolean productStatus) {
         return productService.getProductsByProductStatus(productStatus);
     }
-
-  
 
 }

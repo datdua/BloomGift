@@ -177,20 +177,25 @@ public class FirebaseStorageService {
         System.out.println("File deleted successfully: " + fileName);
     }
 
-    public void deleteFile(String filePath) {
-        Storage storage = StorageOptions.getDefaultInstance().getService();
-        Bucket bucket = storage.get(BUCKET_NAME);
-
+    public void deleteFile(String fileUrl) {
         try {
-            Blob blob = bucket.get(filePath);
-            if (blob != null) {
-                blob.delete();
-                logger.info("File " + filePath + " deleted successfully from bucket: " + BUCKET_NAME);
+            Storage storage = StorageOptions.getDefaultInstance().getService();
+
+            URL url = new URL(fileUrl);
+            String path = url.getPath();
+            String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8.name());
+
+            String objectName = decodedPath.replaceFirst("/" + BUCKET_NAME + "/", "");
+            BlobId blobId = BlobId.of(BUCKET_NAME, objectName);
+            boolean deleted = storage.delete(blobId);
+
+            if (deleted) {
+                logger.info("File deleted successfully: " + fileUrl);
             } else {
-                logger.warning("File " + filePath + " not found in bucket: " + BUCKET_NAME);
+                logger.warning("File not found or not deleted: " + fileUrl);
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error deleting file", e);
+            logger.log(Level.SEVERE, "Error deleting file: " + fileUrl, e);
         }
     }
 
@@ -212,6 +217,21 @@ public class FirebaseStorageService {
         } catch (StorageException e) {
             logger.log(Level.SEVERE, "Error downloading file: " + fileName, e);
             throw new IOException("Failed to download file: " + fileName, e);
+        }
+    }
+
+    public void deleteFileFromURL(String imageUrl) {
+        try {
+            Storage storage = StorageOptions.getDefaultInstance().getService();
+            String fileName = URLDecoder.decode(imageUrl.substring(imageUrl.lastIndexOf("/") + 1),
+                    StandardCharsets.UTF_8);
+            BlobId blobId = BlobId.of(BUCKET_NAME, fileName);
+            boolean deleted = storage.delete(blobId);
+            if (!deleted) {
+                throw new RuntimeException("Failed to delete file: " + fileName);
+            }
+        } catch (StorageException e) {
+            throw new RuntimeException("Failed to delete file from Firebase: " + imageUrl, e);
         }
     }
 

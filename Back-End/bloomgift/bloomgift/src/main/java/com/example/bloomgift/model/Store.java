@@ -78,31 +78,30 @@ public class Store {
     @Column(name = "otp")
     private String otp;
 
-    @Column(name="acqId")
-    private Integer acqId;
+    // @Column(name = "acqIdStore")
+    // private Integer acqIdStore;
 
     @Column(name = "otp_generated_time")
     private LocalDateTime otp_generated_time;
-    
 
     @ManyToOne
     @JoinColumn(name = "roleID", nullable = false)
     private Role role;
 
-
-     @OneToMany(mappedBy = "storeID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "storeID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails = new ArrayList<>();
+
     public Store() {
     }
 
     @OneToMany(mappedBy = "storeID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Payment> payments = new ArrayList<>();
-    
 
     public Store(Integer storeID, Set<Product> products, String storeName, String type, String storePhone,
             String storeAddress, String email, String bankAccountName, String bankNumber, String bankAddress,
             String taxNumber, String storeStatus, String storeAvatar, String identityCard, String identityName,
-            String password, String otp, LocalDateTime otp_generated_time, Role role) {
+            String password, Role role, String otp, LocalDateTime otp_generated_time, Integer acqIdStore,
+            List<OrderDetail> orderDetails, List<Payment> payments) {
         this.storeID = storeID;
         this.products = products;
         this.storeName = storeName;
@@ -119,9 +118,12 @@ public class Store {
         this.identityCard = identityCard;
         this.identityName = identityName;
         this.password = password;
+        this.role = role;
         this.otp = otp;
         this.otp_generated_time = otp_generated_time;
-        this.role = role;
+        //this.acqIdStore = acqIdStore;
+        this.orderDetails = orderDetails;
+        this.payments = payments;
     }
 
     public Integer getStoreID() {
@@ -277,13 +279,13 @@ public class Store {
         this.otp_generated_time = otp_generated_time;
     }
 
-    public Integer getAcqId() {
-        return acqId;
-    }
+    // public Integer getAcqIdStore() {
+    //     return acqIdStore;
+    // }
 
-    public void setAcqId(Integer acqId) {
-        this.acqId = acqId;
-    }
+    // public void setAcqIdStore(Integer acqIdStore) {
+    //     this.acqIdStore = acqIdStore;
+    // }
 
     public List<OrderDetail> getOrderDetails() {
         return orderDetails;
