@@ -1,14 +1,13 @@
 import PropTypes from "prop-types";
 import React, { Fragment } from "react";
 import { connect } from "react-redux";
-import { getProducts } from "../../helpers/product";
 import ProductGridSingle from "../../components/product/ProductGridSingle";
 import { addToCart } from "../../redux/actions/cartActions";
 import { addToWishlist } from "../../redux/actions/wishlistActions";
 import { addToCompare } from "../../redux/actions/compareActions";
 
 const ProductGrid = ({
-  products,
+  products = [], // This prop is the array of products passed based on the active tab
   currency,
   addToCart,
   addToWishlist,
@@ -21,7 +20,7 @@ const ProductGrid = ({
 }) => {
   return (
     <Fragment>
-      {products.map(product => {
+      {products.map((product, index) => {
         return (
           <ProductGridSingle
             sliderClassName={sliderClassName}
@@ -31,20 +30,10 @@ const ProductGrid = ({
             addToCart={addToCart}
             addToWishlist={addToWishlist}
             addToCompare={addToCompare}
-            cartItem={
-              cartItems.filter(cartItem => cartItem.id === product.id)[0]
-            }
-            wishlistItem={
-              wishlistItems.filter(
-                wishlistItem => wishlistItem.id === product.id
-              )[0]
-            }
-            compareItem={
-              compareItems.filter(
-                compareItem => compareItem.id === product.id
-              )[0]
-            }
-            key={product.id}
+            cartItem={cartItems.find(cartItem => cartItem.productID === product.productID)}
+            wishlistItem={wishlistItems.find(wishlistItem => wishlistItem.productID === product.productID)}
+            compareItem={compareItems.find(compareItem => compareItem.productID === product.productID)}
+            key={`${product.productID}-${index}`}
           />
         );
       })}
@@ -59,7 +48,7 @@ ProductGrid.propTypes = {
   cartItems: PropTypes.array,
   compareItems: PropTypes.array,
   currency: PropTypes.object,
-  products: PropTypes.array,
+  products: PropTypes.array, // Ensure products array is passed correctly
   sliderClassName: PropTypes.string,
   spaceBottomClass: PropTypes.string,
   wishlistItems: PropTypes.array
@@ -67,12 +56,6 @@ ProductGrid.propTypes = {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    products: getProducts(
-      state.productData.products,
-      ownProps.category,
-      ownProps.type,
-      ownProps.limit
-    ),
     currency: state.currencyData,
     cartItems: state.cartData,
     wishlistItems: state.wishlistData,
@@ -82,22 +65,8 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    addToCart: (
-      item,
-      addToast,
-      quantityCount,
-      selectedProductColor,
-      selectedProductSize
-    ) => {
-      dispatch(
-        addToCart(
-          item,
-          addToast,
-          quantityCount,
-          selectedProductColor,
-          selectedProductSize
-        )
-      );
+    addToCart: (item, addToast, quantityCount, selectedProductColor, selectedProductSize) => {
+      dispatch(addToCart(item, addToast, quantityCount, selectedProductColor, selectedProductSize));
     },
     addToWishlist: (item, addToast) => {
       dispatch(addToWishlist(item, addToast));

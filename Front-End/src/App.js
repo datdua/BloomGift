@@ -15,6 +15,8 @@ import ShopManagement from "./components/sidebar/ShopManagement";
 import StoreProfile from "./components/sidebar/ProductManager/StoreProfile";
 import Header from "./components/sidebar/HeaderSidebar";
 import ProductList from "./components/sidebar/ProductManager/ProductList";
+import OrderHistory from "./pages/other/Order";
+
 
 
 // home pages
@@ -111,6 +113,7 @@ const About = lazy(() => import("./pages/other/About"));
 const Contact = lazy(() => import("./pages/other/Contact"));
 const MyAccount = lazy(() => import("./pages/other/MyAccount"));
 const LoginRegister = lazy(() => import("./pages/other/LoginRegister"));
+
 
 const Cart = lazy(() => import("./pages/other/Cart"));
 const Wishlist = lazy(() => import("./pages/other/Wishlist"));
@@ -447,6 +450,10 @@ const App = (props) => {
                 <Route
                   path={publicUrl + "/not-found"}
                   component={NotFound}
+                />
+                <Route 
+                  path={publicUrl + "/donhang"}
+                  component={OrderHistory}
                 />
                 <Route path="/seller">
                   <SalerSidebar>

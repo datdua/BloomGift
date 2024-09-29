@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect, useCallback } from "react";
 import MetaTags from "react-meta-tags";
 import Paginator from "react-hooks-paginator";
 import { BreadcrumbsItem } from "react-breadcrumbs-dynamic";
@@ -11,6 +11,7 @@ import ShopSidebar from "../../wrappers/product/ShopSidebar";
 import ShopTopbar from "../../wrappers/product/ShopTopbar";
 import ShopProducts from "../../wrappers/product/ShopProducts";
 import { getAllProducts, searchProduct } from "../../redux/actions/productActions";
+import { useToasts } from "react-toast-notifications";
 
 const ShopGridFullWidth = ({ location, products, getAllProducts, searchProduct }) => {
   const [layout, setLayout] = useState("grid three-column");
@@ -22,34 +23,66 @@ const ShopGridFullWidth = ({ location, products, getAllProducts, searchProduct }
   const [currentPage, setCurrentPage] = useState(1);
   const [currentData, setCurrentData] = useState([]);
   const [sortedProducts, setSortedProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // Add state for search term
-
-  const pageLimit = 15;
+  const [isSearching, setIsSearching] = useState(false);
+  const pageLimit = 10;
   const { pathname } = location;
 
+
+  // New state for search parameters
+  const [searchParams, setSearchParams] = useState({
+    descriptionProduct: "",
+    colourProduct: "",
+    priceProduct: "",
+    productName: "",
+    categoryName: "",
+    createDate: "",
+    storeName: "",
+    sizeProduct: ""
+  });
+
+  const { addToast } = useToasts();
+
+  const fetchProducts = useCallback(() => {
+    setIsSearching(true);
+    const apiCall = Object.values(searchParams).some(param => param !== "")
+      ? searchProduct(
+        addToast,
+        searchParams.descriptionProduct,
+        searchParams.colourProduct,
+        searchParams.priceProduct,
+        searchParams.productName,
+        searchParams.categoryName,
+        searchParams.createDate,
+        searchParams.storeName,
+        searchParams.sizeProduct,
+        currentPage - 1,
+        pageLimit
+      )
+      : getAllProducts(currentPage - 1, pageLimit);
+
+    apiCall
+      .then((response) => {
+        setSortedProducts(response.content);
+        setCurrentData(response.content);
+        setIsSearching(false);
+      })
+      .catch((error) => {
+        console.error("Failed to load products", error);
+        setIsSearching(false);
+      });
+  }, [searchParams, currentPage, pageLimit, searchProduct, getAllProducts, addToast]);
+
   useEffect(() => {
-    if (searchTerm) {
-      // Fetch products based on the search term
-      searchProduct(searchTerm)
-        .then((products) => {
-          setSortedProducts(products);
-          setCurrentData(products.slice(offset, offset + pageLimit));
-        })
-        .catch((error) => {
-          console.error("Failed to load search results", error);
-        });
-    } else {
-      // Fetch all products if no search term
-      getAllProducts()
-        .then((products) => {
-          setSortedProducts(products);
-          setCurrentData(products.slice(offset, offset + pageLimit));
-        })
-        .catch((error) => {
-          console.error("Failed to load products", error);
-        });
-    }
-  }, [offset, searchTerm, getAllProducts, searchProduct]);
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const handleSearch = useCallback((paramName, value) => {
+    setSearchParams(prevParams => ({
+      ...prevParams,
+      [paramName]: value
+    }));
+    setCurrentPage(1);
+  }, []);
 
   const getLayout = (layout) => {
     setLayout(layout);
@@ -65,6 +98,7 @@ const ShopGridFullWidth = ({ location, products, getAllProducts, searchProduct }
     setFilterSortValue(sortValue);
   };
 
+  // Sort products based on user selection
   useEffect(() => {
     const sortedProductsList = getSortedProducts(products, sortType, sortValue);
     const filterSortedProductsList = getSortedProducts(
@@ -76,9 +110,6 @@ const ShopGridFullWidth = ({ location, products, getAllProducts, searchProduct }
     setCurrentData(filterSortedProductsList.slice(offset, offset + pageLimit));
   }, [offset, products, sortType, sortValue, filterSortType, filterSortValue]);
 
-  const handleSearch = (searchQuery) => {
-    setSearchTerm(searchQuery);
-  };
 
   return (
     <Fragment>
@@ -103,34 +134,37 @@ const ShopGridFullWidth = ({ location, products, getAllProducts, searchProduct }
                   products={products}
                   getSortParams={getSortParams}
                   sideSpaceClass="mr-30"
-                  handleSearch={handleSearch} // Add search handler
+                  handleSearch={handleSearch}
+                  isSearching={isSearching}
+                  searchParams={searchParams}
                 />
               </div>
               <div className="col-lg-9 order-1 order-lg-2">
-                {/* shop topbar default */}
                 <ShopTopbar
                   getLayout={getLayout}
                   getFilterSortParams={getFilterSortParams}
                   productCount={products.length}
-                  sortedProductCount={currentData.length}
+                  sortedProductCount={Array.isArray(currentData) ? currentData.length : 0} // Safely access length
                 />
 
                 {/* shop page content default */}
-                <ShopProducts layout={layout} products={currentData} />
+                <ShopProducts layout={layout} products={products} />
 
                 {/* shop product pagination */}
                 <div className="pro-pagination-style text-center mt-30">
-                  <Paginator
-                    totalRecords={sortedProducts.length}
-                    pageLimit={pageLimit}
-                    pageNeighbours={2}
-                    setOffset={setOffset}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
-                    pageContainerClass="mb-0 mt-0"
-                    pagePrevText="«"
-                    pageNextText="»"
-                  />
+                  {sortedProducts && Array.isArray(sortedProducts) && (
+                    <Paginator
+                      totalRecords={sortedProducts.length} // Safely access the length
+                      pageLimit={pageLimit}
+                      pageNeighbours={2}
+                      setOffset={setOffset}
+                      currentPage={currentPage}
+                      setCurrentPage={setCurrentPage}
+                      pageContainerClass="mb-0 mt-0"
+                      pagePrevText="«"
+                      pageNextText="»"
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -145,7 +179,7 @@ ShopGridFullWidth.propTypes = {
   location: PropTypes.object,
   products: PropTypes.array,
   getAllProducts: PropTypes.func.isRequired,
-  searchProduct: PropTypes.func.isRequired 
+  searchProduct: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state) => {
@@ -156,7 +190,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
   getAllProducts,
-  searchProduct, 
+  searchProduct,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ShopGridFullWidth);

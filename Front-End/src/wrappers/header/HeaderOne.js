@@ -19,7 +19,9 @@ const HeaderOne = ({
 
   useEffect(() => {
     const header = document.querySelector(".sticky-bar");
-    setHeaderTop(header.offsetTop);
+    if (header) {
+      setHeaderTop(header.offsetTop);
+    }
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -44,13 +46,12 @@ const HeaderOne = ({
         }`}
       >
         <div className={layout === "container-fluid" ? layout : "container"}>
-          {/* header top */}
           <HeaderTop borderStyle={borderStyle} />
         </div>
       </div>
 
       <div
-        className={` ${
+        className={`${
           headerPaddingClass ? headerPaddingClass : ""
         } sticky-bar header-res-padding clearfix ${
           scroll > headerTop ? "stick" : ""

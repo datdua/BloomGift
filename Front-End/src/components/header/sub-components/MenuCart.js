@@ -34,7 +34,7 @@ const MenuCart = ({ cartData, currency, deleteFromCart }) => {
                       <img
                         alt={single.productName}
                         src={single.images && single.images.length > 0
-                          ? single.images[0].productImage // Correct access to productImage
+                          ? single.images[0].productImage
                           : `${process.env.PUBLIC_URL}/assets/img/product/fashion/1.jpg`}
                         className="img-fluid"
                       />
@@ -55,7 +55,7 @@ const MenuCart = ({ cartData, currency, deleteFromCart }) => {
                     {single.colour && single.sizes && single.sizes.length > 0 ? (
                       <div className="cart-item-variation">
                         <span>Color: {single.colour}</span>
-                        <span>Size: {single.sizes[0]}</span>
+                        <span>Size: {single.sizes[0].text}</span>
                       </div>
                     ) : null}
                   </div>

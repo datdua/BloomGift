@@ -198,7 +198,7 @@ const Checkout = ({ location, cartItems, currency }) => {
                       <div className="payment-method"></div>
                     </div>
                     <div className="place-order mt-25">
-                      <button className="btn-hover">Place Order</button>
+                      <Link to={process.env.PUBLIC_URL + "/donhang"}>Place Order</Link>
                     </div>
                   </div>
                 </div>

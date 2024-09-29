@@ -3,7 +3,7 @@ import React from "react";
 import Tab from "react-bootstrap/Tab";
 import Nav from "react-bootstrap/Nav";
 
-const ProductDescriptionTab = ({ spaceBottomClass, productFullDesc }) => {
+const ProductDescriptionTab = ({ spaceBottomClass, product }) => {
   return (
     <div className={`description-review-area ${spaceBottomClass}`}>
       <div className="container">
@@ -11,9 +11,7 @@ const ProductDescriptionTab = ({ spaceBottomClass, productFullDesc }) => {
           <Tab.Container defaultActiveKey="productDescription">
             <Nav variant="pills" className="description-review-topbar">
               <Nav.Item>
-                <Nav.Link eventKey="additionalInfo">
-                  Additional Information
-                </Nav.Link>
+                <Nav.Link eventKey="additionalInfo">Additional Information</Nav.Link>
               </Nav.Item>
               <Nav.Item>
                 <Nav.Link eventKey="productDescription">Description</Nav.Link>
@@ -27,23 +25,28 @@ const ProductDescriptionTab = ({ spaceBottomClass, productFullDesc }) => {
                 <div className="product-anotherinfo-wrapper">
                   <ul>
                     <li>
-                      <span>Weight</span> 400 g
+                      <span>Category</span> {product?.categoryName || "N/A"}
                     </li>
                     <li>
-                      <span>Dimensions</span>10 x 10 x 15 cm{" "}
+                      <span>Store</span> {product?.storeName || "N/A"}
                     </li>
                     <li>
-                      <span>Materials</span> 60% cotton, 40% polyester
+                      <span>Weight</span> {product?.weight || "N/A"} 
                     </li>
                     <li>
-                      <span>Other Info</span> American heirloom jean shorts pug
-                      seitan letterpress
+                      <span>Dimensions</span> {product?.dimesions || "NA"}
+                    </li>
+                    <li>
+                      <span>Materials</span> {product?.materials || "NA"}
+                    </li>
+                    <li>
+                      <span>Other Info</span> {product?.materials || "NA"}
                     </li>
                   </ul>
                 </div>
               </Tab.Pane>
               <Tab.Pane eventKey="productDescription">
-                {productFullDesc}
+                {product?.description || "No description available"}
               </Tab.Pane>
               <Tab.Pane eventKey="productReviews">
                 <div className="row">
@@ -179,7 +182,7 @@ const ProductDescriptionTab = ({ spaceBottomClass, productFullDesc }) => {
 };
 
 ProductDescriptionTab.propTypes = {
-  productFullDesc: PropTypes.string,
+  product: PropTypes.object.isRequired,
   spaceBottomClass: PropTypes.string
 };
 

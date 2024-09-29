@@ -19,18 +19,16 @@ const ProductImageDescription = ({
   compareItems
 }) => {
   const wishlistItem = wishlistItems.filter(
-    wishlistItem => wishlistItem.id === product.id
+    wishlistItem => wishlistItem.id === product?.productID
   )[0];
   const compareItem = compareItems.filter(
-    compareItem => compareItem.id === product.id
+    compareItem => compareItem.id === product?.productID
   )[0];
   const { addToast } = useToasts();
 
-  const discountedPrice = getDiscountPrice(product.price, product.discount);
-  const finalProductPrice = +(product.price * currency.currencyRate).toFixed(2);
-  const finalDiscountedPrice = +(
-    discountedPrice * currency.currencyRate
-  ).toFixed(2);
+  const discountedPrice = getDiscountPrice(product?.price, product?.discount);
+  const finalProductPrice = +(product?.price * currency?.currencyRate || 0).toFixed(2);
+  const finalDiscountedPrice = +(discountedPrice * currency?.currencyRate || 0).toFixed(2);
 
   return (
     <div

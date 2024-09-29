@@ -17,6 +17,7 @@ const ProductGridListSingle = ({
   sliderClassName,
   spaceBottomClass
 }) => {
+  console.log('Rendering product:', product);
   const [modalShow, setModalShow] = useState(false);
   const { addToast } = useToasts();
 

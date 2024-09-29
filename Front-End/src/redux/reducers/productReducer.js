@@ -2,7 +2,8 @@ import {
   FETCH_PRODUCTS_SUCCESS, 
   SEARCH_PRODUCT, 
   GET_PRODUCT_DETAIL, 
-  GET_NEW_PRODUCT 
+  GET_NEW_PRODUCT,
+  GET_PRODUCT_IMAGES 
 } from "../actions/productActions";
 
 const initState = {
@@ -37,7 +38,11 @@ const productReducer = (state = initState, action) => {
         ...state,
         newProducts: action.payload
       };
-
+    case GET_PRODUCT_IMAGES:
+      return {
+        ...state,
+        productImages: action.payload
+      };
     default:
       return state;
   }

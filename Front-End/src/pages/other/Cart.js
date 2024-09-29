@@ -10,7 +10,6 @@ import {
   addToCart,
   decreaseQuantity,
   deleteFromCart,
-  cartItemStock,
   deleteAllFromCart
 } from "../../redux/actions/cartActions";
 import LayoutOne from "../../layouts/LayoutOne";
@@ -29,6 +28,16 @@ const Cart = ({
   const { addToast } = useToasts();
   const { pathname } = location;
   let cartTotalPrice = 0;
+
+  // New function to safely get item stock
+  const getItemStock = (item) => {
+    if (item.stock) {
+      return item.stock;
+    } else if (item.quantity) {
+      return item.quantity;
+    }
+    return 0; // Default to 0 if no stock information is available
+  };
 
   return (
     <Fragment>
@@ -99,7 +108,7 @@ const Cart = ({
                                       className="img-fluid"
                                       src={
                                         cartItem.images && cartItem.images.length > 0 
-                                        ? process.env.PUBLIC_URL + cartItem.images[0].productImage
+                                        ? cartItem.images[0].productImage
                                         : process.env.PUBLIC_URL + "/assets/img/product/fashion/1.jpg"
                                       }
                                       alt={cartItem.productName}
@@ -181,11 +190,7 @@ const Cart = ({
                                         cartItem !== undefined &&
                                         cartItem.quantity &&
                                         cartItem.quantity >=
-                                          cartItemStock(
-                                            cartItem,
-                                            cartItem.selectedProductColor,
-                                            cartItem.selectedProductSize
-                                          )
+                                          getItemStock(cartItem)
                                       }
                                     >
                                       +
@@ -330,7 +335,7 @@ const Cart = ({
                     </div>
                   </div>
                 </div>
-              </Fragment>
+                </Fragment>
             ) : (
               <div className="row">
                 <div className="col-lg-12">

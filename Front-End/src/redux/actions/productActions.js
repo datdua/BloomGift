@@ -4,6 +4,12 @@ export const FETCH_PRODUCTS_SUCCESS = "FETCH_PRODUCTS_SUCCESS";
 export const SEARCH_PRODUCT = "SEARCH_PRODUCT";
 export const GET_PRODUCT_DETAIL = "GET_PRODUCT_DETAIL";
 export const GET_NEW_PRODUCT = "GET_NEW_PRODUCT";
+export const GET_ALL_PRODUCTS = "GET_ALL_PRODUCTS";
+export const GET_FEATURE_PRODUCT = "GET_FEATURE_PRODUCTS"
+export const GET_BEST_SELLER_PRODUCTS = "GET_BEST_SELLER_PRODUCT";
+export const CREATE_PRODUCT_SUCCESS = "CREATE_PRODUCT_SUCCESS";
+export const CREATE_PRODUCT_FAILURE = "CREATE_PRODUCT_FAILURE";
+export const GET_PRODUCT_IMAGES = "GET_PRODUCT_IMAGE";
 
 const fetchProductsSuccess = products => ({
   type: FETCH_PRODUCTS_SUCCESS,
@@ -16,12 +22,24 @@ export const fetchProducts = products => {
   };
 };
 
+// Create product success action
+const createProductSuccess = (message) => ({
+  type: CREATE_PRODUCT_SUCCESS,
+  payload: message,
+});
+
+// Create product failure action
+const createProductFailure = (error) => ({
+  type: CREATE_PRODUCT_FAILURE,
+  payload: error,
+});
+
 export const getAllProducts = (addToast) => {
   return async (dispatch) => {
     try {
-      const response = await axios.get("https://bloomgift.lemonhill-6b585cc3.eastasia.azurecontainerapps.io/api/auth/product-customer/list-product-by-customer");
+      const response = await axios.get("http://localhost:8080/api/auth/product-customer/list-product-by-customer");
       dispatch(fetchProductsSuccess(response.data));
-      
+
       return response.data;
     } catch (error) {
       console.error("Get all products failed:", error);
@@ -33,16 +51,16 @@ export const getAllProducts = (addToast) => {
 
 
 export const searchProduct = (
-  addToast, 
-  descriptionProduct, 
-  colourProduct, 
-  priceProduct, 
-  productName, 
-  categoryName, 
-  createDate, 
-  storeName, 
-  sizeProduct, 
-  page = 0, 
+  addToast,
+  descriptionProduct,
+  colourProduct,
+  priceProduct,
+  productName,
+  categoryName,
+  createDate,
+  storeName,
+  sizeProduct,
+  page = 0,
   size = 10
 ) => {
   return async (dispatch) => {
@@ -60,10 +78,10 @@ export const searchProduct = (
       params.size = size;
 
       const response = await axios.get(
-        "https://bloomgift.lemonhill-6b585cc3.eastasia.azurecontainerapps.io/api/product/search",
+        "http://localhost:8080/api/auth/product-customer/search-product",
         { params }
       );
-      
+
       dispatch({
         type: SEARCH_PRODUCT,
         payload: response.data,
@@ -80,7 +98,10 @@ export const searchProduct = (
 export const getProductDetail = (addToast, productId) => {
   return async (dispatch) => {
     try {
-      const response = await axios.get(`https://bloomgift.lemonhill-6b585cc3.eastasia.azurecontainerapps.io/api/product/${productId}`);
+      const response = await axios.get(`http://localhost:8080/api/product/${productId}`,{
+        headers: {
+          'Content-Type': 'application/json',
+      }});
       dispatch({
         type: GET_PRODUCT_DETAIL,
         payload: response.data,
@@ -94,19 +115,146 @@ export const getProductDetail = (addToast, productId) => {
   };
 }
 
+export const getProductBestSeller = (addToast, top) => {
+  return async (dispatch) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/auth/product-customer/get-product-best-seller/{Top}?top=${top}`);
+      dispatch({
+        type: GET_BEST_SELLER_PRODUCTS,
+        payload: response.data,
+      })
+      return response.data;
+    } catch (error) {
+      console.error("Get best seller failed:", error);
+      if (addToast) addToast("Lấy sản phẩm bán chạy thất bại!", { appearance: "error", autoDismiss: true });
+      throw error;
+    }
+  }
+} 
+
 export const getNewProduct = (addToast) => {
   return async (dispatch) => {
     try {
-      const response = await axios.get(`https://bloomgift.lemonhill-6b585cc3.eastasia.azurecontainerapps.io/api/product/new-product`);
+      const response = await axios.get(`http://localhost:8080/api/auth/product-customer/new-product`);
       dispatch({
         type: GET_NEW_PRODUCT,
         payload: response.data,
       })
       return response.data;
-      } catch (error) {
-        console.error("Get new product failed:", error);
-        if (addToast) addToast("Lấy sản phẩm mới thất bại!", { appearance:"error", autoDismiss: true });
-        throw error;
-        }
+    } catch (error) {
+      console.error("Get new product failed:", error);
+      if (addToast) addToast("Lấy sản phẩm mới thất bại!", { appearance: "error", autoDismiss: true });
+      throw error;
     }
+  }
+}
+
+export const getFeatureProduct = (addToast) => {
+  return async (dispatch) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/auth/product-customer/get-product-feature-true`);
+      dispatch({
+        type: GET_FEATURE_PRODUCT,
+        payload: response.data,
+      })
+      return response.data;
+    } catch (error) {
+      console.error("Get feature product failed:", error);
+      if (addToast) addToast("Lấy sản phẩm nổi bật thất bại!", { appearance: "error", autoDismiss: true });
+      throw error;
+    }
+  }
+}
+
+export const getProductByStatusFalse = () => {
+  return async (dispatch) => {
+    try {
+      const response = await axios.get('http://localhost:8080/api/product/products/status?productStatus=false');
+      if (response.status !== 200) {
+        throw new Error(`Lỗi khi nhận dữ liệu: ${response.status}`);
+      }
+      const products = response.data;
+      dispatch({
+        type: GET_ALL_PRODUCTS,
+        payload: products
+      });
+      return products;
+    } catch (error) {
+      console.error("Fetch all products failed:", error);
+      return Promise.reject(error);
+    }
+  }
+}
+
+export const getProductByStatusTrue = () => {
+  return async (dispatch) => {
+    try {
+      const response = await axios.get('http://localhost:8080/api/product/products/status?productStatus=true');
+      if (response.status !== 200) {
+        throw new Error(`Lỗi khi nhận dữ liệu: ${response.status}`);
+      }
+      const products = response.data;
+      dispatch({
+        type: GET_ALL_PRODUCTS,
+        payload: products
+      });
+      return products;
+    } catch (error) {
+      console.error("Fetch all products failed:", error);
+      return Promise.reject(error);
+    }
+  }
+}
+
+export const createProduct = (productRequest, imageFiles) => {
+  return async (dispatch) => {
+    try {
+
+      const formData = new FormData();
+
+      formData.append('productRequest', JSON.stringify(productRequest));
+
+      imageFiles.forEach((file) => {
+        formData.append('imageFiles', file);
+      });
+      const response = await axios.post(
+        'http://localhost:8080/api/product/create',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      if (response.status === 201) {
+        dispatch(createProductSuccess('Product created successfully'));
+      } else {
+        throw new Error('Failed to create product');
+      }
+    } catch (error) {
+      console.error('Create product failed:', error);
+      dispatch(createProductFailure(error.message));
+      return Promise.reject(error);
+    }
+  };
+};
+
+export const getProductImages = (productID) => {
+  return async (dispatch) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/product-images/${productID}/images`);
+      if (response.status !== 200) {
+        throw new Error(`Failed to fetch images: ${response.status}`);
+      }
+      const images = response.data;
+      dispatch({
+        type: GET_PRODUCT_IMAGES,
+        payload: images,
+      });
+      return images;
+    } catch (error) {
+      console.error('Fetch images failed:', error);
+      return Promise.reject(error);
+    }
+  };
 }

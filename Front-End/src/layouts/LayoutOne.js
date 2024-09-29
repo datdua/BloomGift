@@ -2,6 +2,12 @@ import PropTypes from "prop-types";
 import React, { Fragment } from "react";
 import HeaderOne from "../wrappers/header/HeaderOne";
 import FooterOne from "../wrappers/footer/FooterOne";
+import HeaderTwo from "../wrappers/header/HeaderTwo";
+import HeaderThree from "../wrappers/header/HeaderThree";
+import HeaderFour from "../wrappers/header/HeaderFour";
+import HeaderFive from "../wrappers/header/HeaderFive";
+import HeaderSix from "../wrappers/header/HeaderSix";
+import { Header } from "react-fullpage";
 
 const LayoutOne = ({
   children,

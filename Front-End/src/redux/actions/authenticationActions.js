@@ -13,7 +13,7 @@ export const LOGIN_GOOGLE = "LOGIN_GOOGLE"
 export const registerAccount = (userData, addToast) => {
     return async (dispatch) => {
         try {
-            const response = await axios.post('https://bloomgift.lemonhill-6b585cc3.eastasia.azurecontainerapps.io/api/auth/register', {
+            const response = await axios.post('http://localhost:8080/api/auth/register', {
                 email: userData.email,
                 phone: userData.phone,
                 address: userData.address,
@@ -42,7 +42,7 @@ export const registerAccount = (userData, addToast) => {
 export const loginAccount = (userData, addToast) => {
     return async (dispatch) => {
         try {
-            const response = await axios.post("https://bloomgift.lemonhill-6b585cc3.eastasia.azurecontainerapps.io/api/auth/login", {
+            const response = await axios.post("http://localhost:8080/api/auth/login", {
                 email: userData.email,
                 password: userData.password,
             });
@@ -50,6 +50,11 @@ export const loginAccount = (userData, addToast) => {
                 type: LOGIN,
                 payload: response.data,
             });
+
+            if (response.data && response.data.token) {
+                localStorage.setItem("token", response.data.token);
+            }
+            
             if (addToast) addToast("Đăng nhập thành công!", { appearance: "success", autoDismiss: true });
             return response.data;
         } catch (error) {
@@ -68,7 +73,7 @@ export const verifyAccount = (userData, addToast) => {
                 otp: userData.otp
             }).toString();
 
-            const response = await axios.put(`https://bloomgift.lemonhill-6b585cc3.eastasia.azurecontainerapps.io/api/auth/verify-account?${query}`, {
+            const response = await axios.put(`http://localhost:8080/api/auth/verify-account?${query}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
@@ -89,7 +94,7 @@ export const verifyAccount = (userData, addToast) => {
 export const forgotPassword = (email, addToast) => {
     return async (dispatch) => {
         try {
-            const url = `https://bloomgift.lemonhill-6b585cc3.eastasia.azurecontainerapps.io/api/auth/forget-password?email=${encodeURIComponent(email)}`;
+            const url = `http://localhost:8080/api/auth/forget-password?email=${encodeURIComponent(email)}`;
             console.log("Forgot Password URL:", url);
 
             const response = await axios.post(url);
@@ -110,7 +115,7 @@ export const forgotPassword = (email, addToast) => {
 export const resetPassword = (userData, addToast) => {
     return async (dispatch) => {
         try {
-            const url = `https://bloomgift.lemonhill-6b585cc3.eastasia.azurecontainerapps.io/api/auth/set-password?email=${encodeURIComponent(userData.email)}&newPassword=${encodeURIComponent(userData.newPassword)}`;
+            const url = `http://localhost:8080/api/auth/set-password?email=${encodeURIComponent(userData.email)}&newPassword=${encodeURIComponent(userData.newPassword)}`;
             const response = await axios.put(url);
 
             dispatch({
@@ -129,7 +134,7 @@ export const resetPassword = (userData, addToast) => {
 export const regenerateOTP = (email, addToast) => {
     return async (dispatch) => {
         try {
-            const response = await axios.put(`https://bloomgift.lemonhill-6b585cc3.eastasia.azurecontainerapps.io/api/auth/regenerate-otp?email=${encodeURIComponent(email)}`);
+            const response = await axios.put(`http://localhost:8080/api/auth/regenerate-otp?email=${encodeURIComponent(email)}`);
             dispatch({
                 type: REGENERATE_OTP,
                 payload: response.data
@@ -145,7 +150,7 @@ export const regenerateOTP = (email, addToast) => {
 export const signInWithGoogle = (addToast) => {
     return async (dispatch) => {
         try {
-            const response = await axios.get("https://bloomgift.lemonhill-6b585cc3.eastasia.azurecontainerapps.io/api/auth/signInWithGoogle", { withCredentials: true });
+            const response = await axios.get("http://localhost:8080/api/auth/signInWithGoogle", { withCredentials: true });
             
             dispatch({
                 type: LOGIN_GOOGLE,
@@ -170,7 +175,7 @@ export const signInWithGoogle = (addToast) => {
 export const registerStoreAccount = (storeData, addToast) => {
     return async (dispatch) => {
         try {
-            const response = await axios.post('https://bloomgift.lemonhill-6b585cc3.eastasia.azurecontainerapps.io/api/auth/store/register', {
+            const response = await axios.post('http://localhost:8080/api/auth/store/register', {
                 storeName: storeData.storeName,
                 email: storeData.email,
                 type: storeData.type,
