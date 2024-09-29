@@ -3,19 +3,20 @@ package com.example.bloomgift.service;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.domain.Pageable;
+
 import com.example.bloomgift.model.Category;
 import com.example.bloomgift.model.Product;
 import com.example.bloomgift.model.ProductImage;
@@ -47,6 +48,9 @@ public class ProductService {
 
     @Autowired
     private FirebaseStorageService firebaseStorageService;
+
+    @Autowired
+    private ComboService comboService;
 
     public List<ProductReponse> getAllProducts() {
         List<Product> products = productRepository.findAll();
@@ -454,8 +458,14 @@ public class ProductService {
         return imageUrls;
     }
 
+    // Method to delete a product and update combos if necessary
     public void deleteProduct(Integer productID) {
-        Product existingProduct = productRepository.findById(productID).orElseThrow();
+        Product existingProduct = productRepository.findById(productID)
+                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại: " + productID));
+        
+        // Call ComboService to update combo status
+        comboService.updateComboStatusIfProductRemoved(productID);
+
         productRepository.delete(existingProduct);
     }
 

@@ -45,7 +45,7 @@ public class SecurityConfig {
             "/api/product/**"
     };
 
-    private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**" };
+    private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**", "/api/combos/**" };
 
     private static final String[] ADMIN_URL = { "/api/admin/**", "/api/google-sheets/**" };
 
@@ -75,6 +75,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(SWAGGER_URL).permitAll()
+                        .requestMatchers(GUEST_URL).permitAll()
                         .requestMatchers(CUSTOMER_URL).hasRole("CUSTOMER")
                         .requestMatchers(ADMIN_URL).hasRole("ADMIN")
                         .anyRequest().authenticated())
