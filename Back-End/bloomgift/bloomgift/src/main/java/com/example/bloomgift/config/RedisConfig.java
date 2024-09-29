@@ -18,6 +18,7 @@ public class RedisConfig {
         redisStandaloneConfiguration.setHostName("bloomgift12.redis.cache.windows.net");
         redisStandaloneConfiguration.setPort(6380);
         redisStandaloneConfiguration.setPassword("B3l4TP13MSLG1iI0opLMDsV4ZBawGRlvfAzCaH1qYEo=");
+
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                 .useSsl()
                 .build();

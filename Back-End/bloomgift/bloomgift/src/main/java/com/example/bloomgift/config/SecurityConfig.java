@@ -28,88 +28,102 @@ import com.example.bloomgift.service.AccountService;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private static final String[] SWAGGER_URL = {
-            "/v2/api-docs",
-            "/v3/api-docs",
-            "/v3/api-docs/**",
-            "/swagger-resources",
-            "/swagger-resources/**",
-            "/configuration/ui",
-            "/configuration/security",
-            "/swagger-ui/**",
-            "/webjars/**",
-            "/swagger-ui.html",
-            "/api-docs/**",
-            "/api/auth/**",
-            "/api/store/**",
-            "/api/product/**"
-    };
+        private static final String[] SWAGGER_URL = {
+                        "/v2/api-docs",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**",
+                        "/swagger-resources",
+                        "/swagger-resources/**",
+                        "/configuration/ui",
+                        "/configuration/security",
+                        "/swagger-ui/**",
+                        "/webjars/**",
+                        "/swagger-ui.html",
+                        "/api-docs/**",
+                        "/api/auth/**",
+                        "/api/product/**",
 
-    private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**" };
+        };
 
-    private static final String[] ADMIN_URL = { "/api/admin/**", "/api/google-sheets/**" };
+        private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**",
+                        "/api/categories/**" };
 
-    private static final String[] CUSTOMER_URL = { "/api/customer/**", "/api/promotion/**", "/api/store/**" };
+        private static final String[] ADMIN_URL = { "/api/admin/**", "/api/google-sheets/**" };
 
-    private static final String[] MANAGER_URL = { "/api/manager/**" };
+        private static final String[] CUSTOMER_URL = { "/api/customer/**", "/api/promotion/**", "/api/store/**" };
 
-    private static final String[] ADMIN_MANAGER_URL = {};
+        private static final String[] MANAGER_URL = { "/api/manager/**" };
 
-    private static final String[] ADMIN_MANAGER_SALE_STAFF_URL = {};
+        private static final String[] SELLER_URL = { "/api/seller/**" };
 
-    @Autowired
-    private final AccountService UserService;
+        private static final String[] ADMIN_SELLER_URL = { "/api/store/**", "/api/product/**", "/api/promotion/**",
+                        "/api/manager/**", "/api/seller/**", "/api/customer/**", "/api/admin/**", "/api/revenue/**",
+                        "/api/chats/**", "/api/category" };
 
-    @Autowired
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private static final String[] ADMIN_MANAGER_SALE_STAFF_URL = {};
 
-    public SecurityConfig(AccountService UserService, JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.UserService = UserService;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    }
+        @Autowired
+        private final AccountService UserService;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers(SWAGGER_URL).permitAll()
-                        .requestMatchers(CUSTOMER_URL).hasRole("CUSTOMER")
-                        .requestMatchers(ADMIN_URL).hasRole("ADMIN")
-                        .anyRequest().authenticated())
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("http://localhost:8080/oauth2/authorization/google")
-                        .defaultSuccessUrl("http://localhost:3000/signInWithGoogle", true))
-                .formLogin(Customizer.withDefaults());
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        @Autowired
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-        return http.build();
-    }
+        public SecurityConfig(AccountService UserService, JwtAuthenticationFilter jwtAuthenticationFilter) {
+                this.UserService = UserService;
+                this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                http
+                                .cors(withDefaults())
+                                .csrf(csrf -> csrf.disable())
+                                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                                                .requestMatchers(SWAGGER_URL).permitAll()
+                                                .requestMatchers(GUEST_URL).permitAll()
+                                                .requestMatchers(CUSTOMER_URL).hasRole("CUSTOMER")
+                                                .requestMatchers(ADMIN_URL).hasRole("ADMIN")
+                                                .requestMatchers(MANAGER_URL).hasRole("MANAGER")
+                                                .requestMatchers(SELLER_URL).hasRole("SELLER")
+                                                .requestMatchers(ADMIN_SELLER_URL).hasAnyRole("ADMIN", "SELLER")
+                                                .anyRequest().authenticated())
+                                .exceptionHandling(exceptionHandling -> exceptionHandling
+                                                .authenticationEntryPoint(
+                                                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                                .oauth2Login(oauth2 -> oauth2
+                                                .loginPage(
+                                                                "https://bloomgiftshop.yellowbay-4df1e92b.eastasia.azurecontainerapps.io/oauth2/authorization/google")
+                                                .defaultSuccessUrl(
+                                                                "https://bloomgiftshop.yellowbay-4df1e92b.eastasia.azurecontainerapps.io/api/auth/signInWithGoogle",
+                                                                true))
+                                .formLogin(Customizer.withDefaults());
+                http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
-    }
+                return http.build();
+        }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://the-diamond-store-demo.web.app",
-                "https://www.thediamondstore.site"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+        @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+                return configuration.getAuthenticationManager();
+        }
+
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowedOrigins(
+                                Arrays.asList("http://localhost:3000", "https://the-diamond-store-demo.web.app",
+                                                "https://www.thediamondstore.site"));
+                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                configuration.setAllowedHeaders(Arrays.asList("*"));
+                configuration.setAllowCredentials(true);
+
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 }

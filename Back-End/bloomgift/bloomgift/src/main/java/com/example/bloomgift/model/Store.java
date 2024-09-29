@@ -78,26 +78,24 @@ public class Store {
     @Column(name = "otp")
     private String otp;
 
-    @Column(name="acqId")
+    @Column(name = "acqId")
     private Integer acqId;
 
     @Column(name = "otp_generated_time")
     private LocalDateTime otp_generated_time;
-    
 
     @ManyToOne
     @JoinColumn(name = "roleID", nullable = false)
     private Role role;
 
-
-     @OneToMany(mappedBy = "storeID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "storeID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails = new ArrayList<>();
+
     public Store() {
     }
 
     @OneToMany(mappedBy = "storeID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Payment> payments = new ArrayList<>();
-    
 
     public Store(Integer storeID, Set<Product> products, String storeName, String type, String storePhone,
             String storeAddress, String email, String bankAccountName, String bankNumber, String bankAddress,

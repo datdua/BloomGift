@@ -16,12 +16,13 @@ import com.example.bloomgift.model.Message;
 import com.example.bloomgift.service.ChatService;
 
 @RestController
-@RequestMapping("/api/chats")
-public class ChatController {
+@RequestMapping("/api/customer/chats")
+public class ChatControllerByCustomer {
+    
     private final ChatService chatService;
 
     @Autowired
-    public ChatController(ChatService chatService) {
+    public ChatControllerByCustomer(ChatService chatService) {
         this.chatService = chatService;
     }
 

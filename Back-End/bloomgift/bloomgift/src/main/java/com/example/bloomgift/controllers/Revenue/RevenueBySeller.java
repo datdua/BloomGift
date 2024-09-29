@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.bloomgift.service.RevenueService;
 
 @RestController
-@RequestMapping("/api/auth/revenue-by-store")
-public class RevenueByStore {
+@RequestMapping("/api/seller/revenue/revenue-management")
+public class RevenueBySeller {
     @Autowired 
     private RevenueService revenueService;
 

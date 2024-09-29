@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
-@RequestMapping("/api/products-size")
-public class SizeController {
+@RequestMapping("/api/seller/products/product-size/product-size-management")
+public class ProductSizeController {
     @Autowired
     private SizeSerivce sizeService;
 

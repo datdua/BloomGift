@@ -1,14 +1,15 @@
 package com.example.bloomgift.service;
 
-import java.math.BigDecimal;
 import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,6 @@ import com.example.bloomgift.model.Size;
 import com.example.bloomgift.model.Store;
 import com.example.bloomgift.reponse.OrderDetailReponse;
 import com.example.bloomgift.reponse.OrderReponse;
-import com.example.bloomgift.reponse.ProductReponse;
 import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.repository.OrderDetailRepository;
 import com.example.bloomgift.repository.OrderRepository;
@@ -38,12 +38,6 @@ import com.example.bloomgift.repository.SizeRepository;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.OrderDetailRequest;
 import com.example.bloomgift.request.OrderRequest;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Scanner;
-import java.net.URLEncoder;
-
-import ch.qos.logback.core.util.StringUtil;
 
 @Service
 public class OrderSevice {
@@ -82,7 +76,7 @@ public class OrderSevice {
         String specificAddress = orderRequest.getSpecificAddress();
         Boolean transfer = orderRequest.getTransfer();
         String deliveryAddress;
-        
+
         deliveryAddress = specificAddress + ", " + deliveryWard + ", " + deliveryDistrict + ", " + deliveryProvince;
         if (isValidAddress(deliveryAddress)) {
             throw new RuntimeException("Invalid delivery address");
@@ -109,7 +103,7 @@ public class OrderSevice {
         Order order = new Order();
         List<OrderDetail> orderDetails = new ArrayList<>();
         float totalProductPrice = 0.0f;
-        Store firstStore = null; 
+        Store firstStore = null;
         for (OrderDetailRequest orderDetailRequests : orderRequest.getOrderDetailRequests()) {
             Product product = productRepository.findById(orderDetailRequests.getProductID()).orElseThrow();
             if (product.getQuantity() < orderDetailRequests.getQuantity()) {
@@ -117,7 +111,7 @@ public class OrderSevice {
             }
             Store store = storeRepository.findByProducts(product);
             if (firstStore == null) {
-                firstStore = store;  
+                firstStore = store;
             }
             Integer sizeID = orderDetailRequests.getSizeID();
             Integer quantity = orderDetailRequests.getQuantity();
@@ -148,7 +142,6 @@ public class OrderSevice {
             } else {
                 product.setQuantity(product.getQuantity() - quantity);
             }
-            
 
             totalProductPrice += productTotalPrice;
             orderDetail.setProductTotalPrice(productTotalPrice);
@@ -162,7 +155,7 @@ public class OrderSevice {
             Integer newSold = product.getSold() + quantity;
             product.setSold(newSold);
             orderDetails.add(orderDetail);
-          
+
         }
 
         order.setAccountID(account);
@@ -182,7 +175,7 @@ public class OrderSevice {
         Integer newPoint = account.getPoint() - point;
         account.setPoint(newPoint);
         orderRepository.save(order);
-        if(transfer == true){   
+        if (transfer == true) {
             Payment payment = new Payment();
             payment.setOrderID(order);
             payment.setAccountID(accountID);
@@ -312,13 +305,14 @@ public class OrderSevice {
         String apiKey = "AIzaSyCRtENA_fhaXoBIos56K0BVZYGlhMVE8Xc"; // Thay thế bằng API Key của bạn
         try {
             String encodedAddress = URLEncoder.encode(address, "UTF-8");
-            String urlString = "https://maps.googleapis.com/maps/api/geocode/json?address=" + encodedAddress + "&key=" + apiKey;
-    
+            String urlString = "https://maps.googleapis.com/maps/api/geocode/json?address=" + encodedAddress + "&key="
+                    + apiKey;
+
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
-    
+
             int responseCode = conn.getResponseCode();
             if (responseCode == 200) {
                 Scanner sc = new Scanner(url.openStream());
@@ -327,7 +321,7 @@ public class OrderSevice {
                     inline.append(sc.nextLine());
                 }
                 sc.close();
-    
+
                 JSONObject jsonResponse = new JSONObject(inline.toString());
                 return jsonResponse.getString("status").equals("OK");
             } else {
@@ -377,5 +371,5 @@ public class OrderSevice {
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
-  
+
 }

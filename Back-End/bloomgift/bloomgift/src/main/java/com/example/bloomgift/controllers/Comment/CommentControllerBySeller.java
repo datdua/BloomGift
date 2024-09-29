@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.bloomgift.service.CommentService;
 
 @RestController
-@RequestMapping("/api/comments/store")
-public class CommentControllerByStore {
+@RequestMapping("/api/seller/comments/comment-management")
+public class CommentControllerBySeller {
     @Autowired
     private CommentService commentService;
 
