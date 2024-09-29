@@ -36,33 +36,6 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    // @PostMapping("/create-product")
-    // public ResponseEntity<String> createProduct(@RequestBody ProductRequest
-    // productRequest) {
-    // try {
-    // productService.createProductt(productRequest);
-    // return new ResponseEntity<>("Product created successfully",
-    // HttpStatus.CREATED);
-    // } catch (RuntimeException e) {
-    // return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    // }
-    // }
-
-    // @PostMapping(value ="/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    // public ResponseEntity<String> createProduct(@RequestParam ProductRequest
-    // productRequest,
-    // @RequestParam("imageFiles") List<MultipartFile> imageFiles) {
-    // try {
-    // productService.createProductt(productRequest, imageFiles);
-    // return ResponseEntity.status(HttpStatus.CREATED).body("Product created
-    // successfully");
-    // } catch (RuntimeException e) {
-    // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-    // } catch (Exception e) {
-    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-    // .body("An error occurred while creating the product");
-    // }
-    // }
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> createProduct(@RequestPart("productRequest") String productRequestJson,
             @RequestPart("imageFiles") List<MultipartFile> imageFiles) {
@@ -123,27 +96,6 @@ public class ProductController {
             return ResponseEntity.badRequest().body(null);
         }
     }
-
-    // @GetMapping("/product/{storeID}")
-    // public ResponseEntity<List<ProductReponse>>
-    // getProductsByStoreID(@PathVariable int storeID) {
-    // List<ProductReponse> products = productService.getProductByStoreID(storeID);
-    // return ResponseEntity.ok(products);
-    // }
-
-    // @GetMapping("/product-feature-true/{storeID}")
-    // public ResponseEntity<List<ProductReponse>>
-    // getProductsByStorIdAndFeaEntity(@PathVariable int storeID) {
-    // List<ProductReponse> products = productService.getProductByStoreID(storeID);
-    // return ResponseEntity.ok(products);
-    // }
-
-    // @GetMapping("/product-best-seller/{storeID}")
-    // public ResponseEntity<List<ProductReponse>>
-    // getProductsBestSeller(@RequestParam int top) {
-    // List<ProductReponse> products = productService.getProductBySold(top);
-    // return ResponseEntity.ok(products);
-    // }
 
     @GetMapping("/products/status")
     public List<ProductReponse> getProductsByProductStatus(@RequestParam Boolean productStatus) {

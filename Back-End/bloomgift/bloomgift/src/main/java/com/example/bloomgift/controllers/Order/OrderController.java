@@ -18,7 +18,7 @@ import com.example.bloomgift.request.OrderRequest;
 import com.example.bloomgift.service.OrderSevice;
 
 @RestController
-@RequestMapping("/api/auth/order")
+@RequestMapping("/api/customer/order")
 public class OrderController {
 
     @Autowired

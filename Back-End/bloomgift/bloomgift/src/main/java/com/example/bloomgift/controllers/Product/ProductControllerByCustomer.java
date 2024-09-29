@@ -17,7 +17,7 @@ import com.example.bloomgift.reponse.ProductReponse;
 import com.example.bloomgift.service.ProductService;
 
 @RestController
-@RequestMapping("/api/auth/product-customer")
+@RequestMapping("/api/customer/product")
 public class ProductControllerByCustomer {
     @Autowired
     private ProductService productService;

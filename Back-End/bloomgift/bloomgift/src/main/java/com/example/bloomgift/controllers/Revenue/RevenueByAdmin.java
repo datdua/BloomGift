@@ -12,7 +12,7 @@ import com.example.bloomgift.service.OrderSevice;
 import com.example.bloomgift.service.RevenueService;
 
 @RestController
-@RequestMapping("/api/auth/revenue-by-admin")
+@RequestMapping("/api/admin/revenue/revenue-management")
 public class RevenueByAdmin {
 
     @Autowired 

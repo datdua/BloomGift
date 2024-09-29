@@ -1,5 +1,4 @@
 package com.example.bloomgift.controllers.Store;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +21,8 @@ import com.example.bloomgift.reponse.StoreResponse;
 import com.example.bloomgift.service.StoreService;
 
 @RestController
-@RequestMapping("/api/store/store-management")
-public class StoreController {
-
+@RequestMapping("/api/customer/store")
+public class StoreControllerByCustomer {
     @Autowired
     private StoreService storeService;
 
@@ -36,21 +34,6 @@ public class StoreController {
     @GetMapping("/get-by-name")
     public ResponseEntity<?> getStoreByName(@RequestParam String storeName) {
         return storeService.getStoreByName(storeName);
-    }
-
-    // @PostMapping(value = "/add", produces = "application/json;charset=UTF-8")
-    // public ResponseEntity<?> addStore(@RequestBody StoreRequest storeRequest) {
-    // return storeService.addStore(storeRequest);
-    // }
-
-    @PutMapping(value = "/update/{storeID}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<?> updateStore(@PathVariable Integer storeID, @RequestBody StorePutRequest storePutRequest) {
-        return storeService.updateStore(storeID, storePutRequest);
-    }
-
-    @DeleteMapping(value = "/delete", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<?> deleteStore(@RequestBody List<Integer> storeIDs) {
-        return storeService.deleteStore(storeIDs);
     }
 
     @GetMapping(value = "/search/get-paging", produces = "application/json;charset=UTF-8")
