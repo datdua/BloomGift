@@ -7,6 +7,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
+import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,17 +21,22 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 import com.example.bloomgift.model.Category;
+import com.example.bloomgift.model.OrderDetail;
 import com.example.bloomgift.model.Product;
 import com.example.bloomgift.model.ProductImage;
 import com.example.bloomgift.model.Size;
 import com.example.bloomgift.model.Store;
+import com.example.bloomgift.model.Order;
 import com.example.bloomgift.reponse.ProductImageReponse;
 import com.example.bloomgift.reponse.ProductReponse;
 import com.example.bloomgift.reponse.SizeReponse;
 import com.example.bloomgift.repository.CategoryRepository;
 import com.example.bloomgift.repository.ProductImageRepository;
+import com.example.bloomgift.repository.OrderDetailRepository;
 import com.example.bloomgift.repository.ProductRepository;
+import com.example.bloomgift.repository.SizeRepository;
 import com.example.bloomgift.repository.StoreRepository;
+import com.example.bloomgift.repository.OrderRepository;
 import com.example.bloomgift.request.ProductRequest;
 import com.example.bloomgift.specification.ProductSpecification;
 
@@ -46,7 +55,18 @@ public class ProductService {
     private ProductImageRepository productImageRepository;
 
     @Autowired
+    private OrderDetailRepository orderDetailRepository;
+
+    @Autowired
     private FirebaseStorageService firebaseStorageService;
+
+    @Autowired
+    private SizeRepository sizeRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(ProductService.class);
 
     public List<ProductReponse> getAllProducts() {
         List<Product> products = productRepository.findAll();
@@ -59,7 +79,7 @@ public class ProductService {
                 .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
                 .collect(Collectors.toList());
         List<SizeReponse> sizeReponses = product.getSizes().stream()
-                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeFloat()))
+                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeQuantity()))
                 .collect(Collectors.toList());
 
         return new ProductReponse(
@@ -79,20 +99,22 @@ public class ProductService {
                 sizeReponses,
                 imageResponses);
     }
-    public List<ProductReponse> getAllProductByCustomer(){
+
+    public List<ProductReponse> getAllProductByCustomer() {
         List<Product> products = productRepository.findAll();
 
         return products.stream().map(this::convertToProductReponseByCustomer).collect(Collectors.toList());
     }
+
     private ProductReponse convertToProductReponseByCustomer(Product product) {
         ProductImageReponse firstImageResponse = product.getProductImages().stream()
-                .findFirst()  
+                .findFirst()
                 .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
-                .orElse(null); 
+                .orElse(null);
         List<SizeReponse> sizeReponses = product.getSizes().stream()
-                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeFloat()))
+                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeQuantity()))
                 .collect(Collectors.toList());
-    
+
         return new ProductReponse(
                 product.getProductID(),
                 product.getDiscount(),
@@ -108,7 +130,7 @@ public class ProductService {
                 product.getCategoryName(),
                 product.getStoreName(),
                 sizeReponses,
-                firstImageResponse != null ? List.of(firstImageResponse) : List.of()  // Wrap the first image in a list
+                firstImageResponse != null ? List.of(firstImageResponse) : List.of() // Wrap the first image in a list
         );
     }
 
@@ -118,7 +140,7 @@ public class ProductService {
                 .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
                 .collect(Collectors.toList());
         List<SizeReponse> sizeReponses = product.getSizes().stream()
-                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeFloat()))
+                .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(), size.getSizeQuantity()))
                 .collect(Collectors.toList());
         return new ProductReponse(
                 product.getProductID(),
@@ -155,7 +177,7 @@ public class ProductService {
                             .collect(Collectors.toList());
                     List<SizeReponse> sizeReponses = product.getSizes().stream()
                             .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
-                                    size.getSizeFloat()))
+                                    size.getSizeQuantity()))
                             .collect(Collectors.toList());
                     return new ProductReponse(
                             product.getProductID(),
@@ -190,7 +212,7 @@ public class ProductService {
                             .collect(Collectors.toList());
                     List<SizeReponse> sizeReponses = product.getSizes().stream()
                             .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
-                                    size.getSizeFloat()))
+                                    size.getSizeQuantity()))
                             .collect(Collectors.toList());
                     return new ProductReponse(
                             product.getProductID(),
@@ -212,6 +234,7 @@ public class ProductService {
                 .collect(Collectors.toList());
         return productResponses;
     }
+
     public List<ProductReponse> getProductFeatured() {
         List<Product> products = productRepository.findAll();
         List<Product> featureProducts = products.stream().filter(Product::getFeatured).collect(Collectors.toList());
@@ -222,7 +245,7 @@ public class ProductService {
                             .collect(Collectors.toList());
                     List<SizeReponse> sizeReponses = product.getSizes().stream()
                             .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
-                                    size.getSizeFloat()))
+                                    size.getSizeQuantity()))
                             .collect(Collectors.toList());
                     return new ProductReponse(
                             product.getProductID(),
@@ -263,7 +286,7 @@ public class ProductService {
                             .collect(Collectors.toList());
                     List<SizeReponse> sizeReponses = product.getSizes().stream()
                             .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
-                                    size.getSizeFloat()))
+                                    size.getSizeQuantity()))
                             .collect(Collectors.toList());
                     return new ProductReponse(
                             product.getProductID(),
@@ -284,7 +307,7 @@ public class ProductService {
                 })
                 .collect(Collectors.toList());
         return productResponses;
-        
+
     }
 
     private int partition(List<Product> products, int low, int high) {
@@ -316,7 +339,7 @@ public class ProductService {
 
                     List<SizeReponse> sizeReponses = product.getSizes().stream()
                             .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
-                                    size.getSizeFloat()))
+                                    size.getSizeQuantity()))
                             .collect(Collectors.toList());
 
                     return new ProductReponse(
@@ -351,7 +374,7 @@ public class ProductService {
                             .collect(Collectors.toList());
                     List<SizeReponse> sizeReponses = product.getSizes().stream()
                             .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
-                                    size.getSizeFloat()))
+                                    size.getSizeQuantity()))
                             .collect(Collectors.toList());
                     return new ProductReponse(
                             product.getProductID(),
@@ -374,7 +397,6 @@ public class ProductService {
         return productResponses;
 
     }
-
 
     public void createProduct(ProductRequest productRequest, List<MultipartFile> imageFiles) {
         checkProduct(productRequest);
@@ -417,7 +439,7 @@ public class ProductService {
                     Size size = new Size();
                     size.setPrice(sizeRequest.getPrice());
                     size.setText(sizeRequest.getText());
-                    size.setSizeFloat(sizeRequest.getSizeFloat());
+                    size.setSizeQuantity(sizeRequest.getSizeQuanity());
                     size.setProductID(product);
                     return size;
                 })
@@ -430,7 +452,7 @@ public class ProductService {
                 .map(imageUrl -> {
                     ProductImage image = new ProductImage();
                     image.setProductImage(imageUrl);
-                    image.setProductID(product); 
+                    image.setProductID(product);
                     return image;
                 })
                 .collect(Collectors.toList());
@@ -456,58 +478,92 @@ public class ProductService {
         return imageUrls;
     }
 
+    @Transactional
     public void deleteProduct(Integer productID) {
-        Product existingProduct = productRepository.findById(productID).orElseThrow();
-        productRepository.delete(existingProduct);
+        Product product = productRepository.findById(productID)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + productID));
+
+        // Xóa hình ảnh sản phẩm từ Firebase
+        for (ProductImage image : product.getProductImages()) {
+            firebaseStorageService.deleteFile(image.getProductImage());
+        }
+
+        // Xóa các OrderDetail liên quan
+        List<OrderDetail> orderDetails = orderDetailRepository.findByProductID(product);
+        for (OrderDetail orderDetail : orderDetails) {
+            // Cập nhật Order tổng nếu cần
+            Order order = orderDetail.getOrderID();
+            if (order != null) {
+                order.setOrderPrice(order.getOrderPrice() - orderDetail.getProductTotalPrice());
+                orderRepository.save(order);
+            }
+            orderDetailRepository.delete(orderDetail);
+        }
+
+        // Xóa các Size liên quan
+        sizeRepository.deleteAll(product.getSizes());
+
+        // Xóa các ProductImage liên quan
+        productImageRepository.deleteAll(product.getProductImages());
+
+        // Xóa sản phẩm
+        productRepository.delete(product);
     }
 
-    public Product updateProduct(Integer productID, ProductRequest productRequest) {
+    public Product updateProduct(Integer productID, ProductRequest productRequest, List<MultipartFile> newImageFiles) {
         checkProduct(productRequest);
         Product existingProduct = productRepository.findById(productID).orElse(null);
         if (existingProduct == null) {
-            throw new RuntimeException("Không tìm thấy san pham");
+            throw new RuntimeException("Không tìm thấy sản phẩm");
         }
 
-        Float discount = productRequest.getDiscount();
-        String description = productRequest.getDescription();
-        String colour = productRequest.getColour();
-        Boolean featured = productRequest.getFeatured();
-        Integer quantity = productRequest.getQuantity();
-        String categoryName = productRequest.getCategoryName();
-        String productName = productRequest.getProductName();
-        Boolean productStatus = productRequest.getProductStatus();
-        Float price = productRequest.getPrice();
-        Category category = categoryRepository.findByCategoryName(categoryName);
+        // Update basic product information
+        existingProduct.setDescription(productRequest.getDescription());
+        existingProduct.setDiscount(productRequest.getDiscount());
+        existingProduct.setColour(productRequest.getColour());
+        existingProduct.setFeatured(productRequest.getFeatured());
+        existingProduct.setQuantity(productRequest.getQuantity());
+        existingProduct.setProductName(productRequest.getProductName());
+        existingProduct.setProductStatus(productRequest.getProductStatus());
+        existingProduct.setPrice(productRequest.getPrice());
+
+        // Update category
+        Category category = categoryRepository.findByCategoryName(productRequest.getCategoryName());
         if (category == null) {
             throw new RuntimeException("Category not found");
         }
-
-        // ----------------------------------------------/
-        existingProduct.setDescription(description);
-        existingProduct.setDiscount(discount);
-        existingProduct.setColour(colour);
-        existingProduct.setFeatured(featured);
-        existingProduct.setQuantity(quantity);
         existingProduct.setCategoryID(category);
-        existingProduct.setProductName(productName);
-        existingProduct.setProductStatus(productStatus);
-        existingProduct.setPrice(price);
-        // List<Size> updatedSizes = productRequest.getSizes().stream()
-        // .map(sizeRequest -> {
-        // Size size = existingProduct.getSizes().stream()
-        // .filter(s -> s.getSizeID().equals(sizeRequest.getSizeID()))
-        // .findFirst()
-        // .orElse(new Size());
-        // size.setPrice(sizeRequest.getPrice());
-        // size.setText(sizeRequest.getText());
-        // size.setSizeFloat(sizeRequest.getSizeFloat());
-        // size.setProductID(existingProduct);
-        // return size;
-        // })
-        // .collect(Collectors.toList());
-        // existingProduct.setSizes(updatedSizes);
-        return productRepository.save(existingProduct);
 
+        // Handle new images
+        if (newImageFiles != null && !newImageFiles.isEmpty()) {
+            // Delete old images from Firebase
+            for (ProductImage oldImage : existingProduct.getProductImages()) {
+                firebaseStorageService.deleteFile(oldImage.getProductImage());
+            }
+
+            // Clear old image records
+            existingProduct.getProductImages().clear();
+
+            // Upload new images
+            List<String> newImageUrls = uploadImagesByStoreAndProduct(newImageFiles,
+                    existingProduct.getStoreID().getStoreName(), existingProduct.getProductName());
+
+            // Create new ProductImage entities
+            List<ProductImage> newProductImages = newImageUrls.stream()
+                    .map(imageUrl -> {
+                        ProductImage image = new ProductImage();
+                        image.setProductImage(imageUrl);
+                        image.setProductID(existingProduct);
+                        return image;
+                    })
+                    .collect(Collectors.toList());
+
+            // Set new images
+            existingProduct.setProductImages(newProductImages);
+        }
+
+        // Save and return the updated product
+        return productRepository.save(existingProduct);
     }
 
     public void checkProduct(ProductRequest productRequest) {
@@ -540,7 +596,7 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm: " + productID));
     }
 
-    public Page<Product> searhProductWithFilterPage(
+    public Page<Product> searchProductWithFilterPage(
             String descriptionProduct,
             String colourProduct,
             Float priceProduct,
@@ -548,10 +604,11 @@ public class ProductService {
             String categoryName,
             Date createDate,
             String storeName,
-            Integer sizeProduct,
             int page,
             int size) {
+
         Specification<Product> spec = Specification.where(null);
+
         if (descriptionProduct != null && !descriptionProduct.isEmpty()) {
             spec = spec.and(ProductSpecification.hasDescriptionProduct(descriptionProduct));
         }
@@ -561,7 +618,7 @@ public class ProductService {
         if (priceProduct != null) {
             spec = spec.and(ProductSpecification.hasPriceProduct(priceProduct));
         }
-        if (productName != null && !colourProduct.isEmpty()) {
+        if (productName != null && !productName.isEmpty()) {
             spec = spec.and(ProductSpecification.hasProductName(productName));
         }
         if (categoryName != null && !categoryName.isEmpty()) {
@@ -573,13 +630,9 @@ public class ProductService {
         if (storeName != null && !storeName.isEmpty()) {
             spec = spec.and(ProductSpecification.hasStoreName(storeName));
         }
-        if (sizeProduct != null) {
-            spec = spec.and(ProductSpecification.hasSizeProduct(sizeProduct));
-        }
 
         Pageable pageable = PageRequest.of(page, size);
         return productRepository.findAll(spec, pageable);
-
     }
 
 }

@@ -16,7 +16,7 @@ import com.example.bloomgift.service.ProfileService;
 import io.jsonwebtoken.io.IOException;
 
 @RestController
-@RequestMapping("/api/customer/profile")
+@RequestMapping("/api/auth/profile")
 public class ProfileCustomer {
 
     @Autowired

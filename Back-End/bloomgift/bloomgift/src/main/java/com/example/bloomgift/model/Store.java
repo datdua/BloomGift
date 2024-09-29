@@ -78,6 +78,9 @@ public class Store {
     @Column(name = "otp")
     private String otp;
 
+    @Column(name = "acqId")
+    private Integer acqId;
+
     @Column(name = "otp_generated_time")
     private LocalDateTime otp_generated_time;
 
@@ -85,11 +88,14 @@ public class Store {
     @JoinColumn(name = "roleID", nullable = false)
     private Role role;
 
-
-     @OneToMany(mappedBy = "storeID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "storeID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails = new ArrayList<>();
+
     public Store() {
     }
+
+    @OneToMany(mappedBy = "storeID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Payment> payments = new ArrayList<>();
 
     public Store(Integer storeID, Set<Product> products, String storeName, String type, String storePhone,
             String storeAddress, String email, String bankAccountName, String bankNumber, String bankAddress,
@@ -267,6 +273,22 @@ public class Store {
 
     public void setOtp_generated_time(LocalDateTime otp_generated_time) {
         this.otp_generated_time = otp_generated_time;
+    }
+
+    public Integer getAcqId() {
+        return acqId;
+    }
+
+    public void setAcqId(Integer acqId) {
+        this.acqId = acqId;
+    }
+
+    public List<OrderDetail> getOrderDetails() {
+        return orderDetails;
+    }
+
+    public void setOrderDetails(List<OrderDetail> orderDetails) {
+        this.orderDetails = orderDetails;
     }
 
 }
