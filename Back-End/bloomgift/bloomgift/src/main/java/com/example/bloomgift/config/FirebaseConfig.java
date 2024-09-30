@@ -1,7 +1,7 @@
 package com.example.bloomgift.config;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +20,7 @@ public class FirebaseConfig {
     @SuppressWarnings("deprecation")
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
-        FileInputStream serviceAccount = new FileInputStream(new ClassPathResource(SERCURITY_FIREBASE).getFile());
+        InputStream serviceAccount = new ClassPathResource(SERCURITY_FIREBASE).getInputStream();
 
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
