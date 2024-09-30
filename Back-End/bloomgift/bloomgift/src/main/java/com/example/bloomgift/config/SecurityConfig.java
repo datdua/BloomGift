@@ -46,7 +46,7 @@ public class SecurityConfig {
         };
 
         private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**",
-                        "/api/categories/**" };
+                        "/api/customer/category/**", "/api/customer/product/**", "/api/customer/promotion/**", "/api/customer/store/**" };
 
         private static final String[] ADMIN_URL = { "/api/admin/**", "/api/google-sheets/**" };
 
@@ -58,7 +58,7 @@ public class SecurityConfig {
 
         private static final String[] ADMIN_SELLER_URL = { "/api/store/**", "/api/product/**", "/api/promotion/**",
                         "/api/manager/**", "/api/seller/**", "/api/customer/**", "/api/admin/**", "/api/revenue/**",
-                        "/api/chats/**", "/api/category" };
+                        "/api/chats/**" };
 
         private static final String[] ADMIN_MANAGER_SALE_STAFF_URL = {};
 
