@@ -23,13 +23,14 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 
+
 @Component
 public class GoogleSheetsUtil {
 
     private static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
-    private static final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
+    private static final String TOKENS_DIRECTORY_PATH = "tokens/path";
+    private static final List<String> SCOPES =  Collections.singletonList(SheetsScopes.SPREADSHEETS);
     private static final String CREDENTIALS_FILE_PATH = "credentials.json";
 
     public Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {

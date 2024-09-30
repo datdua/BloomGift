@@ -2,16 +2,23 @@ package com.example.bloomgift.controllers.Account;
 
 import java.util.Collections;
 
-import java.util.Map;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.model.Category;
@@ -21,10 +28,7 @@ import com.example.bloomgift.request.AccountRequest;
 import com.example.bloomgift.request.CategoryRequest;
 import com.example.bloomgift.service.AccountService;
 import com.example.bloomgift.service.CategoryService;
-import com.example.bloomgift.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/accounts-management")
@@ -35,8 +39,8 @@ public class AccountControllerByAdmin {
     @Autowired
     private AccountService accountService;
 
-    @Autowired
-    private ProductService productService;
+    // @Autowired
+    // private ProductService productService;
 
     @Autowired
     private CategoryService categoryService;

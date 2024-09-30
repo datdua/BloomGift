@@ -45,7 +45,7 @@ public class SecurityConfig {
 
         };
 
-        private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**",
+        private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**", "/api/combos/**",
                         "/api/customer/category/**", "/api/customer/product/**", "/api/customer/promotion/**", "/api/customer/store/**" };
 
         private static final String[] ADMIN_URL = { "/api/admin/**", "/api/google-sheets/**" };
@@ -73,31 +73,23 @@ public class SecurityConfig {
                 this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         }
 
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-                http
-                                .cors(withDefaults())
-                                .csrf(csrf -> csrf.disable())
-                                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                                                .requestMatchers(SWAGGER_URL).permitAll()
-                                                .requestMatchers(GUEST_URL).permitAll()
-                                                .requestMatchers(CUSTOMER_URL).hasRole("CUSTOMER")
-                                                .requestMatchers(ADMIN_URL).hasRole("ADMIN")
-                                                .requestMatchers(MANAGER_URL).hasRole("MANAGER")
-                                                .requestMatchers(SELLER_URL).hasRole("SELLER")
-                                                .requestMatchers(ADMIN_SELLER_URL).hasAnyRole("ADMIN", "SELLER")
-                                                .anyRequest().authenticated())
-                                .exceptionHandling(exceptionHandling -> exceptionHandling
-                                                .authenticationEntryPoint(
-                                                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                                .oauth2Login(oauth2 -> oauth2
-                                                .loginPage(
-                                                                "https://bloomgiftshop.yellowbay-4df1e92b.eastasia.azurecontainerapps.io/oauth2/authorization/google")
-                                                .defaultSuccessUrl(
-                                                                "https://bloomgiftshop.yellowbay-4df1e92b.eastasia.azurecontainerapps.io/api/auth/signInWithGoogle",
-                                                                true))
-                                .formLogin(Customizer.withDefaults());
-                http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(withDefaults())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .requestMatchers(SWAGGER_URL).permitAll()
+                        .requestMatchers(CUSTOMER_URL).hasRole("CUSTOMER")
+                        .requestMatchers(ADMIN_URL).hasRole("ADMIN")
+                        .anyRequest().authenticated())
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("http://localhost:8080/oauth2/authorization/google")
+                        .defaultSuccessUrl("http://localhost:8080/api/auth/signInWithGoogle", true))
+                .formLogin(Customizer.withDefaults());
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();
         }

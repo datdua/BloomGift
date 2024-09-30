@@ -19,10 +19,25 @@ public class FirebaseConfig {
 
     @SuppressWarnings("deprecation")
     @Bean
-    public FirebaseApp firebaseApp() throws IOException {
-        InputStream serviceAccount = new ClassPathResource(SERCURITY_FIREBASE).getInputStream();
+    public FirebaseApp firebaseApp() throws Exception {
+        InputStream serviceAccount;
 
-        FirebaseOptions options = new FirebaseOptions.Builder()
+        try {
+            // Truy xuất tệp từ Azure Blob Storage
+            BlobClient blobClient = new BlobClientBuilder()
+                    .connectionString(CONNECTION_STRING)
+                    .containerName(CONTAINER_NAME)
+                    .blobName(BLOB_NAME)
+                    .buildClient();
+            serviceAccount = blobClient.openInputStream();
+        } catch (Exception e) {
+            // Nếu không truy cập được từ Azure Blob Storage, thử từ file trong resources
+            // của ứng dụng
+            serviceAccount = new FileInputStream(new ClassPathResource("serviceAccountKey.json").getFile());
+        }
+
+        // Cấu hình Firebase từ tệp serviceAccountKey.json
+        FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .setDatabaseUrl(DATABASE_URL)
                 .build();
