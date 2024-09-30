@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,8 +28,10 @@ import com.example.bloomgift.reponse.ProductReponse;
 import com.example.bloomgift.reponse.SizeReponse;
 import com.example.bloomgift.repository.CategoryRepository;
 import com.example.bloomgift.repository.OrderDetailRepository;
+import com.example.bloomgift.repository.OrderRepository;
 import com.example.bloomgift.repository.ProductImageRepository;
 import com.example.bloomgift.repository.ProductRepository;
+import com.example.bloomgift.repository.SizeRepository;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.ProductRequest;
 import com.example.bloomgift.specification.ProductSpecification;
