@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.stream.Collectors;
 
 import com.example.bloomgift.model.Promotion;
+import com.example.bloomgift.reponse.PromotionResponse;
 import com.example.bloomgift.request.PromotionRequest;
 import com.example.bloomgift.service.PromotionService;
 
@@ -20,27 +22,51 @@ public class PromotionControllerByCustomer {
     private PromotionService promotionService;
 
     @GetMapping("/get-all")
-    public List<Promotion> getAllPromotions() {
-        return promotionService.getAllPromotions();
+    public List<PromotionResponse> getAllPromotions() {
+        List<Promotion> promotions = promotionService.getAllPromotions();
+        return promotions.stream()
+                .map(promotionService::convertPromotionToPromotionResponse)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/get-by-promotionID/{promotionID}")
-    public Promotion getPromotionById(@PathVariable int promotionID) {
-        return promotionService.getPromotionById(promotionID);
+    public ResponseEntity<?> getPromotionById(@PathVariable int promotionID) {
+        Promotion promotion = promotionService.getPromotionById(promotionID);
+        if (promotion == null) {
+            return ResponseEntity.status(404).body("Không tìm thấy mã giảm giá với ID này.");
+        }
+        PromotionResponse response = promotionService.convertPromotionToPromotionResponse(promotion);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/get-by-promotion-code/{promotionCode}")
-    public Promotion getPromotionByPromotionCode(@PathVariable String promotionCode) {
-        return promotionService.getPromotionByPromotionCode(promotionCode);
+    public ResponseEntity<?> getPromotionByPromotionCode(@PathVariable String promotionCode) {
+        Promotion promotion = promotionService.getPromotionByPromotionCode(promotionCode);
+        if (promotion == null) {
+            return ResponseEntity.status(404).body("Không tìm thấy mã giảm giá với mã này.");
+        }
+        PromotionResponse response = promotionService.convertPromotionToPromotionResponse(promotion);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping(value = "/paging", produces = "application/json;charset=UTF-8")
+    public Page<PromotionResponse> getPromotions(@RequestParam int page, @RequestParam int size) {
+        Page<Promotion> promotionPage = promotionService.getPromotions(page, size);
+        return promotionPage.map(promotionService::convertPromotionToPromotionResponse);
     }
 
     @GetMapping("/status/{status}")
-    public Promotion getPromotionsByStatus(@PathVariable String status) {
-        return promotionService.getPromotionsByStatus(status);
+    public ResponseEntity<?> getPromotionsByStatus(@PathVariable String status) {
+        Promotion promotion = promotionService.getPromotionsByStatus(status);
+        if (promotion == null) {
+            return ResponseEntity.status(404).body("Không tìm thấy khuyến mãi với trạng thái này.");
+        }
+        PromotionResponse response = promotionService.convertPromotionToPromotionResponse(promotion);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/search/get-paging", produces = "application/json;charset=UTF-8")
-    public Page<Promotion> searchPromotionWithFilterPage(
+    public Page<PromotionResponse> searchPromotionWithFilterPage(
             @RequestParam(required = false) String promotionDescription,
             @RequestParam(required = false) BigDecimal promotionDiscount,
             @RequestParam(required = false) String promotionStatus,
@@ -49,7 +75,9 @@ public class PromotionControllerByCustomer {
             @RequestParam(required = false) String storeName,
             @RequestParam int page,
             @RequestParam int size) {
-        return promotionService.searchPromotionWithFilterPage(
+        Page<Promotion> promotionPage = promotionService.searchPromotionWithFilterPage(
                 promotionDescription, promotionDiscount, promotionStatus, startDate, endDate, storeName, page, size);
+        // Chuyển đổi Page<Promotion> sang Page<PromotionResponse>
+        return promotionPage.map(promotionService::convertPromotionToPromotionResponse);
     }
 }

@@ -34,6 +34,7 @@ import com.example.bloomgift.repository.ProductRepository;
 import com.example.bloomgift.repository.SizeRepository;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.ProductRequest;
+import com.example.bloomgift.request.SizeRequest;
 import com.example.bloomgift.specification.ProductSpecification;
 
 @Service
@@ -438,7 +439,7 @@ public class ProductService {
                     Size size = new Size();
                     size.setPrice(sizeRequest.getPrice());
                     size.setText(sizeRequest.getText());
-                    size.setSizeQuantity(sizeRequest.getSizeQuanity());
+                    size.setSizeQuantity(sizeRequest.getSizeQuantity());
                     size.setProductID(product);
                     return size;
                 })
@@ -498,6 +499,33 @@ public class ProductService {
         existingProduct.setProductName(productRequest.getProductName());
         existingProduct.setProductStatus(productRequest.getProductStatus());
         existingProduct.setPrice(productRequest.getPrice());
+
+        // Update sizes
+        List<Size> updatedSizes = new ArrayList<>();
+        for (SizeRequest sizeRequest : productRequest.getSizes()) {
+            Size existingSize = existingProduct.getSizes().stream()
+                    .filter(size -> size.getText().equals(sizeRequest.getText()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existingSize != null) {
+                // Update existing size
+                existingSize.setPrice(sizeRequest.getPrice());
+                existingSize.setSizeQuantity(sizeRequest.getSizeQuantity());
+                updatedSizes.add(existingSize);
+            } else {
+                // Create new size
+                Size newSize = new Size();
+                newSize.setPrice(sizeRequest.getPrice());
+                newSize.setText(sizeRequest.getText());
+                newSize.setSizeQuantity(sizeRequest.getSizeQuantity());
+                newSize.setProductID(existingProduct);
+                updatedSizes.add(newSize);
+            }
+        }
+
+        // Set updated sizes to the product
+        existingProduct.setSizes(updatedSizes);
 
         // Update category
         Category category = categoryRepository.findByCategoryName(productRequest.getCategoryName());

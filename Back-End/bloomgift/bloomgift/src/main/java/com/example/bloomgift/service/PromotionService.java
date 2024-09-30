@@ -13,9 +13,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.bloomgift.model.Promotion;
 import com.example.bloomgift.model.Store;
+import com.example.bloomgift.reponse.PromotionResponse;
 import com.example.bloomgift.repository.PromotionRepository;
 import com.example.bloomgift.repository.StoreRepository;
 import com.example.bloomgift.request.PromotionRequest;
@@ -41,10 +43,25 @@ public class PromotionService {
     }
 
     public Promotion getPromotionByPromotionCode(String promotionCode) {
-        return promotionRepository.findByPromotionCode(promotionCode);
+    return promotionRepository.findByPromotionCode(promotionCode);
+    }
+
+    public PromotionResponse convertPromotionToPromotionResponse(Promotion promotion) {
+        PromotionResponse response = new PromotionResponse();
+        response.setPromotionName(promotion.getPromotionName());
+        response.setPromotionCode(promotion.getPromotionCode());
+        response.setPromotionDescription(promotion.getPromotionDescription());
+        response.setPromotionDiscount(promotion.getPromotionDiscount());
+        response.setQuantity(promotion.getQuantity());
+        response.setPromotionStatus(promotion.getPromotionStatus());
+        response.setStartDate(promotion.getStartDate());
+        response.setEndDate(promotion.getEndDate());
+        response.setStoreName(promotion.getStoreID().getStoreName());
+        return response;
     }
     
-    public ResponseEntity<?> createPromotion(@RequestBody PromotionRequest promotionRequest) {
+    public ResponseEntity<?> createPromotion(@RequestParam Integer storeID,
+            @RequestBody PromotionRequest promotionRequest) {
 
         if (promotionRequest.getStartDate().isAfter(promotionRequest.getEndDate())) {
             return ResponseEntity.badRequest().body("Ngày bắt đầu không thể sau ngày kết thúc.");
@@ -54,7 +71,7 @@ public class PromotionService {
             return ResponseEntity.badRequest().body("Mã giảm giá đã tồn tại.");
         }
 
-        Store store = storeRepository.findById(promotionRequest.getStoreID()).orElse(null);
+        Store store = storeRepository.findById(storeID).orElse(null);
         if (store == null) {
             return ResponseEntity.badRequest().body("Không tìm thấy cửa hàng.");
         }
@@ -87,11 +104,6 @@ public class PromotionService {
             return ResponseEntity.badRequest().body("Mã giảm giá đã tồn tại.");
         }
 
-        Store store = storeRepository.findById(promotionRequest.getStoreID()).orElse(null);
-        if (store == null) {
-            return ResponseEntity.badRequest().body("Không tìm thấy cửa hàng.");
-        }
-
         promotion.setPromotionCode(promotionRequest.getPromotionCode());
         promotion.setPromotionDiscount(promotionRequest.getPromotionDiscount());
         promotion.setQuantity(promotionRequest.getQuantity());
@@ -99,7 +111,6 @@ public class PromotionService {
         promotion.setEndDate(promotionRequest.getEndDate());
         promotion.setPromotionStatus(promotionRequest.getPromotionStatus());
         promotion.setPromotionDescription(promotionRequest.getPromotionDescription());
-        promotion.setStoreID(store);
         promotionRepository.save(promotion);
         return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật mã giảm giá thành công."));
     }

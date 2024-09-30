@@ -1,4 +1,4 @@
-package com.example.bloomgift.request;
+package com.example.bloomgift.reponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -6,8 +6,9 @@ import java.time.LocalDateTime;
 import com.example.bloomgift.model.Store;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-public class PromotionRequest {
 
+public class PromotionResponse {
+    
     private String promotionName;
     private String promotionCode;
     private String promotionDescription;
@@ -20,7 +21,7 @@ public class PromotionRequest {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endDate;
-
+    private String storeName;
 
     public String getPromotionName() {
         return promotionName;
@@ -54,6 +55,14 @@ public class PromotionRequest {
         this.promotionDiscount = promotionDiscount;
     }
 
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
     public String getPromotionStatus() {
         return promotionStatus;
     }
@@ -78,11 +87,11 @@ public class PromotionRequest {
         this.endDate = endDate;
     }
 
-    public Integer getQuantity() {
-        return quantity;
+    public String getStoreName() {
+        return storeName;
     }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+    public void setStoreName(String storeName) {
+        this.storeName = storeName;
     }
 }
