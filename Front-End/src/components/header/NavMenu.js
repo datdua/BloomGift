@@ -20,17 +20,17 @@ const NavMenu = ({ strings, menuWhiteClass, sidebarMenu }) => {
             </Link>
           </li>
           <li>
-            <Link to={process.env.PUBLIC_URL + "/shop-grid-full-width"}>
+            <Link to={process.env.PUBLIC_URL + "/cuahang"}>
               {" "}
               {strings["shop"]}
             </Link>
           </li>
           <li>
-            <Link to={process.env.PUBLIC_URL + "/shop-list-full-width"}>
+            <Link to={process.env.PUBLIC_URL + "/combo"}>
               {strings["collection"]}
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link to={process.env.PUBLIC_URL + "/"}>
               {strings["pages"]}
               {sidebarMenu ? (
@@ -44,7 +44,7 @@ const NavMenu = ({ strings, menuWhiteClass, sidebarMenu }) => {
             <ul className="submenu">
               <li>
                 <Link to={process.env.PUBLIC_URL + "/cart"}>
-                  {strings["cart"]}
+                  {strings["giỏ hàng"]}
                 </Link>
               </li>
               <li>
@@ -71,7 +71,7 @@ const NavMenu = ({ strings, menuWhiteClass, sidebarMenu }) => {
                 <Link to={process.env.PUBLIC_URL + "/login-register"}>
                   {strings["login_register"]}
                 </Link>
-              </li>
+              </li> 
               <li>
                 <Link to={process.env.PUBLIC_URL + "/about"}>
                   {strings["about_us"]}
@@ -88,19 +88,19 @@ const NavMenu = ({ strings, menuWhiteClass, sidebarMenu }) => {
                 </Link>
               </li>
             </ul>
-          </li>
+          </li>*/}
           <li>
             <Link to={process.env.PUBLIC_URL + "/blog-standard"}>
               {strings["blog"]}
-              {sidebarMenu ? (
+              {/* {sidebarMenu ? (
                 <span>
                   <i className="fa fa-angle-right"></i>
                 </span>
               ) : (
                 <i className="fa fa-angle-down" />
-              )}
+              )} */}
             </Link>
-            <ul className="submenu">
+            {/* <ul className="submenu">
               <li>
                 <Link to={process.env.PUBLIC_URL + "/blog-standard"}>
                   {strings["blog_standard"]}
@@ -121,7 +121,7 @@ const NavMenu = ({ strings, menuWhiteClass, sidebarMenu }) => {
                   {strings["blog_details_standard"]}
                 </Link>
               </li>
-            </ul>
+            </ul> */}
           </li>
           <li>
             <Link to={process.env.PUBLIC_URL + "/contact"}>

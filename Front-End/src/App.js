@@ -330,7 +330,7 @@ const App = (props) => {
                   component={ShopGridNoSidebar}
                 />
                 <Route
-                  path={publicUrl + "/shop-grid-full-width"}
+                  path={publicUrl + "/cuahang"}
                   component={ShopGridFullWidth}
                 />
                 <Route
@@ -342,7 +342,7 @@ const App = (props) => {
                   component={ShopListStandard}
                 />
                 <Route
-                  path={publicUrl + "/shop-list-full-width"}
+                  path={publicUrl + "/combo"}
                   component={ShopListFullWidth}
                 />
                 <Route

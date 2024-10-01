@@ -1,15 +1,15 @@
 [
   {
     "id": 1,
-    "title": "Smart Products",
-    "subtitle": "Winter Offer 2020 Collection",
+    "title": "Chào mừng!",
+    "subtitle": "Nền tảng kết nối các cửa hàng hoa",
     "image": "/assets/img/slider/single-slide-hm1-2.png",
     "url": "/shop-grid-standard"
   },
   {
     "id": 2,
-    "title": "Smart Products",
-    "subtitle": "Summer Offer 2020 Collection",
+    "title": "Để mọi dịp đặc biệt trở nên ý nghĩa hơn.",
+    "subtitle": "BloomGift",
     "image": "/assets/img/slider/single-slide-1.png",
     "url": "/shop-grid-standard"
   }

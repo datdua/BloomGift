@@ -117,10 +117,10 @@ const ProductDescriptionInfo = ({
                 >
                   <input
                     type="radio"
-                    value={sizeOption.text}
-                    checked={sizeOption.text === selectedProductSize}
+                    value={sizeOption.sizeID}
+                    checked={sizeOption.sizeID === selectedProductSize}
                     onChange={() => {
-                      setSelectedProductSize(sizeOption.text);
+                      setSelectedProductSize(sizeOption.sizeID);
                       setProductStock(sizeOption.sizeQuantity);
                       setQuantityCount(1);
                     }}
@@ -208,7 +208,7 @@ const ProductDescriptionInfo = ({
         <span>Category:</span>
         <ul>
           <li>
-            <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
+            <Link to={process.env.PUBLIC_URL + "/cuahang"}>
               {product.categoryName}
             </Link>
           </li>
@@ -218,7 +218,7 @@ const ProductDescriptionInfo = ({
         <span>Store:</span>
         <ul>
           <li>
-            <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
+            <Link to={process.env.PUBLIC_URL + "/cuahang"}>
               {product.storeName}
             </Link>
           </li>

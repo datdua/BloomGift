@@ -13,7 +13,7 @@ const BlogFeatured = ({ spaceTopClass, spaceBottomClass }) => {
     >
       <div className="container">
         <SectionTitle
-          titleText="OUR BLOG"
+          titleText="CÁC BÀI BLOG"
           positionClass="text-center"
           spaceClass="mb-55"
         />

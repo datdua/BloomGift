@@ -8,7 +8,7 @@ import { connect } from "react-redux";
 import { getDiscountPrice } from "../../helpers/product";
 import {
   addToCart,
-  decreaseQuantity,
+  updateCartQuantity,
   deleteFromCart,
   deleteAllFromCart
 } from "../../redux/actions/cartActions";
@@ -19,30 +19,45 @@ const Cart = ({
   location,
   cartItems,
   currency,
-  decreaseQuantity,
-  addToCart,
+  updateCartQuantity,
   deleteFromCart,
   deleteAllFromCart
 }) => {
-  const [quantityCount] = useState(1);
   const { addToast } = useToasts();
   const { pathname } = location;
   let cartTotalPrice = 0;
 
-  // New function to safely get item stock
   const getItemStock = (item) => {
-    if (item.stock) {
-      return item.stock;
-    } else if (item.quantity) {
-      return item.quantity;
+    return item.quantity || 0;
+  };
+
+  const getDiscountedPrice = (price, discount) => {
+    return discount ? price - (price * discount / 100) : price;
+  };
+
+
+  // Handle the change in quantity, ensuring it doesn't exceed stock or go below 1
+  const handleQuantityChange = (item, change) => {
+    const newQuantity = item.quantity + change;
+    const stock = getItemStock(item);
+
+    if (newQuantity > 0 && newQuantity <= stock) {
+      // Update quantity only if within the stock limit
+      updateCartQuantity(item, newQuantity, addToast);
+    } else if (newQuantity <= 0) {
+      addToast("Quantity must be at least 1", { appearance: "error", autoDismiss: true });
+    } else {
+      addToast(`Quantity cannot exceed available stock of ${stock}`, {
+        appearance: "error",
+        autoDismiss: true
+      });
     }
-    return 0; // Default to 0 if no stock information is available
   };
 
   return (
     <Fragment>
       <MetaTags>
-        <title>Flone | Cart</title>
+        <title>BloomGift | Giỏ hàng</title>
         <meta
           name="description"
           content="Cart page of flone react minimalist eCommerce template."
@@ -51,11 +66,10 @@ const Cart = ({
 
       <BreadcrumbsItem to={process.env.PUBLIC_URL + "/"}>Trang chủ</BreadcrumbsItem>
       <BreadcrumbsItem to={process.env.PUBLIC_URL + pathname}>
-        Cart
+        Giỏ hàng
       </BreadcrumbsItem>
 
       <LayoutOne headerTop="visible">
-        {/* breadcrumb */}
         <Breadcrumb />
         <div className="cart-main-area pt-90 pb-100">
           <div className="container">
@@ -68,32 +82,21 @@ const Cart = ({
                       <table>
                         <thead>
                           <tr>
-                            <th>Image</th>
-                            <th>Product Name</th>
-                            <th>Unit Price</th>
-                            <th>Qty</th>
-                            <th>Subtotal</th>
-                            <th>action</th>
+                            <th>Hình ảnh</th>
+                            <th>Tên</th>
+                            <th>Giá</th>
+                            <th>Số lượng</th>
+                            <th>Tổng tiền</th>
+                            <th>Hành động</th>
                           </tr>
                         </thead>
                         <tbody>
                           {cartItems.map((cartItem, key) => {
-                            const discountedPrice = getDiscountPrice(
-                              cartItem.price,
-                              cartItem.discount
-                            );
-                            const finalProductPrice = (
-                              cartItem.price * currency.currencyRate
-                            ).toFixed(2);
-                            const finalDiscountedPrice = (
-                              discountedPrice * currency.currencyRate
-                            ).toFixed(2);
+                            const discountedPrice = getDiscountedPrice(cartItem.price, cartItem.discount);
+                            const finalProductPrice = +(cartItem.price * currency.currencyRate).toFixed(2);
+                            const finalDiscountedPrice = +(discountedPrice * currency.currencyRate).toFixed(2);
 
-                            discountedPrice != null
-                              ? (cartTotalPrice +=
-                                  finalDiscountedPrice * cartItem.quantity)
-                              : (cartTotalPrice +=
-                                  finalProductPrice * cartItem.quantity);
+                            cartTotalPrice += finalDiscountedPrice * cartItem.quantity;
                             return (
                               <tr key={key}>
                                 <td className="product-thumbnail">
@@ -107,9 +110,9 @@ const Cart = ({
                                     <img
                                       className="img-fluid"
                                       src={
-                                        cartItem.images && cartItem.images.length > 0 
-                                        ? cartItem.images[0].productImage
-                                        : process.env.PUBLIC_URL + "/assets/img/product/fashion/1.jpg"
+                                        cartItem.images && cartItem.images.length > 0
+                                          ? cartItem.images[0].productImage
+                                          : process.env.PUBLIC_URL + "/assets/img/product/fashion/1.jpg"
                                       }
                                       alt={cartItem.productName}
                                     />
@@ -127,7 +130,7 @@ const Cart = ({
                                     {cartItem.productName}
                                   </Link>
                                   {cartItem.selectedProductColor &&
-                                  cartItem.selectedProductSize ? (
+                                    cartItem.selectedProductSize ? (
                                     <div className="cart-item-variation">
                                       <span>
                                         Color: {cartItem.selectedProductColor}
@@ -165,33 +168,26 @@ const Cart = ({
                                   <div className="cart-plus-minus">
                                     <button
                                       className="dec qtybutton"
-                                      onClick={() =>
-                                        decreaseQuantity(cartItem, addToast)
-                                      }
+                                      onClick={() => handleQuantityChange(cartItem, -1)}
+                                      // disabled={cartItem.quantity <= 1}
+                                      aria-label="Decrease quantity"
                                     >
                                       -
                                     </button>
+                                    <label htmlFor={`quantity-${cartItem.productID}`} className="sr-only">Quantity</label>
                                     <input
                                       className="cart-plus-minus-box"
+                                      id={`quantity-${cartItem.productID}`}
                                       type="text"
                                       value={cartItem.quantity}
                                       readOnly
+                                      aria-label="Quantity"
                                     />
                                     <button
                                       className="inc qtybutton"
-                                      onClick={() =>
-                                        addToCart(
-                                          cartItem,
-                                          addToast,
-                                          quantityCount
-                                        )
-                                      }
-                                      disabled={
-                                        cartItem !== undefined &&
-                                        cartItem.quantity &&
-                                        cartItem.quantity >=
-                                          getItemStock(cartItem)
-                                      }
+                                      onClick={() => handleQuantityChange(cartItem, 1)}
+                                      // disabled={cartItem.quantity >= getItemStock(cartItem)}
+                                      aria-label="Increase quantity"
                                     >
                                       +
                                     </button>
@@ -200,13 +196,13 @@ const Cart = ({
                                 <td className="product-subtotal">
                                   {discountedPrice !== null
                                     ? currency.currencySymbol +
-                                      (
-                                        finalDiscountedPrice * cartItem.quantity
-                                      ).toFixed(2)
+                                    (
+                                      finalDiscountedPrice * cartItem.quantity
+                                    ).toFixed(2)
                                     : currency.currencySymbol +
-                                      (
-                                        finalProductPrice * cartItem.quantity
-                                      ).toFixed(2)}
+                                    (
+                                      finalProductPrice * cartItem.quantity
+                                    ).toFixed(2)}
                                 </td>
 
                                 <td className="product-remove">
@@ -231,9 +227,9 @@ const Cart = ({
                     <div className="cart-shiping-update-wrapper">
                       <div className="cart-shiping-update">
                         <Link
-                          to={process.env.PUBLIC_URL + "/shop-grid-standard"}
+                          to={process.env.PUBLIC_URL + "/cuahang"}
                         >
-                          Continue Shopping
+                          Tiếp tục mua sắm
                         </Link>
                       </div>
                       <div className="cart-clear">
@@ -250,7 +246,7 @@ const Cart = ({
                     <div className="cart-tax">
                       <div className="title-wrap">
                         <h4 className="cart-bottom-title section-bg-gray">
-                          Estimate Shipping And Tax
+                          Phí giao hàng và thuế
                         </h4>
                       </div>
                       <div className="tax-wrapper">
@@ -335,7 +331,7 @@ const Cart = ({
                     </div>
                   </div>
                 </div>
-                </Fragment>
+              </Fragment>
             ) : (
               <div className="row">
                 <div className="col-lg-12">
@@ -345,7 +341,7 @@ const Cart = ({
                     </div>
                     <div className="item-empty-area__text">
                       No items found in cart <br />{" "}
-                      <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
+                      <Link to={process.env.PUBLIC_URL + "/cuahang"}>
                         Shop Now
                       </Link>
                     </div>
@@ -382,8 +378,12 @@ const mapDispatchToProps = dispatch => {
     addToCart: (item, addToast, quantityCount) => {
       dispatch(addToCart(item, addToast, quantityCount));
     },
-    decreaseQuantity: (item, addToast) => {
-      dispatch(decreaseQuantity(item, addToast));
+    updateCartQuantity: (item, newQuantity, addToast) => {
+      if (newQuantity > 0) {
+        dispatch(updateCartQuantity(item, newQuantity, addToast));
+      } else {
+        addToast("Số lượng phải là số dương", { appearance: "error", autoDismiss: true });
+      }
     },
     deleteFromCart: (item, addToast) => {
       dispatch(deleteFromCart(item, addToast));

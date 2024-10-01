@@ -255,7 +255,7 @@ const MobileNavMenu = ({ strings }) => {
                   </Link>
                 </li>
                 <li>
-                  <Link to={process.env.PUBLIC_URL + "/shop-grid-full-width"}>
+                  <Link to={process.env.PUBLIC_URL + "/cuahang"}>
                     {strings["shop_grid_full_width"]}
                   </Link>
                 </li>
@@ -272,7 +272,7 @@ const MobileNavMenu = ({ strings }) => {
                   </Link>
                 </li>
                 <li>
-                  <Link to={process.env.PUBLIC_URL + "/shop-list-full-width"}>
+                  <Link to={process.env.PUBLIC_URL + "/combo"}>
                     {strings["shop_list_full_width"]}
                   </Link>
                 </li>

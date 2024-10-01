@@ -11,7 +11,7 @@ const HomeFashion = () => {
   return (
     <Fragment>
       <MetaTags>
-        <title>Bloom Gift | Home</title>
+        <title>Bloom Gift | Trang chủ</title>
         <meta
           name="description"
           content="Fashion home of flone react minimalist eCommerce template."

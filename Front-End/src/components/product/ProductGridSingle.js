@@ -27,6 +27,16 @@ const ProductGridSingle = ({
     discountedPrice * currency.currencyRate
   ).toFixed(2);
 
+  const handleAddToCart = () => {
+    addToCart(
+      product,
+      addToast,
+      1, // quantityCount
+      null, // selectedProductColor (you might want to add this feature)
+      null  // selectedProductSize (you might want to add this feature)
+    );
+  };
+
   return (
     <Fragment>
       <div
@@ -44,7 +54,7 @@ const ProductGridSingle = ({
                 src={process.env.PUBLIC_URL + product.images[0].productImage}
                 alt=""
               />
-              {product.images[0].length > 1 ? (
+              {product.images.length > 1 ? (
                 <img
                   className="hover-img"
                   src={process.env.PUBLIC_URL + product.images[1].productImage}
@@ -93,12 +103,12 @@ const ProductGridSingle = ({
                     Buy now{" "}
                   </a>
                 ) : product.variation && product.variation.length >= 1 ? (
-                  <Link to={`${process.env.PUBLIC_URL}/product/${product.id}`}>
+                  <Link to={`${process.env.PUBLIC_URL}/product/${product.productID}`}>
                     Select Option
                   </Link>
-                ) : product.stock && product.stock > 0 ? (
+                ) : product.quantity && product.quantity > 0 ? (
                   <button
-                    onClick={() => addToCart(product, addToast)}
+                    onClick={handleAddToCart}
                     className={
                       cartItem !== undefined && cartItem.quantity > 0
                         ? "active"

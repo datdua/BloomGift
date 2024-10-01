@@ -37,9 +37,12 @@ const createProductFailure = (error) => ({
 export const getAllProducts = (addToast) => {
   return async (dispatch) => {
     try {
-      const response = await axios.get("http://localhost:8080/api/auth/product-customer/list-product-by-customer");
+      const response = await axios.get("https://bloomgift-bloomgift.azuremicroservices.io/api/customer/product/list-product-by-customer", {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+      }});
       dispatch(fetchProductsSuccess(response.data));
-
       return response.data;
     } catch (error) {
       console.error("Get all products failed:", error);
@@ -78,8 +81,13 @@ export const searchProduct = (
       params.size = size;
 
       const response = await axios.get(
-        "http://localhost:8080/api/auth/product-customer/search-product",
-        { params }
+        "https://bloomgift-bloomgift.azuremicroservices.io/api/auth/product-customer/search-product",
+        { params }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token') 
+        }
+        }
       );
 
       dispatch({
@@ -98,9 +106,10 @@ export const searchProduct = (
 export const getProductDetail = (addToast, productId) => {
   return async (dispatch) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/product/${productId}`,{
+      const response = await axios.get(`https://bloomgift-bloomgift.azuremicroservices.io/api/product/${productId}`,{
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token') 
       }});
       dispatch({
         type: GET_PRODUCT_DETAIL,
@@ -118,24 +127,39 @@ export const getProductDetail = (addToast, productId) => {
 export const getProductBestSeller = (addToast, top) => {
   return async (dispatch) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/auth/product-customer/get-product-best-seller/{Top}?top=${top}`);
+      // Use string concatenation to prevent axios from encoding the curly braces
+      const url = 'https://bloomgift-bloomgift.azuremicroservices.io/api/customer/product/get-product-best-seller/{Top}?top=' + top;
+      
+      const response = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+      }});
+      
       dispatch({
         type: GET_BEST_SELLER_PRODUCTS,
         payload: response.data,
-      })
+      });
+      
       return response.data;
     } catch (error) {
       console.error("Get best seller failed:", error);
-      if (addToast) addToast("Lấy sản phẩm bán chạy thất bại!", { appearance: "error", autoDismiss: true });
+      if (addToast) {
+        addToast("Lấy sản phẩm bán chạy thất bại!", { appearance: "error", autoDismiss: true });
+      }
       throw error;
     }
   }
-} 
+};
 
 export const getNewProduct = (addToast) => {
   return async (dispatch) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/auth/product-customer/new-product`);
+      const response = await axios.get(`https://bloomgift-bloomgift.azuremicroservices.io/api/customer/product/new-product`,{
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token') 
+      }});
       dispatch({
         type: GET_NEW_PRODUCT,
         payload: response.data,
@@ -152,7 +176,11 @@ export const getNewProduct = (addToast) => {
 export const getFeatureProduct = (addToast) => {
   return async (dispatch) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/auth/product-customer/get-product-feature-true`);
+      const response = await axios.get(`https://bloomgift-bloomgift.azuremicroservices.io/api/customer/product/get-product-feature-true`,{
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token') 
+      }});
       dispatch({
         type: GET_FEATURE_PRODUCT,
         payload: response.data,
@@ -169,7 +197,7 @@ export const getFeatureProduct = (addToast) => {
 export const getProductByStatusFalse = () => {
   return async (dispatch) => {
     try {
-      const response = await axios.get('http://localhost:8080/api/product/products/status?productStatus=false');
+      const response = await axios.get('https://bloomgift-bloomgift.azuremicroservices.io/api/product/products/status?productStatus=false');
       if (response.status !== 200) {
         throw new Error(`Lỗi khi nhận dữ liệu: ${response.status}`);
       }
@@ -189,7 +217,7 @@ export const getProductByStatusFalse = () => {
 export const getProductByStatusTrue = () => {
   return async (dispatch) => {
     try {
-      const response = await axios.get('http://localhost:8080/api/product/products/status?productStatus=true');
+      const response = await axios.get('https://bloomgift-bloomgift.azuremicroservices.io/api/product/products/status?productStatus=true');
       if (response.status !== 200) {
         throw new Error(`Lỗi khi nhận dữ liệu: ${response.status}`);
       }
@@ -218,7 +246,7 @@ export const createProduct = (productRequest, imageFiles) => {
         formData.append('imageFiles', file);
       });
       const response = await axios.post(
-        'http://localhost:8080/api/product/create',
+        'https://bloomgift-bloomgift.azuremicroservices.io/api/product/create',
         formData,
         {
           headers: {
@@ -242,7 +270,11 @@ export const createProduct = (productRequest, imageFiles) => {
 export const getProductImages = (productID) => {
   return async (dispatch) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/product-images/${productID}/images`);
+      const response = await axios.get(`https://bloomgift-bloomgift.azuremicroservices.io/api/product-images/${productID}/images`,{
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token') 
+      }});
       if (response.status !== 200) {
         throw new Error(`Failed to fetch images: ${response.status}`);
       }

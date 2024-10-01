@@ -17,13 +17,12 @@ const FooterCopyright = ({ footerLogo, spaceBottomClass, colorClass }) => {
       <p>
         &copy; {new Date().getFullYear()}{" "}
         <a
-          href="https://hasthemes.com"
+          href="https://www.facebook.com/bloomgift201/"
           rel="noopener noreferrer"
           target="_blank"
         >
-          Flone
+          BloomGift
         </a>
-        .<br /> All Rights Reserved
       </p>
     </div>
   );

@@ -18,7 +18,7 @@ const HeroSliderOneSingle = ({ data, sliderClassName }) => {
               <div className="slider-btn btn-hover">
                 <Link
                   className="animated"
-                  to={process.env.PUBLIC_URL + '/shop-grid-full-width'}
+                  to={process.env.PUBLIC_URL + '/cuahang'}
                 >
                   MUA NGAY
                 </Link>

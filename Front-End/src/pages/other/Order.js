@@ -62,7 +62,6 @@ const OrderHistory = ({ orders, location }) => {
         <Breadcrumb />
         <div className="cart-main-area pt-90 pb-100">
           <div className="container">
-            <h3 className="cart-page-title">Lịch sử đơn hàng</h3>
             {!Array.isArray(sortedOrders) || sortedOrders.length === 0 ? (
               <p>Không có đơn hàng nào để hiển thị.</p>
             ) : (

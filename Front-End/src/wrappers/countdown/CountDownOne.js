@@ -21,7 +21,7 @@ const CountDownOne = ({ spaceTopClass, spaceBottomClass, bgImg, dateTime }) => {
                 <Countdown date={new Date(dateTime)} renderer={Renderer} />
               </div>
               <div className="funfact-btn btn-hover">
-                <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
+                <Link to={process.env.PUBLIC_URL + "/cuahang"}>
                   SHOP NOW
                 </Link>
               </div>

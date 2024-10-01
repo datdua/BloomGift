@@ -15,7 +15,7 @@ const CtaOne = ({ spaceTopClass, backgroundImage }) => {
           <div className="save-money-content">
             <h2>Shop and save money</h2>
             <div className="save-money-btn">
-              <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
+              <Link to={process.env.PUBLIC_URL + "/cuahang"}>
                 Buy $97.09
               </Link>
             </div>
