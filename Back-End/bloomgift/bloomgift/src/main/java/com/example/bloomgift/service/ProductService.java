@@ -399,7 +399,11 @@ public class ProductService {
     }
 
     public void createProduct(ProductRequest productRequest, List<MultipartFile> imageFiles) {
+        logger.info("Starting createProduct method");
+
         checkProduct(productRequest);
+        logger.info("Product request checked");
+
         Float discount = productRequest.getDiscount();
         String description = productRequest.getDescription();
         String colour = productRequest.getColour();
@@ -410,16 +414,20 @@ public class ProductService {
         String productName = productRequest.getProductName();
         Category category = categoryRepository.findByCategoryName(categoryName);
         if (category == null) {
+            logger.error("Category not found: " + categoryName);
             throw new IllegalArgumentException("Category not found");
         }
+        logger.info("Category found: " + categoryName);
+
         Store store = null;
         if (productRequest.getStoreID() != null) {
             store = storeRepository.findById(productRequest.getStoreID()).orElse(null);
         }
         if (store == null) {
+            logger.error("Store not found: " + productRequest.getStoreID());
             throw new IllegalArgumentException("Store not found");
-
         }
+        logger.info("Store found: " + store.getStoreName());
 
         Product product = new Product();
         product.setDiscount(discount);
@@ -434,6 +442,8 @@ public class ProductService {
         product.setCategoryID(category);
         product.setSold(0);
         product.setStoreID(store);
+        logger.info("Product entity populated");
+
         List<Size> sizes = productRequest.getSizes().stream()
                 .map(sizeRequest -> {
                     Size size = new Size();
@@ -445,9 +455,12 @@ public class ProductService {
                 })
                 .collect(Collectors.toList());
         product.setSizes(sizes);
+        logger.info("Sizes set for product");
 
         List<String> imageUrls = uploadImagesByStoreAndProduct(imageFiles, store.getStoreName(),
                 product.getProductName());
+        logger.info("Images uploaded: " + imageUrls);
+
         List<ProductImage> productImages = imageUrls.stream()
                 .map(imageUrl -> {
                     ProductImage image = new ProductImage();
@@ -456,10 +469,11 @@ public class ProductService {
                     return image;
                 })
                 .collect(Collectors.toList());
-
         product.setProductImages(productImages);
-        productRepository.save(product);
+        logger.info("Product images set");
 
+        productRepository.save(product);
+        logger.info("Product saved successfully");
     }
 
     public List<String> uploadImagesByStoreAndProduct(List<MultipartFile> imageFiles, String storeName,

@@ -2,6 +2,7 @@ package com.example.bloomgift.controllers.FireBase;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,11 +21,11 @@ import com.example.bloomgift.service.FirebaseStorageService;
 @RestController
 @RequestMapping("/api/customer/files")
 public class FirebaseControllerByCustomer {
-    private final FirebaseStorageService firebaseStorageService;
 
-    public FirebaseControllerByCustomer(FirebaseStorageService firebaseStorageService) {
-        this.firebaseStorageService = firebaseStorageService;
-    }
+    @Autowired
+    private FirebaseStorageService firebaseStorageService;
+
+    
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadFile(

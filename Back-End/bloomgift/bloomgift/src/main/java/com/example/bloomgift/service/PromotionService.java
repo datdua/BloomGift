@@ -77,6 +77,7 @@ public class PromotionService {
         }
 
         Promotion promotion = new Promotion();
+        promotion.setPromotionName(promotionRequest.getPromotionName());
         promotion.setPromotionCode(promotionRequest.getPromotionCode());
         promotion.setPromotionDiscount(promotionRequest.getPromotionDiscount());
         promotion.setQuantity(promotionRequest.getQuantity());
@@ -104,6 +105,7 @@ public class PromotionService {
             return ResponseEntity.badRequest().body("Mã giảm giá đã tồn tại.");
         }
 
+        promotion.setPromotionName(promotionRequest.getPromotionName());
         promotion.setPromotionCode(promotionRequest.getPromotionCode());
         promotion.setPromotionDiscount(promotionRequest.getPromotionDiscount());
         promotion.setQuantity(promotionRequest.getQuantity());
@@ -115,27 +117,13 @@ public class PromotionService {
         return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật mã giảm giá thành công."));
     }
 
-    public ResponseEntity<?> deletePromotion(@RequestBody List<Integer> promotionIDs) {
-        // Filter existent promotionIDs
-        List<Integer> existingPromotionIDs = promotionIDs.stream()
-                .filter(promotionID -> promotionRepository.existsById(promotionID))
-                .collect(Collectors.toList());
-        
-        // Filter non-existent promotionIDs
-        List<Integer> nonExistentPromotionIDs = promotionIDs.stream()
-                .filter(promotionID -> !existingPromotionIDs.contains(promotionID))
-                .collect(Collectors.toList());
-
-        if (existingPromotionIDs.isEmpty()) {
-            return ResponseEntity.badRequest().body("Không tìm thấy cửa hàng để xóa");
-        } else {
-            promotionRepository.deleteAllById(existingPromotionIDs);
-            String message = "Xóa các cửa hàng thành công";
-            if (!nonExistentPromotionIDs.isEmpty()) {
-                message += ". Các cửa hàng không tồn tại: " + nonExistentPromotionIDs;
-            }
-            return ResponseEntity.ok().body(message);
+    public ResponseEntity<?> deletePromotion(Integer promotionID) {
+        Promotion promotion = promotionRepository.findById(promotionID).orElse(null);
+        if (promotion == null) {
+            return ResponseEntity.badRequest().body("Không tìm thấy mã giảm giá.");
         }
+        promotionRepository.delete(promotion);
+        return ResponseEntity.ok(Collections.singletonMap("message", "Xóa mã giảm giá thành công."));
     }
 
     public Page<Promotion> getPromotions(int page, int size) {
@@ -143,8 +131,8 @@ public class PromotionService {
         return promotionRepository.findAll(pageable);
     }
 
-    public Promotion getPromotionsByStatus(String promotionStatus) {
-        return promotionRepository.findByPromotionStatus(promotionStatus);
+    public List<Promotion> getPromotionsByStatus(String status) {
+        return promotionRepository.findByPromotionStatus(status);
     }
 
     public Page<Promotion> searchPromotionWithFilterPage(

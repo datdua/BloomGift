@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriUtils;
+import java.nio.charset.StandardCharsets;
+
 import java.util.stream.Collectors;
 
 import com.example.bloomgift.model.Promotion;
@@ -55,13 +58,18 @@ public class PromotionControllerByCustomer {
         return promotionPage.map(promotionService::convertPromotionToPromotionResponse);
     }
 
-    @GetMapping("/status/{status}")
-    public ResponseEntity<?> getPromotionsByStatus(@PathVariable String status) {
-        Promotion promotion = promotionService.getPromotionsByStatus(status);
-        if (promotion == null) {
+    @GetMapping(value = "/get-by-promotion-status/{promotionStatus}", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<?> getPromotionsByStatus(@PathVariable String promotionStatus) {
+        // Decode the URL-encoded promotionStatus
+        String decodedStatus = UriUtils.decode(promotionStatus, StandardCharsets.UTF_8);
+        
+        List<Promotion> promotions = promotionService.getPromotionsByStatus(decodedStatus);
+        if (promotions.isEmpty()) {
             return ResponseEntity.status(404).body("Không tìm thấy khuyến mãi với trạng thái này.");
         }
-        PromotionResponse response = promotionService.convertPromotionToPromotionResponse(promotion);
+        List<PromotionResponse> response = promotions.stream()
+                .map(promotionService::convertPromotionToPromotionResponse)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
 
