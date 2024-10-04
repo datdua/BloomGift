@@ -1,78 +1,62 @@
 import PropTypes from "prop-types";
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useToasts } from "react-toast-notifications";
+import { deleteFromCart, getCartItems } from "../../../redux/actions/cartActions";
+import { useDispatch } from "react-redux";
 
-const MenuCart = ({ cartData, currency, deleteFromCart }) => {
-  let cartTotalPrice = 0;
+const MenuCart = ({ cartData, currency }) => {
   const { addToast } = useToasts();
-
+  const dispatch = useDispatch();
+  const cartItemsArray = Object.values(cartData);
+  const totalPriceCart = cartItemsArray.reduce((total, item) => total + (item.price * item.quantity), 0);
+  
+  useEffect(() => {
+    dispatch(getCartItems(addToast));
+  }, [dispatch, addToast]);
+  
   return (
     <div className="shopping-cart-content">
-      {cartData && cartData.length > 0 ? (
+      {cartItemsArray.length > 0 ? (
         <Fragment>
           <ul>
-            {cartData.map((single, key) => {
-              const discountedPrice = single.discount > 0
-                ? single.price * (1 - single.discount / 100)
-                : null;
-              const finalProductPrice = (
-                single.price * currency.currencyRate
-              ).toFixed(2);
-              const finalDiscountedPrice = discountedPrice
-                ? (discountedPrice * currency.currencyRate).toFixed(2)
-                : null;
-
-              discountedPrice != null
-                ? (cartTotalPrice += finalDiscountedPrice * single.quantity)
-                : (cartTotalPrice += finalProductPrice * single.quantity);
-
-              return (
-                <li className="single-shopping-cart" key={key}>
-                  <div className="shopping-cart-img">
-                    <Link to={`${process.env.PUBLIC_URL}/product/${single.productID}`}>
-                      <img
-                        alt={single.productName}
-                        src={single.images && single.images.length > 0
-                          ? single.images[0].productImage
-                          : `${process.env.PUBLIC_URL}/assets/img/product/fashion/1.jpg`}
-                        className="img-fluid"
-                      />
+            {cartItemsArray.map((item) => (
+              <li className="single-shopping-cart" key={item.productID}>
+                <div className="shopping-cart-img">
+                  <Link to={`${process.env.PUBLIC_URL}/product/${item.productID}`}>
+                    <img
+                      alt={item.productName}
+                      src={`${process.env.PUBLIC_URL}/assets/img/product/fashion/1.jpg`}
+                      className="img-fluid"
+                    />
+                  </Link>
+                </div>
+                <div className="shopping-cart-title">
+                  <h4>
+                    <Link to={`${process.env.PUBLIC_URL}/product/${item.productID}`}>
+                      {item.productName}
                     </Link>
+                  </h4>
+                  <h6>Qty: {item.quantity}</h6>
+                  <span>{currency.currencySymbol + item.price.toFixed(2)}</span>
+                  <div className="cart-item-variation">
+                    <span>Size: {item.sizeText}</span>
+                    <span>Store: {item.storeName}</span>
                   </div>
-                  <div className="shopping-cart-title">
-                    <h4>
-                      <Link to={`${process.env.PUBLIC_URL}/product/${single.productID}`}>
-                        {single.productName}
-                      </Link>
-                    </h4>
-                    <h6>Qty: {single.quantity}</h6>
-                    <span>
-                      {discountedPrice !== null
-                        ? currency.currencySymbol + finalDiscountedPrice
-                        : currency.currencySymbol + finalProductPrice}
-                    </span>
-                    {single.colour && single.sizes && single.sizes.length > 0 ? (
-                      <div className="cart-item-variation">
-                        <span>Color: {single.colour}</span>
-                        <span>Size: {single.sizes[0].text}</span>
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="shopping-cart-delete">
-                    <button onClick={() => deleteFromCart(single, addToast)}>
-                      <i className="fa fa-times-circle" />
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
+                </div>
+                <div className="shopping-cart-delete">
+                  <button onClick={() => deleteFromCart(item, addToast)}>
+                    <i className="fa fa-times-circle" />
+                  </button>
+                </div>
+              </li>
+            ))}
           </ul>
           <div className="shopping-cart-total">
             <h4>
               Total:{" "}
               <span className="shop-total">
-                {currency.currencySymbol + cartTotalPrice.toFixed(2)}
+                {currency.currencySymbol + totalPriceCart.toFixed(2)}
               </span>
             </h4>
           </div>
@@ -80,10 +64,7 @@ const MenuCart = ({ cartData, currency, deleteFromCart }) => {
             <Link className="default-btn" to={process.env.PUBLIC_URL + "/cart"}>
               View Cart
             </Link>
-            <Link
-              className="default-btn"
-              to={process.env.PUBLIC_URL + "/checkout"}
-            >
+            <Link className="default-btn" to={process.env.PUBLIC_URL + "/checkout"}>
               Checkout
             </Link>
           </div>
@@ -96,9 +77,9 @@ const MenuCart = ({ cartData, currency, deleteFromCart }) => {
 };
 
 MenuCart.propTypes = {
-  cartData: PropTypes.array,
+  cartData: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   currency: PropTypes.object,
-  deleteFromCart: PropTypes.func,
+  deleteFromCart: PropTypes.func
 };
 
 export default MenuCart;

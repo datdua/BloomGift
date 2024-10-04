@@ -5,7 +5,7 @@ export const ADD_TO_CART = "ADD_TO_CART";
 export const UPDATE_CART_QUANTITY = "UPDATE_CART_QUANTITY";
 export const DELETE_FROM_CART = "DELETE_FROM_CART";
 export const DELETE_ALL_FROM_CART = "DELETE_ALL_FROM_CART";
-
+export const GET_CART_ITEMS = "GET_CART_ITEMS"
 
 
 
@@ -13,7 +13,7 @@ export const DELETE_ALL_FROM_CART = "DELETE_ALL_FROM_CART";
 const getAccountIDFromToken = () => {
   const token = localStorage.getItem('token'); // Assume the token is stored in localStorage
   if (!token) return null;
-  
+
   try {
     const decodedToken = jwtDecode(token);
     return decodedToken.accountID;
@@ -101,8 +101,6 @@ export const addToCart = (
   };
 };
 
-
-
 export const updateCartQuantity = (item, newQuantity, addToast) => {
   return async dispatch => {
     try {
@@ -125,14 +123,18 @@ export const updateCartQuantity = (item, newQuantity, addToast) => {
       if (response.status === 200 && addToast) {
         addToast("Cập nhật giỏ hàng thành công", {
           appearance: "success",
-          autoDismiss: true
+          autoDismiss: true          
         });
+        dispatch(getCartItems(addToast));
       }
 
       // Dispatch the updated quantity to Redux
       dispatch({
-        type: UPDATE_CART_QUANTITY,
-        payload: { ...item, quantity: newQuantity }
+        type: "UPDATE_CART_QUANTITY",
+        payload: { 
+          productID: item.productID, 
+          quantity: newQuantity 
+        }
       });
     } catch (error) {
       console.error("Error updating cart:", error);
@@ -155,10 +157,12 @@ export const deleteFromCart = (item, addToast) => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }});
+        }
+      });
 
       if (addToast) {
         addToast("Đã xoá sản phẩm khỏi giỏ hàng", { appearance: "success", autoDismiss: true });
+        dispatch(getCartItems(addToast));
       }
 
       dispatch({ type: DELETE_FROM_CART, payload: item });
@@ -230,4 +234,44 @@ export const cartItemStock = async (productId) => {
     console.error("Error fetching cart item stock:", error);
     return 0; // or another default value
   }
+};
+
+export const getCartItems = (addToast) => {
+  return async (dispatch) => {
+    try {
+      const accountID = getAccountIDFromToken();
+      if (!accountID) {
+        console.error("No valid account ID found");
+        if (addToast) {
+          addToast("Lỗi xác thực, vui lòng đăng nhập lại", {
+            appearance: "error",
+            autoDismiss: true,
+          });
+        }
+        return;
+      }
+
+      const response = await axios.get(
+        `https://bloomgift-bloomgift.azuremicroservices.io/api/customer/cart/view/${accountID}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (response.data && response.data.cartItems) {
+        dispatch({ type: GET_CART_ITEMS, payload: Object.values(response.data.cartItems) });
+      }
+    } catch (error) {
+      console.error("Error fetching cart items:", error);
+      if (addToast) {
+        addToast("Lỗi khi lấy dữ liệu giỏ hàng", {
+          appearance: "error",
+          autoDismiss: true,
+        });
+      }
+    }
+  };
 };

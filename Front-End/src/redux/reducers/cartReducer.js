@@ -5,75 +5,33 @@ import {
   DELETE_FROM_CART,
   DELETE_ALL_FROM_CART,
   UPDATE_CART_QUANTITY,
+  GET_CART_ITEMS,
 } from "../actions/cartActions";
 
 const initState = [];
 
 const cartReducer = (state = initState, action) => {
-  const cartItems = state || []; 
+  // Ensure state is always an array
+  const cartItems = Array.isArray(state) ? state : [];
   const product = action.payload;
 
-  if (action.type === ADD_TO_CART) {
-    if (!product) return state;
-    if (product.variation === undefined) {
-      const cartItem = cartItems.filter(item => item.id === product.id)[0];
-      if (cartItem === undefined) {
-        return [
-          ...cartItems,
-          {
-            ...product,
-            quantity: product.quantity ? product.quantity : 1,
-            cartItemId: uuid()
-          }
-        ];
-      } else {
-        return cartItems.map(item =>
-          item.cartItemId === cartItem.cartItemId
-            ? {
-                ...item,
-                quantity: product.quantity
-                  ? item.quantity + product.quantity
-                  : item.quantity + 1
-              }
-            : item
-        );
-      }
-    } else {
-      const cartItem = cartItems.filter(
-        item =>
-          item.id === product.id &&
-          product.selectedProductColor &&
-          product.selectedProductColor === item.selectedProductColor &&
-          product.selectedProductSize &&
-          product.selectedProductSize === item.selectedProductSize &&
-          (product.cartItemId ? product.cartItemId === item.cartItemId : true)
-      )[0];
+  switch (action.type) {
+    case ADD_TO_CART:
+      if (!product) return cartItems;
 
-      if (cartItem === undefined) {
-        return [
-          ...cartItems,
-          {
-            ...product,
-            quantity: product.quantity ? product.quantity : 1,
-            cartItemId: uuid()
-          }
-        ];
-      } else if (
-        cartItem !== undefined &&
-        (cartItem.selectedProductColor !== product.selectedProductColor ||
-          cartItem.selectedProductSize !== product.selectedProductSize)
-      ) {
-        return [
-          ...cartItems,
-          {
-            ...product,
-            quantity: product.quantity ? product.quantity : 1,
-            cartItemId: uuid()
-          }
-        ];
-      } else {
+      const existingItem = cartItems.find(item => {
+        if (product.variation === undefined) {
+          return item.id === product.id;
+        } else {
+          return item.id === product.id &&
+                 item.selectedProductColor === product.selectedProductColor &&
+                 item.selectedProductSize === product.selectedProductSize;
+        }
+      });
+
+      if (existingItem) {
         return cartItems.map(item =>
-          item.cartItemId === cartItem.cartItemId
+          item.cartItemId === existingItem.cartItemId
             ? {
                 ...item,
                 quantity: product.quantity
@@ -84,31 +42,36 @@ const cartReducer = (state = initState, action) => {
               }
             : item
         );
+      } else {
+        return [
+          ...cartItems,
+          {
+            ...product,
+            quantity: product.quantity ? product.quantity : 1,
+            cartItemId: uuid()
+          }
+        ];
       }
-    }
-  }
 
-  if (action.type === UPDATE_CART_QUANTITY) {
-    return cartItems.map(item =>
-      item.cartItemId === product.cartItemId
-        ? { ...item, quantity: product.quantity }
-        : item
-    );
-  }
+    case UPDATE_CART_QUANTITY:
+      return cartItems.map(item =>
+        item.cartItemId === product.productID
+          ? { ...item, quantity: product.quantity }
+          : item
+      );
 
-  if (action.type === DELETE_FROM_CART) {
-    const remainingItems = (cartItems, product) =>
-      cartItems.filter(cartItem => cartItem.cartItemId !== product.cartItemId);
-    return remainingItems(cartItems, product);
-  }
+    case GET_CART_ITEMS:
+      return action.payload;
 
-  if (action.type === DELETE_ALL_FROM_CART) {
-    return cartItems.filter(item => {
-      return false;
-    });
-  }
+    case DELETE_FROM_CART:
+      return cartItems.filter(item => item.cartItemId !== product.cartItemId);
 
-  return state;
+    case DELETE_ALL_FROM_CART:
+      return [];
+
+    default:
+      return cartItems;
+  }
 };
 
 export default cartReducer;

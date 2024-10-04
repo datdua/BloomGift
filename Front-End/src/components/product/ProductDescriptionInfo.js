@@ -48,7 +48,7 @@ const ProductDescriptionInfo = ({
       return;
     }
     if (newQuantity > product.quantity) {
-      addToast(`Sản phẩm không đủ hàng! Chỉ còn ${product.quantity} tồn kho`, { appearance: "error" });
+      addToast(`Sản phẩm không đủ hàng! Chỉ còn ${product.quantity} sản phẩm tồn kho`, { appearance: "error" });
       return;
     }
     setQuantityCount(newQuantity);
@@ -155,7 +155,7 @@ const ProductDescriptionInfo = ({
           </button>
         </div>
         <div className="pro-details-cart btn-hover">
-          {productStock && productStock > 0 ? (
+          {product.quantity && product.quantity > 0 ? (
             <button
               onClick={() =>
                 addToCart(
@@ -166,7 +166,7 @@ const ProductDescriptionInfo = ({
                   selectedProductSize
                 )
               }
-              disabled={productCartQty >= productStock}
+              disabled={productCartQty >= product.quantity}
             >
               {" "}
               Add To Cart{" "}

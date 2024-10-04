@@ -109,7 +109,7 @@ const IconGroup = ({
         <button className="icon-cart" onClick={e => handleClick(e)}>
           <i className="pe-7s-shopbag" />
           <span className="count-style">
-            {cartData && cartData.length ? cartData.length : 0}
+            {Array.isArray(cartData) ? cartData.length : Object.keys(cartData).length}
           </span>
         </button>
         {/* menu cart */}
@@ -140,13 +140,14 @@ const IconGroup = ({
 };
 
 IconGroup.propTypes = {
-  cartData: PropTypes.array,
+  cartData: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   compareData: PropTypes.array,
   currency: PropTypes.object,
   iconWhiteClass: PropTypes.string,
   deleteFromCart: PropTypes.func,
   wishlistData: PropTypes.array
 };
+
 
 const mapStateToProps = state => {
   return {

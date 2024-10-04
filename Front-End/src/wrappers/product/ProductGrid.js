@@ -7,7 +7,7 @@ import { addToWishlist } from "../../redux/actions/wishlistActions";
 import { addToCompare } from "../../redux/actions/compareActions";
 
 const ProductGrid = ({
-  products = [], // This prop is the array of products passed based on the active tab
+  products = [],
   currency,
   addToCart,
   addToWishlist,
@@ -30,7 +30,7 @@ const ProductGrid = ({
             addToCart={addToCart}
             addToWishlist={addToWishlist}
             addToCompare={addToCompare}
-            cartItem={cartItems.find(cartItem => cartItem.productID === product.productID)}
+            cartItem={cartItems.find(cartItem => cartItem.productID === product.productID)}  // Updated here
             wishlistItem={wishlistItems.find(wishlistItem => wishlistItem.productID === product.productID)}
             compareItem={compareItems.find(compareItem => compareItem.productID === product.productID)}
             key={`${product.productID}-${index}`}
@@ -54,14 +54,15 @@ ProductGrid.propTypes = {
   wishlistItems: PropTypes.array
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
   return {
     currency: state.currencyData,
-    cartItems: state.cartData,
+    cartItems: Object.values(state.cartData.cartItems || {}),
     wishlistItems: state.wishlistData,
     compareItems: state.compareData
   };
 };
+
 
 const mapDispatchToProps = dispatch => {
   return {

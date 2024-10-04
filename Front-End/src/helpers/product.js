@@ -33,24 +33,28 @@ export const getDiscountPrice = (price, discount) => {
 
 // get product cart quantity
 export const getProductCartQuantity = (cartItems, product, color, size) => {
-  let productInCart = cartItems.filter(
+  // Convert cartItems object to an array
+  const cartItemsArray = Object.values(cartItems);
+
+  let productInCart = cartItemsArray.find(
     single =>
-      single.id === product.id &&
+      single.productID === product.id &&
       (single.selectedProductColor
         ? single.selectedProductColor === color
         : true) &&
       (single.selectedProductSize ? single.selectedProductSize === size : true)
-  )[0];
-  if (cartItems.length >= 1 && productInCart) {
+  );
+
+  if (cartItemsArray.length >= 1 && productInCart) {
     if (product.variation) {
-      return cartItems.filter(
+      return cartItemsArray.find(
         single =>
-          single.id === product.id &&
+          single.productID === product.id &&
           single.selectedProductColor === color &&
           single.selectedProductSize === size
-      )[0].quantity;
+      )?.quantity || 0;
     } else {
-      return cartItems.filter(single => product.id === single.id)[0].quantity;
+      return cartItemsArray.find(single => product.id === single.productID)?.quantity || 0;
     }
   } else {
     return 0;
