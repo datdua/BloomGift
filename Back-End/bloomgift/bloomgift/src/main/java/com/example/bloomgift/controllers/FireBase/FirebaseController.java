@@ -2,6 +2,7 @@ package com.example.bloomgift.controllers.FireBase;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,14 +17,23 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.bloomgift.service.FirebaseStorageService;
-
 @RestController
 @RequestMapping("/api/upload-files/file-management")
 public class FirebaseController {
-    private final FirebaseStorageService firebaseStorageService;
 
-    public FirebaseController(FirebaseStorageService firebaseStorageService) {
-        this.firebaseStorageService = firebaseStorageService;
+    @Autowired
+    private FirebaseStorageService firebaseStorageService;
+
+
+    @GetMapping("/get/dowload-url/{filePath}")
+    public ResponseEntity<String> getDownloadUrl(@PathVariable String filePath) {
+        try {
+            String downloadUrl = firebaseStorageService.getDownloadUrl(filePath);
+            return ResponseEntity.ok(downloadUrl);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to get download URL: " + e.getMessage());
+        }
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

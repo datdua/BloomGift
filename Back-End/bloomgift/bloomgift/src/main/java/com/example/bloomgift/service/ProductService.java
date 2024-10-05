@@ -3,41 +3,38 @@ package com.example.bloomgift.service;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
-import org.springframework.transaction.annotation.Transactional;
+
 import org.slf4j.Logger;
-
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.domain.Pageable;
+
 import com.example.bloomgift.model.Category;
-import com.example.bloomgift.model.OrderDetail;
 import com.example.bloomgift.model.Product;
 import com.example.bloomgift.model.ProductImage;
 import com.example.bloomgift.model.Size;
 import com.example.bloomgift.model.Store;
-import com.example.bloomgift.model.Order;
 import com.example.bloomgift.reponse.ProductImageReponse;
 import com.example.bloomgift.reponse.ProductReponse;
 import com.example.bloomgift.reponse.SizeReponse;
 import com.example.bloomgift.repository.CategoryRepository;
-import com.example.bloomgift.repository.ProductImageRepository;
 import com.example.bloomgift.repository.OrderDetailRepository;
+import com.example.bloomgift.repository.OrderRepository;
+import com.example.bloomgift.repository.ProductImageRepository;
 import com.example.bloomgift.repository.ProductRepository;
 import com.example.bloomgift.repository.SizeRepository;
 import com.example.bloomgift.repository.StoreRepository;
-import com.example.bloomgift.repository.OrderRepository;
 import com.example.bloomgift.request.ProductRequest;
+import com.example.bloomgift.request.SizeRequest;
 import com.example.bloomgift.specification.ProductSpecification;
 
 @Service
@@ -67,6 +64,9 @@ public class ProductService {
     private OrderRepository orderRepository;
 
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(ProductService.class);
+
+    @Autowired
+    private ComboService comboService;
 
     public List<ProductReponse> getAllProducts() {
         List<Product> products = productRepository.findAll();
@@ -399,7 +399,11 @@ public class ProductService {
     }
 
     public void createProduct(ProductRequest productRequest, List<MultipartFile> imageFiles) {
+        logger.info("Starting createProduct method");
+
         checkProduct(productRequest);
+        logger.info("Product request checked");
+
         Float discount = productRequest.getDiscount();
         String description = productRequest.getDescription();
         String colour = productRequest.getColour();
@@ -410,16 +414,20 @@ public class ProductService {
         String productName = productRequest.getProductName();
         Category category = categoryRepository.findByCategoryName(categoryName);
         if (category == null) {
+            logger.error("Category not found: " + categoryName);
             throw new IllegalArgumentException("Category not found");
         }
+        logger.info("Category found: " + categoryName);
+
         Store store = null;
         if (productRequest.getStoreID() != null) {
             store = storeRepository.findById(productRequest.getStoreID()).orElse(null);
         }
         if (store == null) {
+            logger.error("Store not found: " + productRequest.getStoreID());
             throw new IllegalArgumentException("Store not found");
-
         }
+        logger.info("Store found: " + store.getStoreName());
 
         Product product = new Product();
         product.setDiscount(discount);
@@ -434,20 +442,25 @@ public class ProductService {
         product.setCategoryID(category);
         product.setSold(0);
         product.setStoreID(store);
+        logger.info("Product entity populated");
+
         List<Size> sizes = productRequest.getSizes().stream()
                 .map(sizeRequest -> {
                     Size size = new Size();
                     size.setPrice(sizeRequest.getPrice());
                     size.setText(sizeRequest.getText());
-                    size.setSizeQuantity(sizeRequest.getSizeQuanity());
+                    size.setSizeQuantity(sizeRequest.getSizeQuantity());
                     size.setProductID(product);
                     return size;
                 })
                 .collect(Collectors.toList());
         product.setSizes(sizes);
+        logger.info("Sizes set for product");
 
         List<String> imageUrls = uploadImagesByStoreAndProduct(imageFiles, store.getStoreName(),
                 product.getProductName());
+        logger.info("Images uploaded: " + imageUrls);
+
         List<ProductImage> productImages = imageUrls.stream()
                 .map(imageUrl -> {
                     ProductImage image = new ProductImage();
@@ -456,10 +469,11 @@ public class ProductService {
                     return image;
                 })
                 .collect(Collectors.toList());
-
         product.setProductImages(productImages);
-        productRepository.save(product);
+        logger.info("Product images set");
 
+        productRepository.save(product);
+        logger.info("Product saved successfully");
     }
 
     public List<String> uploadImagesByStoreAndProduct(List<MultipartFile> imageFiles, String storeName,
@@ -478,36 +492,9 @@ public class ProductService {
         return imageUrls;
     }
 
-    @Transactional
     public void deleteProduct(Integer productID) {
-        Product product = productRepository.findById(productID)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + productID));
-
-        // Xóa hình ảnh sản phẩm từ Firebase
-        for (ProductImage image : product.getProductImages()) {
-            firebaseStorageService.deleteFile(image.getProductImage());
-        }
-
-        // Xóa các OrderDetail liên quan
-        List<OrderDetail> orderDetails = orderDetailRepository.findByProductID(product);
-        for (OrderDetail orderDetail : orderDetails) {
-            // Cập nhật Order tổng nếu cần
-            Order order = orderDetail.getOrderID();
-            if (order != null) {
-                order.setOrderPrice(order.getOrderPrice() - orderDetail.getProductTotalPrice());
-                orderRepository.save(order);
-            }
-            orderDetailRepository.delete(orderDetail);
-        }
-
-        // Xóa các Size liên quan
-        sizeRepository.deleteAll(product.getSizes());
-
-        // Xóa các ProductImage liên quan
-        productImageRepository.deleteAll(product.getProductImages());
-
-        // Xóa sản phẩm
-        productRepository.delete(product);
+        Product existingProduct = productRepository.findById(productID).orElseThrow();
+        productRepository.delete(existingProduct);
     }
 
     public Product updateProduct(Integer productID, ProductRequest productRequest, List<MultipartFile> newImageFiles) {
@@ -526,6 +513,33 @@ public class ProductService {
         existingProduct.setProductName(productRequest.getProductName());
         existingProduct.setProductStatus(productRequest.getProductStatus());
         existingProduct.setPrice(productRequest.getPrice());
+
+        // Update sizes
+        List<Size> updatedSizes = new ArrayList<>();
+        for (SizeRequest sizeRequest : productRequest.getSizes()) {
+            Size existingSize = existingProduct.getSizes().stream()
+                    .filter(size -> size.getText().equals(sizeRequest.getText()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existingSize != null) {
+                // Update existing size
+                existingSize.setPrice(sizeRequest.getPrice());
+                existingSize.setSizeQuantity(sizeRequest.getSizeQuantity());
+                updatedSizes.add(existingSize);
+            } else {
+                // Create new size
+                Size newSize = new Size();
+                newSize.setPrice(sizeRequest.getPrice());
+                newSize.setText(sizeRequest.getText());
+                newSize.setSizeQuantity(sizeRequest.getSizeQuantity());
+                newSize.setProductID(existingProduct);
+                updatedSizes.add(newSize);
+            }
+        }
+
+        // Set updated sizes to the product
+        existingProduct.setSizes(updatedSizes);
 
         // Update category
         Category category = categoryRepository.findByCategoryName(productRequest.getCategoryName());

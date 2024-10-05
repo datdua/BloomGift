@@ -42,11 +42,16 @@ public class SecurityConfig {
                         "/api-docs/**",
                         "/api/auth/**",
                         "/api/product/**",
-
+                        "/api/firebase/**",
+                        "/api/upload-files/file-management/**",
+                        "/api/customer/files/**",
+                        "/api/files/**"
         };
 
         private static final String[] GUEST_URL = { "/api/guest/**", "/api/auth/**", "/api/accounts/**",
-                        "/api/customer/category/**", "/api/customer/product/**", "/api/customer/promotion/**", "/api/customer/store/**" };
+                        "/api/combos/**",
+                        "/api/customer/category/**", "/api/customer/product/**", "/api/customer/promotion/**",
+                        "/api/customer/store/**", "/api/comments/**" };
 
         private static final String[] ADMIN_URL = { "/api/admin/**", "/api/google-sheets/**" };
 
@@ -54,9 +59,9 @@ public class SecurityConfig {
 
         private static final String[] MANAGER_URL = { "/api/manager/**" };
 
-        private static final String[] SELLER_URL = { "/api/seller/**" };
+        private static final String[] SELLER_URL = { "/api/seller/**", "/api/product/**" };
 
-        private static final String[] ADMIN_SELLER_URL = { "/api/store/**", "/api/product/**", "/api/promotion/**",
+        private static final String[] ADMIN_SELLER_URL = { "/api/store/**", "/api/promotion/**",
                         "/api/manager/**", "/api/seller/**", "/api/customer/**", "/api/admin/**", "/api/revenue/**",
                         "/api/chats/**" };
 
@@ -83,7 +88,6 @@ public class SecurityConfig {
                                                 .requestMatchers(GUEST_URL).permitAll()
                                                 .requestMatchers(CUSTOMER_URL).hasRole("CUSTOMER")
                                                 .requestMatchers(ADMIN_URL).hasRole("ADMIN")
-                                                .requestMatchers(MANAGER_URL).hasRole("MANAGER")
                                                 .requestMatchers(SELLER_URL).hasRole("SELLER")
                                                 .requestMatchers(ADMIN_SELLER_URL).hasAnyRole("ADMIN", "SELLER")
                                                 .anyRequest().authenticated())
@@ -91,10 +95,8 @@ public class SecurityConfig {
                                                 .authenticationEntryPoint(
                                                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                                 .oauth2Login(oauth2 -> oauth2
-                                                .loginPage(
-                                                                "https://bloomgiftshop.yellowbay-4df1e92b.eastasia.azurecontainerapps.io/oauth2/authorization/google")
-                                                .defaultSuccessUrl(
-                                                                "https://bloomgiftshop.yellowbay-4df1e92b.eastasia.azurecontainerapps.io/api/auth/signInWithGoogle",
+                                                .loginPage("http://localhost:8080/oauth2/authorization/google")
+                                                .defaultSuccessUrl("http://localhost:8080/api/auth/signInWithGoogle",
                                                                 true))
                                 .formLogin(Customizer.withDefaults());
                 http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -116,8 +118,9 @@ public class SecurityConfig {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
                 configuration.setAllowedOrigins(
-                                Arrays.asList("http://localhost:3000", "https://the-diamond-store-demo.web.app",
-                                                "https://www.thediamondstore.site"));
+                                Arrays.asList("http://localhost:3000",
+                                                "https://bloomgift-bloomgift.azuremicroservices.io",
+                                                "https://bloomgift-bloomgift.azuremicroservices.io/Callback"));
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 configuration.setAllowedHeaders(Arrays.asList("*"));
                 configuration.setAllowCredentials(true);
@@ -126,4 +129,5 @@ public class SecurityConfig {
                 source.registerCorsConfiguration("/**", configuration);
                 return source;
         }
+
 }

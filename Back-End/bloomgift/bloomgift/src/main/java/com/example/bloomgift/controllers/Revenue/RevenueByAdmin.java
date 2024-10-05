@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.bloomgift.service.OrderSevice;
+import com.example.bloomgift.service.OrderService;
 import com.example.bloomgift.service.RevenueService;
 
 @RestController

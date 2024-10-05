@@ -19,12 +19,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.example.bloomgift.model.Account;
+import com.example.bloomgift.model.CartItem;
 import com.example.bloomgift.model.Order;
 import com.example.bloomgift.model.OrderDetail;
 import com.example.bloomgift.model.Payment;
 import com.example.bloomgift.model.Product;
 import com.example.bloomgift.model.Promotion;
-import com.example.bloomgift.model.Size;
 import com.example.bloomgift.model.Store;
 import com.example.bloomgift.reponse.OrderDetailReponse;
 import com.example.bloomgift.reponse.OrderReponse;
@@ -36,11 +36,12 @@ import com.example.bloomgift.repository.ProductRepository;
 import com.example.bloomgift.repository.PromotionRepository;
 import com.example.bloomgift.repository.SizeRepository;
 import com.example.bloomgift.repository.StoreRepository;
-import com.example.bloomgift.request.OrderDetailRequest;
 import com.example.bloomgift.request.OrderRequest;
 
+import jakarta.transaction.Transactional;
+
 @Service
-public class OrderSevice {
+public class OrderService {
     @Autowired
     private AccountRepository accountRepository;
 
@@ -65,6 +66,10 @@ public class OrderSevice {
     @Autowired
     private PaymentRepository paymentRepository;
 
+    @Autowired
+    private CartService cartService;
+
+    @Transactional
     public void createOrder(Integer accountID, OrderRequest orderRequest) {
         checkOrder(orderRequest);
         Account account = accountRepository.findById(accountID).orElseThrow();
@@ -100,62 +105,40 @@ public class OrderSevice {
             Integer newPromotionQuantity = promotion.getQuantity() - 1;
             promotion.setQuantity(newPromotionQuantity);
         }
+
+        // Fetch cart items
+        List<CartItem> cartItems = cartService.getCartItemsByAccountID(accountID);
+        if (cartItems.isEmpty()) {
+            throw new RuntimeException("Cart is empty");
+        }
+
         Order order = new Order();
         List<OrderDetail> orderDetails = new ArrayList<>();
         float totalProductPrice = 0.0f;
         Store firstStore = null;
-        for (OrderDetailRequest orderDetailRequests : orderRequest.getOrderDetailRequests()) {
-            Product product = productRepository.findById(orderDetailRequests.getProductID()).orElseThrow();
-            if (product.getQuantity() < orderDetailRequests.getQuantity()) {
+
+        for (CartItem cartItem : cartItems) {
+            Product product = productRepository.findById(cartItem.getProductID()).orElseThrow();
+            if (product.getQuantity() < cartItem.getQuantity()) {
                 throw new RuntimeException("hết sản phẩm");
             }
             Store store = storeRepository.findByProducts(product);
             if (firstStore == null) {
                 firstStore = store;
             }
-            Integer sizeID = orderDetailRequests.getSizeID();
-            Integer quantity = orderDetailRequests.getQuantity();
             OrderDetail orderDetail = new OrderDetail();
-            float productTotalPrice = 0.0f;
-            Size size = null;
-
-            if (sizeID != null && sizeID != 0) {
-                size = sizeRepository.findById(sizeID)
-                        .orElseThrow(() -> new RuntimeException("Không tồn tại size này"));
-
-                if (!size.getProductID().equals(product)) {
-                    throw new RuntimeException("Size không khớp với sản phẩm");
-                }
-
-                if (size.getSizeQuantity() < quantity) {
-                    throw new RuntimeException("Hết size này");
-                }
-
-                productTotalPrice = size.getPrice() * orderDetailRequests.getQuantity();
-            } else {
-                float discount = product.getDiscount() != null ? product.getDiscount() : 0;
-                productTotalPrice = (product.getPrice() * (1 - discount / 100)) * orderDetailRequests.getQuantity();
-            }
-
-            if (size != null) {
-                size.setSizeQuantity(size.getSizeQuantity() - quantity);
-            } else {
-                product.setQuantity(product.getQuantity() - quantity);
-            }
+            float productTotalPrice = cartItem.getTotalPrice();
 
             totalProductPrice += productTotalPrice;
             orderDetail.setProductTotalPrice(productTotalPrice);
-            orderDetail.setSizeID(size);
             orderDetail.setAccountID(account);
             orderDetail.setProductID(product);
-            orderDetail.setQuantity(quantity);
-            orderDetail.setSizeID(size);
+            orderDetail.setQuantity(cartItem.getQuantity());
             orderDetail.setOrderID(order);
             orderDetail.setStoreID(store);
-            Integer newSold = product.getSold() + quantity;
+            Integer newSold = product.getSold() + cartItem.getQuantity();
             product.setSold(newSold);
             orderDetails.add(orderDetail);
-
         }
 
         order.setAccountID(account);
@@ -175,6 +158,10 @@ public class OrderSevice {
         Integer newPoint = account.getPoint() - point;
         account.setPoint(newPoint);
         orderRepository.save(order);
+
+        // Clear the cart after order creation
+        cartService.clearCart(accountID);
+
         if (transfer == true) {
             Payment payment = new Payment();
             payment.setOrderID(order);
@@ -206,7 +193,7 @@ public class OrderSevice {
                                     orderDetail.getQuantity(),
                                     orderDetail.getProductID().getProductName(),
                                     orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID().getText()))
+                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null))
                             .collect(Collectors.toList());
 
                     return new OrderReponse(
@@ -220,7 +207,7 @@ public class OrderSevice {
                             order.getDeliveryDateTime(),
                             order.getDeliveryAddress(),
                             order.getAccountID().getFullname(),
-                            order.getPromotionID().getPromotionCode(),
+                            (order.getPromotionID() != null) ? order.getPromotionID().getPromotionCode() : null,
                             order.getPhone(),
                             orderDetailReponses);
                 }).collect(Collectors.toList());
@@ -241,7 +228,7 @@ public class OrderSevice {
                                     orderDetail.getQuantity(),
                                     orderDetail.getProductID().getProductName(),
                                     orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID().getText()))
+                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null))
                             .collect(Collectors.toList());
 
                     return new OrderReponse(
@@ -255,7 +242,7 @@ public class OrderSevice {
                             order.getDeliveryDateTime(),
                             order.getDeliveryAddress(),
                             order.getAccountID().getFullname(),
-                            order.getPromotionID().getPromotionCode(),
+                            (order.getPromotionID() != null) ? order.getPromotionID().getPromotionCode() : null,
                             order.getPhone(),
                             orderDetailReponses);
                 }).collect(Collectors.toList());

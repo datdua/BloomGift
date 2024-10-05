@@ -18,8 +18,8 @@ import com.example.bloomgift.request.OrderRequest;
 import com.example.bloomgift.service.OrderService;
 
 @RestController
-@RequestMapping("/api/customer/order")
-public class OrderController {
+@RequestMapping("/api/seller/order/order-management")
+public class OrderControllerBySeller {
 
     @Autowired
     private OrderService orderService;
@@ -39,10 +39,10 @@ public class OrderController {
     @GetMapping("/get-all-order")
     public ResponseEntity<List<OrderReponse>> getAllOrders() {
         List<OrderReponse> orders = orderService.getAllOrder();
-        return ResponseEntity.ok(orders); // Return the list of orders in the response
+        return ResponseEntity.ok(orders);
     }
 
-     @GetMapping("/history-order/{accountID}")
+    @GetMapping("/history-order/{accountID}")
     public ResponseEntity<List<OrderReponse>> getHistoryOrderByCustomer(@PathVariable int accountID) {
         List<OrderReponse> orderReponses = orderService.getHistoryOrderByCustomer(accountID);
         return new ResponseEntity<>(orderReponses, HttpStatus.OK);
