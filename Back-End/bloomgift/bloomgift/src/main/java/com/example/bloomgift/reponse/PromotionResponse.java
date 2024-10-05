@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class PromotionResponse {
     
+    private Integer promotionID;
     private String promotionName;
     private String promotionCode;
     private String promotionDescription;
@@ -22,6 +23,32 @@ public class PromotionResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endDate;
     private String storeName;
+
+    public PromotionResponse() {
+    }
+
+    public PromotionResponse(Integer promotionID, String promotionName, String promotionCode, String promotionDescription,
+            BigDecimal promotionDiscount, Integer quantity, String promotionStatus, LocalDateTime startDate,
+            LocalDateTime endDate, String storeName) {
+        this.promotionID = promotionID;
+        this.promotionName = promotionName;
+        this.promotionCode = promotionCode;
+        this.promotionDescription = promotionDescription;
+        this.promotionDiscount = promotionDiscount;
+        this.quantity = quantity;
+        this.promotionStatus = promotionStatus;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.storeName = storeName;
+    }
+
+    public Integer getPromotionID() {
+        return promotionID;
+    }
+
+    public void setPromotionID(Integer promotionID) {
+        this.promotionID = promotionID;
+    }
 
     public String getPromotionName() {
         return promotionName;

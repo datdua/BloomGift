@@ -1,7 +1,9 @@
 package com.example.bloomgift.model;
 
-public class CartItem {
-    private Integer productId;
+import java.io.Serializable;
+
+public class CartItem implements Serializable {
+    private Integer productID;
     private Integer quantity;
     private String color;
     private String size;
@@ -14,9 +16,9 @@ public class CartItem {
 
     }
 
-    public CartItem(Integer productId, Integer quantity, String color, String size, Float price, Float totalPrice,
+    public CartItem(Integer productID, Integer quantity, String color, String size, Float price, Float totalPrice,
             String description, String imageUrl) {
-        this.productId = productId;
+        this.productID = productID;
         this.quantity = quantity;
         this.color = color;
         this.size = size;
@@ -26,12 +28,12 @@ public class CartItem {
         this.imageUrl = imageUrl;
     }
 
-    public Integer getProductId() {
-        return productId;
+    public Integer getProductID() {
+        return productID;
     }
 
-    public void setProductId(Integer productId) {
-        this.productId = productId;
+    public void setProductID(Integer productID) {
+        this.productID = productID;
     }
 
     public Integer getQuantity() {

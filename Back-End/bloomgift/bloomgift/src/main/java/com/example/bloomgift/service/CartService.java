@@ -1,8 +1,10 @@
 package com.example.bloomgift.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,13 +45,14 @@ public class CartService {
         String key = "CART:" + account.getAccountID();
         float discount = product.getDiscount() != null ? product.getDiscount() : 0;
         float discountedPrice = product.getPrice() * (1 - discount / 100);
+        float totalPrice = discountedPrice * quantity;
         Map<String, Object> productMap = Map.of(
                 "productID", product.getProductID(),
                 "storeName", product.getStoreName(),
                 "productName", product.getProductName(),
                 "price", discountedPrice,
                 "quantity", quantity,
-                "totlePrice", product.getPrice() * quantity);
+                "totalPrice", totalPrice);
         hashOperations.put(key, product.getProductID(), productMap);
     }
 
@@ -119,8 +122,8 @@ public class CartService {
         double totalPriceForSelected = 0.0;
         Map<Integer, Map<String, Object>> selectedItems = new HashMap<>();
         
-        for (Integer productId : selectedProductIds) {
-            Map<String, Object> item = cartItems.get(productId);
+        for (Integer productID : selectedProductIds) {
+            Map<String, Object> item = cartItems.get(productID);
             
             if (item != null) {
                 Float price = (Float) item.get("price");
@@ -128,7 +131,7 @@ public class CartService {
                 double itemTotal = price * quantity;
                 
                 totalPriceForSelected += itemTotal;
-                selectedItems.put(productId, item);  
+                selectedItems.put(productID, item);  
             }
         }
     
@@ -138,4 +141,30 @@ public class CartService {
     
         return response;
     }
+
+    public List<CartItem> getCartItemsByAccountID(Integer accountID) {
+        String key = "CART:" + accountID;
+        Map<Integer, Map<String, Object>> cartData = hashOperations.entries(key);
+
+        if (cartData.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<CartItem> cartItems = cartData.values().stream()
+                .map(map -> {
+                    CartItem cartItem = new CartItem();
+                    cartItem.setProductID((Integer) map.get("productID"));
+                    cartItem.setQuantity((Integer) map.get("quantity"));
+                    cartItem.setTotalPrice((Float) map.get("totalPrice"));
+                    return cartItem;
+                })
+                .collect(Collectors.toList());
+
+        return cartItems;
+    }
+
+    public void clearCart(Integer accountID) {
+        String key = "CART:" + accountID;
+        redisTemplate.delete(key);
+    }
+
 }
