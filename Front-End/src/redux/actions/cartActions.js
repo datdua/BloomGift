@@ -5,8 +5,8 @@ export const ADD_TO_CART = "ADD_TO_CART";
 export const UPDATE_CART_QUANTITY = "UPDATE_CART_QUANTITY";
 export const DELETE_FROM_CART = "DELETE_FROM_CART";
 export const DELETE_ALL_FROM_CART = "DELETE_ALL_FROM_CART";
-export const GET_CART_ITEMS = "GET_CART_ITEMS"
-
+export const GET_CART_ITEMS = "GET_CART_ITEMS";
+export const CLEAR_CART = "CLEAR_CART";
 
 
 // Function to extract accountID from JWT
@@ -138,7 +138,8 @@ export const updateCartQuantity = (item, newQuantity, addToast) => {
       });
     } catch (error) {
       console.error("Error updating cart:", error);
-      addToast("Cập nhật thất bại", { appearance: "error", autoDismiss: true });
+      const errorMessage = error.response?.data?.message || "Không đủ số lượng sản phẩm"
+      addToast(`Cập nhật thất bại: ${errorMessage}`, { appearance: "error", autoDismiss: true });
     }
   };
 };
@@ -273,5 +274,11 @@ export const getCartItems = (addToast) => {
         });
       }
     }
+  };
+};
+
+export const clearCart = () => {
+  return {
+    type: "CLEAR_CART"
   };
 };

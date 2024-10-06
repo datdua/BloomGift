@@ -38,16 +38,18 @@ export const createOrder = (formData, addToast) => {
                     payload: response.data
                 });
                 // Show success toast
-                addToast('Order created successfully', { appearance: 'success', autoDismiss: true });
+                addToast('Đơn hàng đã được tạo', { appearance: 'success', autoDismiss: true });
+                return true;
             }
         } catch (error) {
             // Log the error and dispatch fail action
             console.error('Error creating order:', error);
-            addToast('Error creating order', { appearance: 'error', autoDismiss: true });
+            addToast('Lỗi khi tạo đơn hàng', { appearance: 'error', autoDismiss: true });
             dispatch({
                 type: 'CREATE_ORDER_FAIL',
                 payload: error.response ? error.response.data : error.message,
             });
+            return false;
         }
     }
 };

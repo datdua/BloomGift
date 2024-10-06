@@ -130,7 +130,8 @@ const App = (props) => {
         languages: {
           en: require("./translations/english.json"),
           fn: require("./translations/french.json"),
-          de: require("./translations/germany.json")
+          de: require("./translations/germany.json"),
+          vi: require("./translations/vietnamese.json")
         }
       })
     );

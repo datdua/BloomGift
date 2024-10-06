@@ -40,13 +40,21 @@ const ShopListFullWidth = ({location, products}) => {
     }
 
     useEffect(() => {
-        let sortedProducts = getSortedProducts(products, sortType, sortValue);
-        const filterSortedProducts = getSortedProducts(sortedProducts, filterSortType, filterSortValue);
-        sortedProducts = filterSortedProducts;
-        setSortedProducts(sortedProducts);
-        setCurrentData(sortedProducts.slice(offset, offset + pageLimit));
-    }, [offset, products, sortType, sortValue, filterSortType, filterSortValue ]);
-
+        const sortedProductsList = getSortedProducts(products, sortType, sortValue);
+        const filterSortedProductsList = getSortedProducts(
+          sortedProductsList,
+          filterSortType,
+          filterSortValue
+        );
+      
+        if (Array.isArray(filterSortedProductsList)) {
+          setSortedProducts(filterSortedProductsList);
+          setCurrentData(filterSortedProductsList.slice(offset, offset + pageLimit));
+        } else {
+          setSortedProducts([]); 
+          setCurrentData([]); 
+        }
+      }, [offset, products, sortType, sortValue, filterSortType, filterSortValue]);
     return (
         <Fragment>
             <MetaTags>

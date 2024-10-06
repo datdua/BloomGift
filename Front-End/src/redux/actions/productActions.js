@@ -81,7 +81,7 @@ export const searchProduct = (
       params.size = size;
 
       const response = await axios.get(
-        "https://bloomgift-bloomgift.azuremicroservices.io/api/auth/product-customer/search-product",
+        "https://bloomgift-bloomgift.azuremicroservices.io/api/customer/product/search-product",
         { params }, {
           headers: {
             'Content-Type': 'application/json',

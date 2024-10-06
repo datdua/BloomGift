@@ -6,12 +6,12 @@ import {
   DELETE_ALL_FROM_CART,
   UPDATE_CART_QUANTITY,
   GET_CART_ITEMS,
+  CLEAR_CART, // Ensure CLEAR_CART is handled
 } from "../actions/cartActions";
 
 const initState = [];
 
 const cartReducer = (state = initState, action) => {
-  // Ensure state is always an array
   const cartItems = Array.isArray(state) ? state : [];
   const product = action.payload;
 
@@ -68,6 +68,9 @@ const cartReducer = (state = initState, action) => {
 
     case DELETE_ALL_FROM_CART:
       return [];
+
+    case CLEAR_CART:
+      return []; // Properly clears cart
 
     default:
       return cartItems;

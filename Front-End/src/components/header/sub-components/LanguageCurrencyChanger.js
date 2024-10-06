@@ -8,8 +8,11 @@ const LanguageCurrencyChanger = ({
   currentLanguageCode,
   dispatch
 }) => {
+  console.log('Current language code:', currentLanguageCode);
+
   const changeLanguageTrigger = e => {
     const languageCode = e.target.value;
+    console.log('Changing language to:', languageCode);
     dispatch(changeLanguage(languageCode));
   };
 
@@ -25,10 +28,12 @@ const LanguageCurrencyChanger = ({
           {currentLanguageCode === "en"
             ? "English"
             : currentLanguageCode === "fn"
-            ? "French"
-            : currentLanguageCode === "de"
-            ? "Germany"
-            : ""}{" "}
+              ? "French"
+              : currentLanguageCode === "de"
+                ? "Germany"
+                : currentLanguageCode === "vi"
+                  ? "Vietnamese"
+                  : ""}{" "}
           <i className="fa fa-angle-down" />
         </span>
         <div className="lang-car-dropdown">
@@ -46,6 +51,11 @@ const LanguageCurrencyChanger = ({
             <li>
               <button value="de" onClick={e => changeLanguageTrigger(e)}>
                 Germany
+              </button>
+            </li>
+            <li>
+              <button value="vi" onClick={e => changeLanguageTrigger(e)}>
+                Vietnamese
               </button>
             </li>
           </ul>

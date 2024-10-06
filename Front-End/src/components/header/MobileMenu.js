@@ -9,7 +9,7 @@ const MobileMenu = () => {
     const offCanvasNav = document.querySelector("#offcanvas-navigation");
     const offCanvasNavSubMenu = offCanvasNav.querySelectorAll(".sub-menu");
     const anchorLinks = offCanvasNav.querySelectorAll("a");
-
+    
     for (let i = 0; i < offCanvasNavSubMenu.length; i++) {
       offCanvasNavSubMenu[i].insertAdjacentHTML(
         "beforebegin",

@@ -1,9 +1,9 @@
 import PropTypes from "prop-types";
 import React, { useState, useEffect } from "react";
 import { Link, useHistory } from "react-router-dom";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import MenuCart from "./sub-components/MenuCart";
-import { deleteFromCart } from "../../redux/actions/cartActions";
+import { clearCart, deleteAllFromCart, deleteFromCart } from "../../redux/actions/cartActions";
 import "./IconGroup.css"
 
 const IconGroup = ({
@@ -15,6 +15,7 @@ const IconGroup = ({
   iconWhiteClass
 }) => {
   const history = useHistory();
+  const dispatch = useDispatch();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -37,6 +38,7 @@ const IconGroup = ({
     localStorage.removeItem("token");
     setIsLoggedIn(false);
     history.push("/login-register");
+    dispatch(clearCart());
   };
 
   return (

@@ -172,7 +172,7 @@ const LoginRegister = ({ location }) => {
         }
         if (response && response.token) {
           localStorage.setItem("token", response.token);
-          history.push("/home-fashion");
+          history.push("/");
         }
       })
       .catch((error) => {

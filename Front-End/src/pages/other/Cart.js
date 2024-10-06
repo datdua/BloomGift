@@ -103,7 +103,7 @@ const Cart = ({
                                   <Link to={process.env.PUBLIC_URL + "/product/" + item.productID}>
                                     <img
                                       className="img-fluid"
-                                      src={process.env.PUBLIC_URL + "/assets/img/product/fashion/1.jpg"}
+                                      src={item.image1}
                                       alt={item.productName}
                                     />
                                   </Link>
@@ -161,6 +161,42 @@ const Cart = ({
                   </div>
                   {/* Cart Total */}
                   <div className="row">
+                  <div className="col-lg-12">
+                    <div className="cart-shiping-update-wrapper">
+                      <div className="cart-shiping-update">
+                        <Link
+                          to={process.env.PUBLIC_URL + "/shop-grid-standard"}
+                        >
+                          Continue Shopping
+                        </Link>
+                      </div>
+                      <div className="cart-clear">
+                      <Link to={process.env.PUBLIC_URL + "/checkout"}>
+                          Proceed to checkout
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-lg-4 col-md-6">
+                    <div className="discount-code-wrapper">
+                      <div className="title-wrap">
+                        <h4 className="cart-bottom-title section-bg-gray">
+                          Use Coupon Code
+                        </h4>
+                      </div>
+                      <div className="discount-code">
+                        <p>Enter your coupon code if you have one.</p>
+                        <form>
+                          <input type="text" required name="name" />
+                          <button className="cart-btn-2" type="submit">
+                            Apply Coupon
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>                
                     <div className="col-lg-4 col-md-6 ml-auto">
                       <div className="cart-page-total">
                         <h2>Cart totals</h2>
@@ -169,13 +205,10 @@ const Cart = ({
                             Total{" "}
                             <span>{currency.currencySymbol + totalPriceCart.toFixed(2)}</span>
                           </li>
-                        </ul>
-                        <Link to={process.env.PUBLIC_URL + "/checkout"}>
-                          Proceed to checkout
-                        </Link>
+                        </ul>                    
                       </div>
                     </div>
-                  </div>
+                </div>
                 </Fragment>
               ) : (
                 <div className="row">

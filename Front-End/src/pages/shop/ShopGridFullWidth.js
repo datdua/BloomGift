@@ -106,10 +106,16 @@ const ShopGridFullWidth = ({ location, products, getAllProducts, searchProduct }
       filterSortType,
       filterSortValue
     );
-    setSortedProducts(filterSortedProductsList);
-    setCurrentData(filterSortedProductsList.slice(offset, offset + pageLimit));
+  
+    if (Array.isArray(filterSortedProductsList)) {
+      setSortedProducts(filterSortedProductsList);
+      setCurrentData(filterSortedProductsList.slice(offset, offset + pageLimit));
+    } else {
+      setSortedProducts([]); 
+      setCurrentData([]); 
+    }
   }, [offset, products, sortType, sortValue, filterSortType, filterSortValue]);
-
+  
 
   return (
     <Fragment>
