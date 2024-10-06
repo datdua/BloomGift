@@ -120,6 +120,9 @@ public class SecurityConfig {
                 configuration.setAllowedOrigins(
                                 Arrays.asList("http://localhost:3000",
                                                 "https://bloomgift-bloomgift.azuremicroservices.io",
+                                                "https://banhang.bloomgift.shop",
+                                                "https://bloomgift.shop",
+                                                "https://quantri.bloomgift.shop",
                                                 "https://bloomgift-bloomgift.azuremicroservices.io/Callback"));
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 configuration.setAllowedHeaders(Arrays.asList("*"));

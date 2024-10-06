@@ -41,7 +41,7 @@ public class CartController {
     private SizeRepository sizeRepository;
 
     @PostMapping("/add")
-    public ResponseEntity<String> addToCart(@RequestParam Integer accountId, @RequestParam Integer productId,
+    public ResponseEntity<?> addToCart(@RequestParam Integer accountId, @RequestParam Integer productId,
             @RequestParam int quantity) {
         Account account = accountRepository.findById(accountId).orElseThrow();
         Product product = productRepository.findById(productId).orElseThrow();
@@ -49,12 +49,11 @@ public class CartController {
             return ResponseEntity.badRequest().body("Sản phẩm không tồn tại.");
         }
 
-        cartService.addToCart(account, product, quantity);
-        return ResponseEntity.ok("Thêm vào giỏ hàng thành công.");
+        return cartService.addToCart(account, product, quantity);
     }
 
     @PostMapping("/add-with-size")
-    public ResponseEntity<String> addToCartWithSize(@RequestParam Integer accountId, @RequestParam Integer productId,
+    public ResponseEntity<?> addToCartWithSize(@RequestParam Integer accountId, @RequestParam Integer productId,
             @RequestParam int quantity, @RequestParam int sizeID) {
         Account account = accountRepository.findById(accountId).orElseThrow();
         Product product = productRepository.findById(productId).orElseThrow();
@@ -67,8 +66,7 @@ public class CartController {
             return ResponseEntity.badRequest().body("Kích cỡ không tồn tại hoặc không thuộc về sản phẩm.");
         }
 
-        cartService.addToCartWithSize(account, product, quantity, size);
-        return ResponseEntity.ok("Thêm vào giỏ hàng thành công.");
+        return cartService.addToCartWithSize(account, product, quantity, size);
     }
 
     @GetMapping("/view/{accountId}")
@@ -86,7 +84,7 @@ public class CartController {
     }
 
     @PutMapping("/update-quantity")
-    public ResponseEntity<String> updateCartQuantity(
+    public ResponseEntity<?> updateCartQuantity(
             @RequestParam Integer accountId,
             @RequestParam Integer productId,
             @RequestParam Integer quantity) {
@@ -95,9 +93,7 @@ public class CartController {
         Account account = accountRepository.findById(accountId).orElseThrow();
         Product product = productRepository.findById(productId).orElseThrow();
 
-        cartService.updateCart(account, product, quantity);
-
-        return ResponseEntity.ok("update thanh công");
+        return cartService.updateCart(account, product, quantity);
     }
 
     @PostMapping("/checkout-selected")
