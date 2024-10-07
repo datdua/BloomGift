@@ -1,20 +1,19 @@
 package com.example.bloomgift.service;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
-import static org.springframework.http.ResponseEntity.ok;
 import org.springframework.stereotype.Service;
 
 import com.example.bloomgift.model.Account;
-import com.example.bloomgift.model.CartItem;
 import com.example.bloomgift.model.Product;
 import com.example.bloomgift.model.ProductImage;
 import com.example.bloomgift.model.Size;
@@ -27,7 +26,10 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class CartService {
+
     private static final String CART_KEY = "CART";
+    private static final long CART_EXPIRATION = 60 * 60 * 1000;
+
     @Autowired
     private StoreRepository storeRepository;
     @Autowired
@@ -57,13 +59,13 @@ public class CartService {
 
         if (productMap != null) {
             // Update existing cart item
-            int currentQuantity = (int) productMap.get("quantity");
+            int currentQuantity = ((Number) productMap.get("quantity")).intValue();
             int newQuantity = currentQuantity + quantity;
             return updateCart(account, product, newQuantity);
         } else {
             // Add new cart item
-            float discount = product.getDiscount() != null ? product.getDiscount() : 0;
-            float discountedPrice = product.getPrice() * (1 - discount / 100);
+            float discount = product.getDiscount() != null ? product.getDiscount() : 0f;
+            float discountedPrice = product.getPrice() * (1 - discount / 100f);
             float totalPrice = discountedPrice * quantity;
 
             // Extract all product image URLs with unique keys
@@ -89,9 +91,10 @@ public class CartService {
             if (product.getQuantity() < quantity) {
                 return ResponseEntity.badRequest().body("Số lượng sản phẩm không đủ");
             } else {
+                redisTemplate.expire(key, Duration.ofSeconds(CART_EXPIRATION));
                 product.setQuantity(product.getQuantity() - quantity);
                 productRepository.save(product);
-                return ResponseEntity.ok().body("Sản phẩm đã được thêm vào giỏ hàng");
+                return ResponseEntity.ok().body("Sản phẩm đã được thêm vào giỏ hàng" + totalPrice);
             }
         }
     }
@@ -103,14 +106,12 @@ public class CartService {
 
         if (productMap != null) {
             // Update existing cart item
-            int currentQuantity = (int) productMap.get("quantity");
+            int currentQuantity = ((Number) productMap.get("quantity")).intValue();
             int newQuantity = currentQuantity + quantity;
             return updateCart(account, product, newQuantity);
         } else {
             // Add new cart item
-            float discount = product.getDiscount() != null ? product.getDiscount() : 0;
-            float discountedPrice = product.getPrice() * (1 - discount / 100);
-            float totalPrice = discountedPrice * quantity;
+            float totalPrice = size.getPrice() * quantity;
 
             // Extract all product image URLs with unique keys
             Map<String, String> productImages = new HashMap<>();
@@ -127,7 +128,7 @@ public class CartService {
             productMap.put("price", size.getPrice());
             productMap.put("sizeText", size.getText());
             productMap.put("quantity", quantity);
-            productMap.put("totalPrice", size.getPrice() * quantity);
+            productMap.put("totalPrice", totalPrice);
             productMap.putAll(productImages);
 
             hashOperations.put(key, product.getProductID(), productMap);
@@ -136,6 +137,7 @@ public class CartService {
             if (size.getSizeQuantity() < quantity || product.getQuantity() < quantity) {
                 return ResponseEntity.badRequest().body("Số lượng sản phẩm không đủ");
             } else {
+                redisTemplate.expire(key, Duration.ofSeconds(CART_EXPIRATION));
                 product.setQuantity(product.getQuantity() - quantity);
                 size.setSizeQuantity(size.getSizeQuantity() - quantity);
                 productRepository.save(product);
@@ -143,6 +145,85 @@ public class CartService {
                 return ResponseEntity.ok().body("Sản phẩm đã được thêm vào giỏ hàng");
             }
         }
+    }
+
+    public void clearCart(Account account) {
+        String key = "CART:" + account.getAccountID();
+        hashOperations.entries(key).forEach((productID, productMap) -> {
+            Integer id = (Integer) productMap.get("productID");
+            Product product = productRepository.findById(id).orElse(null);
+
+            if (product != null) {
+                int quantity = (int) productMap.get("quantity");
+                product.setQuantity(product.getQuantity() + quantity);
+
+                if (productMap.containsKey("sizeText")) {
+                    String sizeText = (String) productMap.get("sizeText");
+                    Size size = product.getSizes().stream()
+                            .filter(s -> s.getText().equals(sizeText))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (size != null) {
+                        size.setSizeQuantity(size.getSizeQuantity() + quantity);
+                        sizeRepository.save(size);
+                    }
+                }
+
+                productRepository.save(product);
+            }
+        });
+
+        redisTemplate.delete(key);
+    }
+
+    public Map<String, Object> getCart(Account account) {
+        String key = "CART:" + account.getAccountID();
+        Map<Integer, Map<String, Object>> cartItems = hashOperations.entries(key);
+        float totalPriceCart = 0.0f;
+        List<Map<String, Object>> formattedCartItems = new ArrayList<>();
+
+        for (Map.Entry<Integer, Map<String, Object>> entry : cartItems.entrySet()) {
+            Map<String, Object> item = entry.getValue();
+            Map<String, Object> formattedItem = new HashMap<>(item);
+
+            Object priceObj = item.get("price");
+            Object quantityObj = item.get("quantity");
+            float price = 0.0f;
+            int quantity = 0;
+
+            if (priceObj instanceof Number) {
+                price = ((Number) priceObj).floatValue();
+            }
+            if (quantityObj instanceof Number) {
+                quantity = ((Number) quantityObj).intValue();
+            }
+
+            float itemTotalPrice = price * quantity;
+            totalPriceCart += itemTotalPrice;
+
+            // Update the formatted item with calculated values
+            formattedItem.put("price", price);
+            formattedItem.put("quantity", quantity);
+            formattedItem.put("itemTotalPrice", itemTotalPrice);
+
+            // Ensure other fields are present
+            formattedItem.putIfAbsent("productID", entry.getKey());
+            formattedItem.putIfAbsent("productName", "Unknown Product");
+            formattedItem.putIfAbsent("description", "");
+            formattedItem.putIfAbsent("colour", "");
+            formattedItem.putIfAbsent("size", "");
+            formattedItem.putIfAbsent("imageUrl", "");
+
+            formattedCartItems.add(formattedItem);
+        }
+
+        Map<String, Object> cartResponse = new HashMap<>();
+        cartResponse.put("cartItems", formattedCartItems);
+        cartResponse.put("totalPriceCart", totalPriceCart);
+        cartResponse.put("itemCount", formattedCartItems.size());
+
+        return cartResponse;
     }
 
     @Transactional
@@ -188,6 +269,7 @@ public class CartService {
             mutableProductMap.put("totalPrice", newTotalPrice);
             hashOperations.put(key, product.getProductID(), mutableProductMap);
 
+            redisTemplate.expire(key, Duration.ofSeconds(CART_EXPIRATION));
             return ResponseEntity.ok().body("Giỏ hàng đã được cập nhật");
         } else {
             System.out.println("Sản phẩm không tồn tại trong giỏ hàng.");
@@ -228,22 +310,6 @@ public class CartService {
         redisTemplate.delete(key);
     }
 
-    public Map<String, Object> getCart(Account account) {
-        String key = "CART:" + account.getAccountID();
-        Map<Integer, Map<String, Object>> cartItems = hashOperations.entries(key);
-        double totalPriceCart = 0.0;
-        for (Map<String, Object> item : cartItems.values()) {
-            Float price = (Float) item.get("price");
-            int quantity = (int) item.get("quantity");
-            totalPriceCart += price * quantity;
-        }
-        Map<String, Object> cartResponse = new HashMap<>();
-        cartResponse.put("cartItems", cartItems);
-        cartResponse.put("totalPriceCart", totalPriceCart);
-
-        return cartResponse;
-    }
-
     public void DeteleCart(Account account, Product product) {
         String key = CART_KEY + ":" + account.getAccountID();
         hashOperations.delete(key, product.getProductID());
@@ -276,23 +342,10 @@ public class CartService {
         return response;
     }
 
-    public List<CartItem> getCartItemsByAccountID(Integer accountID) {
-        String key = "CART:" + accountID;
-        Map<Integer, Map<String, Object>> cartData = hashOperations.entries(key);
-
-        if (cartData.isEmpty()) {
-            return new ArrayList<>();
+    public void clearAllCarts() {
+        Set<String> keys = redisTemplate.keys(CART_KEY + ":*");
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
         }
-        List<CartItem> cartItems = cartData.values().stream()
-                .map(map -> {
-                    CartItem cartItem = new CartItem();
-                    cartItem.setProductID((Integer) map.get("productID"));
-                    cartItem.setQuantity((Integer) map.get("quantity"));
-                    cartItem.setTotalPrice((Float) map.get("totalPrice"));
-                    return cartItem;
-                })
-                .collect(Collectors.toList());
-
-        return cartItems;
     }
 }
