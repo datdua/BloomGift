@@ -224,8 +224,8 @@ public class AuthenticationService {
 
     public String generateOtp(String email) {
         Account account = accountRepository.findByEmail(email);
-        
-        if (!account.getAccountStatus(true)) {  // Assuming accountStatus is a boolean field
+
+        if (!account.getAccountStatus(true)) { // Assuming accountStatus is a boolean field
             String otp = otpUtil.generateOtp();
             try {
                 emailUtil.sendOtpEmail(email, otp);
