@@ -1,8 +1,11 @@
 package com.example.bloomgift.service;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,14 +13,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.io.InputStreamReader;
-import com.google.gson.JsonParser;
 
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -40,13 +38,10 @@ import com.example.bloomgift.repository.ProductRepository;
 import com.example.bloomgift.repository.PromotionRepository;
 import com.example.bloomgift.repository.SizeRepository;
 import com.example.bloomgift.repository.StoreRepository;
-import com.example.bloomgift.request.DeliveryRequest;
-import com.example.bloomgift.request.OrderDetailRequest;
 import com.example.bloomgift.request.OrderRequest;
-import java.io.BufferedReader;
-import java.nio.charset.StandardCharsets;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 @Service
 public class OrderService {
@@ -76,7 +71,6 @@ public class OrderService {
 
     @Autowired
     private CartService cartService;
-    
 
     public void createOrder(Integer accountID, OrderRequest orderRequest) {
         checkOrder(orderRequest);
@@ -215,13 +209,14 @@ public class OrderService {
         // Xóa giỏ hàng sau khi đặt hàng thành công
         cartService.clearCart(account);
     }
-    public void deliveryMoney(Integer accountId , Integer storeId, DeliveryRequest deliveryRequest){
-        Optional<Account> account = accountRepository.findById(accountId);
-        if(account == null){
-            return null;
-        }
 
-    }
+    // public void deliveryMoney(Integer accountId, Integer storeId, DeliveryRequest deliveryRequest) {
+    //     Optional<Account> account = accountRepository.findById(accountId);
+    //     if (account == null) {
+    //         return null;
+    //     }
+
+    // }
 
     public List<OrderReponse> getAllOrder() {
         List<Order> orders = orderRepository.findAll();
@@ -291,7 +286,7 @@ public class OrderService {
         return orderReponses;
     }
 
-    public List<OrderReponse> getOrderByOrderID (int orderID){
+    public List<OrderReponse> getOrderByOrderID(int orderID) {
         Order order = orderRepository.findById(orderID).orElseThrow();
         List<OrderReponse> orderReponses = order.getOrderDetail().stream()
                 .map(orderDetail -> {
@@ -399,6 +394,7 @@ public class OrderService {
             return false; // In case of an error, treat the address as invalid
         }
     }
+
     public void checkOrder(OrderRequest orderRequest) {
         Date deliveryDateTime = orderRequest.getDeliveryDateTime();
         String deliveryProvince = orderRequest.getDeliveryProvince();
@@ -438,7 +434,7 @@ public class OrderService {
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
-    public List<OrderReponse> getOrderByOrderStatus (String orderStatus){
+    public List<OrderReponse> getOrderByOrderStatus(String orderStatus) {
         List<Order> orders = orderRepository.findByOrderStatus(orderStatus);
         List<OrderReponse> orderReponses = orders.stream()
                 .map(order -> {
