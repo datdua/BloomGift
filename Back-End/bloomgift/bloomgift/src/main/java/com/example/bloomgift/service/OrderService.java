@@ -10,9 +10,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.io.InputStreamReader;
+import com.google.gson.JsonParser;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +40,13 @@ import com.example.bloomgift.repository.ProductRepository;
 import com.example.bloomgift.repository.PromotionRepository;
 import com.example.bloomgift.repository.SizeRepository;
 import com.example.bloomgift.repository.StoreRepository;
+import com.example.bloomgift.request.DeliveryRequest;
 import com.example.bloomgift.request.OrderDetailRequest;
 import com.example.bloomgift.request.OrderRequest;
+import java.io.BufferedReader;
+import java.nio.charset.StandardCharsets;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonArray;
 
 @Service
 public class OrderService {
@@ -68,6 +76,7 @@ public class OrderService {
 
     @Autowired
     private CartService cartService;
+    
 
     public void createOrder(Integer accountID, OrderRequest orderRequest) {
         checkOrder(orderRequest);
@@ -205,6 +214,13 @@ public class OrderService {
 
         // Xóa giỏ hàng sau khi đặt hàng thành công
         cartService.clearCart(account);
+    }
+    public void deliveryMoney(Integer accountId , Integer storeId, DeliveryRequest deliveryRequest){
+        Optional<Account> account = accountRepository.findById(accountId);
+        if(account == null){
+            return null;
+        }
+
     }
 
     public List<OrderReponse> getAllOrder() {
@@ -346,38 +362,43 @@ public class OrderService {
         return orderReponses;
     }
 
-    public boolean isValidAddress(String address) {
-        String apiKey = "AIzaSyCRtENA_fhaXoBIos56K0BVZYGlhMVE8Xc"; // Thay thế bằng API Key của bạn
+    private boolean isValidAddress(String address) {
         try {
-            String encodedAddress = URLEncoder.encode(address, "UTF-8");
-            String urlString = "https://maps.googleapis.com/maps/api/geocode/json?address=" + encodedAddress + "&key="
-                    + apiKey;
+            // Mã hóa địa chỉ
+            String encodedAddress = URLEncoder.encode(address, StandardCharsets.UTF_8.toString());
 
+            // Construct the API URL
+            String urlString = "https://nominatim.openstreetmap.org/search?q=" + encodedAddress
+                    + "&format=json&limit=1";
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
-            conn.connect();
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0"); // Nominatim requires a user-agent
 
-            int responseCode = conn.getResponseCode();
-            if (responseCode == 200) {
-                Scanner sc = new Scanner(url.openStream());
-                StringBuilder inline = new StringBuilder();
-                while (sc.hasNext()) {
-                    inline.append(sc.nextLine());
-                }
-                sc.close();
-
-                JSONObject jsonResponse = new JSONObject(inline.toString());
-                return jsonResponse.getString("status").equals("OK");
-            } else {
-                throw new RuntimeException("Failed to validate address: " + responseCode);
+            // Read the response
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuilder content = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
             }
+
+            // Close connections
+            in.close();
+            conn.disconnect();
+
+            // Parse the JSON response
+            JsonElement jsonElement = JsonParser.parseString(content.toString());
+            JsonArray jsonArray = jsonElement.getAsJsonArray();
+
+            // If the array is empty, the address is invalid
+            return jsonArray.size() > 0;
+
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return false; // In case of an error, treat the address as invalid
         }
     }
-
     public void checkOrder(OrderRequest orderRequest) {
         Date deliveryDateTime = orderRequest.getDeliveryDateTime();
         String deliveryProvince = orderRequest.getDeliveryProvince();

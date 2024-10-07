@@ -610,6 +610,7 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm: " + productID));
     }
 
+  
     public Page<Product> searchProductWithFilterPage(
             String descriptionProduct,
             String colourProduct,
@@ -648,5 +649,6 @@ public class ProductService {
         Pageable pageable = PageRequest.of(page, size);
         return productRepository.findAll(spec, pageable);
     }
+
 
 }

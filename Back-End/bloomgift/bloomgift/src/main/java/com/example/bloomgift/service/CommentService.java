@@ -65,13 +65,19 @@ public class CommentService {
                     .execute();
             List<List<Object>> values = response.getValues();
             List<List<Object>> filteredComments = new ArrayList<>();
+            int matchingRowCount = 0; // Counter to track matching rows
             if (values != null && !values.isEmpty()) {
                 for (List<Object> row : values) {
                     if (row.size() > 4 && row.get(4) != null && row.get(4).toString().equals(productID.toString())) {
                         String statusValue = row.size() > 13 ? row.get(13).toString() : "FALSE";
                         System.out.println("Status Value: " + statusValue);
                         if ("FALSE".equalsIgnoreCase(statusValue.trim())) {
-                            filteredComments.add(row);
+                            matchingRowCount++;
+                            // Only add the second matching row
+                            if (matchingRowCount == 2) {
+                                filteredComments.add(row);
+                                break; // Exit loop once the second row is found
+                            }
                         }
                     }
                 }
@@ -82,6 +88,7 @@ public class CommentService {
             throw e;
         }
     }
+    
 
     public void addCommentToSheet(Integer accountID, Integer productID, String commentContent, int rating)
             throws Exception {
