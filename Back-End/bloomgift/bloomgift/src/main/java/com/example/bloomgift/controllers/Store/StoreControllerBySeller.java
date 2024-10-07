@@ -13,13 +13,18 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.bloomgift.model.Store;
 import com.example.bloomgift.request.StoreRequest;
 import com.example.bloomgift.request.putRequest.StorePutRequest;
 import com.example.bloomgift.reponse.StoreResponse;
 import com.example.bloomgift.service.StoreService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.MediaType;
+
 
 @RestController
 @RequestMapping("/api/seller/store/store-management")
@@ -42,9 +47,18 @@ public class StoreControllerBySeller {
     // return storeService.addStore(storeRequest);
     // }
 
-    @PutMapping(value = "/update/{storeID}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<?> updateStore(@PathVariable Integer storeID, @RequestBody StorePutRequest storePutRequest) {
-        return storeService.updateStore(storeID, storePutRequest);
+    @PutMapping(value = "/update/{storeID}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateStore(
+            @PathVariable Integer storeID,
+            @RequestPart("storePutRequest") String storePutRequestJson,
+            @RequestPart(value = "storeAvatar", required = false) MultipartFile storeAvatar) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            StorePutRequest storePutRequest = objectMapper.readValue(storePutRequestJson, StorePutRequest.class);
+            return storeService.updateStore(storeID, storePutRequest, storeAvatar);
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("Invalid request data");
+        }
     }
 
     @DeleteMapping(value = "/delete", produces = "application/json;charset=UTF-8")

@@ -110,4 +110,11 @@ public class CartController {
 
         return ResponseEntity.ok(checkoutDetails);
     }
+
+    @DeleteMapping("/delete-all-cart")
+    public ResponseEntity<String> deleteAllCart() {
+        cartService.clearAllCarts();
+        return ResponseEntity.ok("Đã xóa tất cả sản phẩm khỏi giỏ hàng.");
+    }
+
 }

@@ -42,7 +42,7 @@ public class OrderController {
         return ResponseEntity.ok(orders); // Return the list of orders in the response
     }
 
-     @GetMapping("/history-order/{accountID}")
+    @GetMapping("/history-order/{accountID}")
     public ResponseEntity<List<OrderReponse>> getHistoryOrderByCustomer(@PathVariable int accountID) {
         List<OrderReponse> orderReponses = orderService.getHistoryOrderByCustomer(accountID);
         return new ResponseEntity<>(orderReponses, HttpStatus.OK);
@@ -54,4 +54,15 @@ public class OrderController {
         return new ResponseEntity<>(orderReponses, HttpStatus.OK);
     }
 
+    @GetMapping("/get-order-by-id/{orderID}")
+    public ResponseEntity<List<OrderReponse>> getOrderById(@PathVariable int orderID) {
+        List<OrderReponse> orderReponses = orderService.getOrderByOrderID(orderID);
+        return new ResponseEntity<>(orderReponses, HttpStatus.OK);
+    }
+
+    @GetMapping("/get-order-by-status/{orderStatus}")
+    public ResponseEntity<List<OrderReponse>> getOrderByStatus(@PathVariable String orderStatus) {
+        List<OrderReponse> orderReponses = orderService.getOrderByOrderStatus(orderStatus);
+        return new ResponseEntity<>(orderReponses, HttpStatus.OK);
+    }
 }

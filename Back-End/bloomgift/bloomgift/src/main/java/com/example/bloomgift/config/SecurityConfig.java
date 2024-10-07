@@ -95,8 +95,9 @@ public class SecurityConfig {
                                                 .authenticationEntryPoint(
                                                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                                 .oauth2Login(oauth2 -> oauth2
-                                                .loginPage("http://localhost:8080/oauth2/authorization/google")
-                                                .defaultSuccessUrl("http://localhost:8080/api/auth/signInWithGoogle",
+                                                .loginPage("https://bloomgift-bloomgift.azuremicroservices.io/oauth2/authorization/google")
+                                                .defaultSuccessUrl(
+                                                                "https://www.bloomgift.shop/signInWithGoogle",
                                                                 true))
                                 .formLogin(Customizer.withDefaults());
                 http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -121,7 +122,7 @@ public class SecurityConfig {
                                 Arrays.asList("http://localhost:3000",
                                                 "https://bloomgift-bloomgift.azuremicroservices.io",
                                                 "https://banhang.bloomgift.shop",
-                                                "https://bloomgift.shop",
+                                                "https://www.bloomgift.shop",
                                                 "https://quantri.bloomgift.shop",
                                                 "https://bloomgift-bloomgift.azuremicroservices.io/Callback"));
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));

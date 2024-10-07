@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,43 +51,6 @@ public class AccountControllerByAdmin {
         this.accountService = accountService;
     }
 
-    // @PostMapping(value = "/create-account", produces =
-    // "application/json;charset=UTF-8")
-    // public ResponseEntity<Map<String, String>> createAccountbyAdmin(
-    // @RequestBody AccountRequest accountRequest) {
-    // try {
-    // accountService.createAccount(accountRequest);
-    // return ResponseEntity.ok(Collections.singletonMap("message", "Tạo tài khoản
-    // thành công"));
-    // } catch (Exception e) {
-    // return ResponseEntity.badRequest().body(Collections.singletonMap("message",
-    // e.getMessage()));
-    // }
-
-    // }
-
-    @PostMapping(value = "/create-account", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> createAccount(
-            @RequestParam("accountRequest") String accountRequestJson,
-            @RequestParam("avatarFile") MultipartFile avatarFile) {
-
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            AccountRequest accountRequest = objectMapper.readValue(accountRequestJson,
-                    AccountRequest.class);
-            accountService.createAccount(accountRequest, avatarFile);
-            return ResponseEntity.ok("Account created successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " +
-                    e.getMessage());
-        }
-    }
-
-    // @GetMapping("/list-all-account")
-    // public ResponseEntity<List<AccountReponse>> getAllAccounts() {
-    // List<AccountReponse> accountReponse = accountService.getAllAccounts();
-    // return new ResponseEntity<>(accountReponse, HttpStatus.OK);
-    // }
     @GetMapping("/list-all-account")
     public ResponseEntity<Page<AccountReponse>> getAllAccounts(
             @RequestParam(defaultValue = "0") int page,
@@ -102,17 +66,33 @@ public class AccountControllerByAdmin {
         return new ResponseEntity<>(accountReponse, HttpStatus.OK);
     }
 
-    @PutMapping(value = "/update-account/{accountID}", produces = "application/json;charset=UTF-8")
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createAccount(
+            @RequestPart("accountRequest") String accountRequestJson,
+            @RequestPart(value = "avatarFile", required = false) MultipartFile avatarFile) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            AccountRequest accountRequest = objectMapper.readValue(accountRequestJson, AccountRequest.class);
+            accountService.createAccount(accountRequest, avatarFile);
+            return ResponseEntity.ok(Collections.singletonMap("message", "Tài khoản đã được tạo thành công"));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("Invalid request data");
+        }
+    }
+
+    @PutMapping(value = "/update/{accountID}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateAccount(
             @PathVariable Integer accountID,
-            @RequestBody AccountRequest accountRequest) {
+            @RequestPart("accountRequest") String accountRequestJson,
+            @RequestPart(value = "avatarFile", required = false) MultipartFile avatarFile) {
         try {
-            Account account = accountService.updateAccount(accountID, accountRequest);
-            return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật thành công"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("message", e.getMessage()));
+            ObjectMapper objectMapper = new ObjectMapper();
+            AccountRequest accountRequest = objectMapper.readValue(accountRequestJson, AccountRequest.class);
+            Account updatedAccount = accountService.updateAccount(accountID, accountRequest, avatarFile);
+            return ResponseEntity.ok(updatedAccount);
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("Invalid request data");
         }
-
     }
 
     @DeleteMapping("/{accountID}")
