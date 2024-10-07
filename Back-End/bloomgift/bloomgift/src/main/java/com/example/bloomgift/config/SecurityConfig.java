@@ -97,7 +97,7 @@ public class SecurityConfig {
                                 .oauth2Login(oauth2 -> oauth2
                                                 .loginPage("https://bloomgift-bloomgift.azuremicroservices.io/oauth2/authorization/google")
                                                 .defaultSuccessUrl(
-                                                                "https://bloomgift-bloomgift.azuremicroservices.io/api/auth/signInWithGoogle",
+                                                                "https://www.bloomgift.shop/signInWithGoogle",
                                                                 true))
                                 .formLogin(Customizer.withDefaults());
                 http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -3,6 +3,7 @@ package com.example.bloomgift.service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.bloomgift.model.Category;
 import com.example.bloomgift.model.Role;
@@ -46,6 +48,9 @@ public class StoreService {
 
     @Autowired
     private EmailUtil emailUtil;
+
+    @Autowired
+    private FirebaseStorageService firebaseStorageService;
 
     private StoreResponse convertStoreToResponse(Store store) {
         StoreResponse storeResponse = new StoreResponse();
@@ -85,57 +90,64 @@ public class StoreService {
         }
     }
 
-    public ResponseEntity<?> registerStore(StoreRequest storeRequest) {
-        String otp = otpUtil.generateOtp();
-        String Email = storeRequest.getEmail();
-        if (!Email.matches("^[a-zA-Z0-9._%+-]+@gmail.com$")) {
-            return ResponseEntity.badRequest().body("Email không hợp lệ");
-        } else if (storeRepository.existsByEmail(Email) || accountRepository.existsByEmail(Email)) {
-            return ResponseEntity.badRequest().body("Email đã tồn tại");
-        } else {
-            try {
-                emailUtil.sendOtpEmail(Email, otp);
-            } catch (MessagingException e) {
-                return ResponseEntity.badRequest().body("Gửi email thất bại");
-            }
-        }
-
+    public Map<String, String> registerStore(StoreRequest storeRequest, MultipartFile storeAvatar) {
         Store store = new Store();
         store.setStoreName(storeRequest.getStoreName());
         store.setType(storeRequest.getType());
         store.setStoreAddress(storeRequest.getStoreAddress());
         store.setBankAccountName(storeRequest.getBankAccountName());
         store.setBankAddress(storeRequest.getBankAddress());
-        store.setEmail(Email);
 
         String storePhone = storeRequest.getStorePhone();
         if (storePhone.length() != 10) {
-            return ResponseEntity.badRequest().body("Số điện thoại không hợp lệ");
+            return Collections.singletonMap("message", "Số điện thoại không hợp lệ");
         }
         store.setStorePhone(storePhone);
 
         String bankNumber = storeRequest.getBankNumber();
         if (bankNumber.length() < 10 || bankNumber.length() > 20) {
-            return ResponseEntity.badRequest().body("Số tài khoản ngân hàng không hợp lệ");
+            return Collections.singletonMap("message", "Số tài khoản ngân hàng không hợp lệ");
         }
         store.setBankNumber(bankNumber);
 
         String taxNumber = storeRequest.getTaxNumber();
         if (taxNumber.length() < 10 || taxNumber.length() > 13) {
-            return ResponseEntity.badRequest().body("Mã số thuế không hợp lệ");
+            return Collections.singletonMap("message", "Mã số thuế không hợp lệ");
         }
         store.setTaxNumber(taxNumber);
 
         String identityCard = storeRequest.getIdentityCard();
         if (identityCard.length() != 12) {
-            return ResponseEntity.badRequest().body("Số CMND không hợp lệ");
+            return Collections.singletonMap("message", "Số CCCD không hợp lệ");
         }
         store.setIdentityCard(identityCard);
 
         store.setIdentityName(storeRequest.getIdentityName());
         store.setStoreStatus("Đang xử lý");
-        store.setStoreAvatar(storeRequest.getStoreAvatar());
         store.setPassword(storeRequest.getPassword());
+        String otp = otpUtil.generateOtp();
+        String Email = storeRequest.getEmail();
+        if (!Email.matches("^[a-zA-Z0-9._%+-]+@gmail.com$")) {
+            return Collections.singletonMap("message", "Email không hợp lệ");
+        } else if (storeRepository.existsByEmail(Email) || accountRepository.existsByEmail(Email)) {
+            return Collections.singletonMap("message", "Email đã tồn tại");
+        } else {
+            try {
+                emailUtil.sendOtpEmail(Email, otp);
+                store.setEmail(Email);
+            } catch (MessagingException e) {
+                return Collections.singletonMap("message", "Gửi email xác thực thất bại");
+            }
+        }
+        if (storeAvatar != null && !storeAvatar.isEmpty()) {
+            try {
+                String storeAvatarUrl = firebaseStorageService.uploadFileByStore(storeAvatar, Email);
+                store.setStoreAvatar(storeAvatarUrl);
+            } catch (Exception e) {
+                return Collections.singletonMap("message", "Lỗi tải ảnh lên");
+            }
+        }
+
         store.setOtp(otp);
         store.setOtp_generated_time(LocalDateTime.now());
 
@@ -143,11 +155,10 @@ public class StoreService {
         store.setRole(roleID);
 
         storeRepository.save(store);
-        return ResponseEntity
-                .ok(Collections.singletonMap("message", "Gửi email xác thực thành công. Vui lòng kiểm tra email"));
+        return Collections.singletonMap("message", "Đăng ký cửa hàng thành công, vui lòng kiểm tra email để xác thực");
     }
 
-    public ResponseEntity<?> updateStore(Integer storeID, StorePutRequest storePutRequest) {
+    public ResponseEntity<?> updateStore(Integer storeID, StorePutRequest storePutRequest, MultipartFile storeAvatar) {
         Store store = storeRepository.findById(storeID).orElseThrow();
 
         if (store == null) {
@@ -160,11 +171,11 @@ public class StoreService {
         store.setBankAccountName(storePutRequest.getBankAccountName());
         store.setBankAddress(storePutRequest.getBankAddress());
 
-        String Email = storePutRequest.getEmail();
-        if (!Email.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
+        String email = storePutRequest.getEmail();
+        if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
             return ResponseEntity.badRequest().body("Email không hợp lệ");
         }
-        store.setEmail(Email);
+        store.setEmail(email);
 
         String storePhone = storePutRequest.getStorePhone();
         if (storePhone.length() != 10) {
@@ -189,14 +200,21 @@ public class StoreService {
             return ResponseEntity.badRequest().body("Số CCCD không hợp lệ");
         }
         store.setIdentityCard(identityCard);
-
         store.setIdentityName(storePutRequest.getIdentityName());
         store.setStoreStatus(storePutRequest.getStoreStatus());
-        store.setStoreAvatar(storePutRequest.getStoreAvatar());
+
+        // Handle avatar upload
+        if (storeAvatar != null && !storeAvatar.isEmpty()) {
+            try {
+                String storeAvatarUrl = firebaseStorageService.uploadFileByStore(storeAvatar, email);
+                store.setStoreAvatar(storeAvatarUrl);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("Lỗi tải ảnh lên");
+            }
+        }
 
         storeRepository.save(store);
         return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật cửa hàng thành công"));
-
     }
 
     public ResponseEntity<?> deleteStore(@RequestBody List<Integer> storeIDs) {

@@ -14,22 +14,11 @@ public class AccountRequest {
     private int phone ; 
     private Boolean accountStatus; 
     private String roleName; 
+    private MultipartFile avatar;
     public AccountRequest(){
 
     }
-
-    public AccountRequest(String fullname, String email, String password, String address, String gender,
-            Date birthday, int phone, Boolean accountStatus, String roleName) {
-        this.fullname = fullname;
-        this.email = email;
-        this.password = password;
-        this.address = address;
-        this.gender = gender;
-        this.birthday = birthday;
-        this.phone = phone;
-        this.accountStatus = accountStatus;
-        this.roleName = roleName;
-    }
+    
     public String getFullname() {
         return fullname;
     }
@@ -84,6 +73,12 @@ public class AccountRequest {
     }
     public void setRoleName(String roleName) {
         this.roleName = roleName;
+    }
+    public MultipartFile getAvatar() {
+        return avatar;
+    }
+    public void setAvatar(MultipartFile avatar) {
+        this.avatar = avatar;
     }
     
 }

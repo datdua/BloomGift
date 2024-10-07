@@ -2,20 +2,20 @@ package com.example.bloomgift.request;
 
 import java.util.Date;
 
+
+
 public class RegisterRequest {
     private String email;
-    private Integer phone ; 
-    private String address ; 
-    private String fullname ;
-    private String gender ; 
-    private Date birthday ; 
+    private Integer phone;
+    private String address;
+    private String fullname;
+    private String gender;
+    private Date birthday;
     private String password;
-    
-    public RegisterRequest(){
+
+    public RegisterRequest() {
 
     }
-
- 
 
     public RegisterRequest(String email, Integer phone, String address, String fullname, String gender, Date birthday,
             String password) {
@@ -27,8 +27,6 @@ public class RegisterRequest {
         this.birthday = birthday;
         this.password = password;
     }
-
-
 
     public String getEmail() {
         return email;
@@ -82,14 +80,8 @@ public class RegisterRequest {
         return password;
     }
 
-
-
     public void setPassword(String password) {
         this.password = password;
     }
 
-
-
-
-    
 }

@@ -1,5 +1,6 @@
 package com.example.bloomgift.service;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.model.Role;
@@ -56,6 +58,9 @@ public class AuthenticationService {
 
     @Autowired
     private EmailUtil emailUtil;
+
+    @Autowired
+    private FirebaseStorageService firebaseStorageService;
 
     @Autowired
     private StoreRepository storeRepository;
@@ -102,7 +107,7 @@ public class AuthenticationService {
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
 
-    public Map<String, String> register(RegisterRequest registerRequest) {
+    public Map<String, String> register(RegisterRequest registerRequest, MultipartFile avatar) {
         checkvalidateRegister(registerRequest);
         String email = registerRequest.getEmail();
         Account existingAccount = accountRepository.findByEmail(email);
@@ -114,10 +119,9 @@ public class AuthenticationService {
         try {
             emailUtil.sendOtpEmail(registerRequest.getEmail(), otp);
         } catch (MessagingException e) {
-            throw new RuntimeException("unble");
+            throw new RuntimeException("Unable to send OTP email");
         }
         String fullname = registerRequest.getFullname();
-        // String email = registerRequest.getEmail();
         Integer phone = registerRequest.getPhone();
         String password = registerRequest.getPassword();
         String address = registerRequest.getAddress();
@@ -137,8 +141,19 @@ public class AuthenticationService {
         account.setAccountStatus(false);
         account.setOtp(otp);
         account.setOtp_generated_time(LocalDateTime.now());
+
+        // Handle avatar upload
+        if (avatar != null && !avatar.isEmpty()) {
+            try {
+                String avatarUrl = firebaseStorageService.uploadFileByCustomer(avatar, email);
+                account.setAvatar(avatarUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload avatar", e);
+            }
+        }
+
         accountRepository.save(account);
-        return Collections.singletonMap("messag e", "kiểm tra mail và nhập OTP");
+        return Collections.singletonMap("message", "Check your email and enter the OTP");
     }
 
     public void checkvalidateRegister(RegisterRequest registerRequest) {

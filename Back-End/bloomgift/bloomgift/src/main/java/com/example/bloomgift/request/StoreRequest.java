@@ -1,5 +1,7 @@
 package com.example.bloomgift.request;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public class StoreRequest {
     private String storeName;
     private String type;
@@ -10,7 +12,7 @@ public class StoreRequest {
     private String bankNumber;
     private String bankAddress;
     private String taxNumber;
-    private String storeAvatar;
+    private MultipartFile storeAvatar;
     private String password;
     private String identityCard;
     private String identityName;
@@ -88,11 +90,11 @@ public class StoreRequest {
         this.taxNumber = taxNumber;
     }
 
-    public String getStoreAvatar() {
+    public MultipartFile getStoreAvatar() {
         return storeAvatar;
     }
 
-    public void setStoreAvatar(String storeAvatar) {
+    public void setStoreAvatar(MultipartFile storeAvatar) {
         this.storeAvatar = storeAvatar;
     }
 

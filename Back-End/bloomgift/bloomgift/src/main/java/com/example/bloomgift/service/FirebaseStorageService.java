@@ -63,6 +63,12 @@ public class FirebaseStorageService {
         return uploadFile(file, folderPath);
     }
 
+    public String uploadFileByStore(MultipartFile file, String email) throws IOException {
+        String sanitizedStoreName = email.replaceAll("[@.]", "_");
+        String folderPath = "authen/seller/avatar" + sanitizedStoreName + "/";
+        return uploadFile(file, folderPath);
+    }
+
     public String uploadFileByProduct(MultipartFile file, String storeName, String productName) throws IOException {
         String sanitizedStoreName = storeName.replaceAll("[^a-zA-Z0-9]", "_");
         String folderPath = "products/" + sanitizedStoreName + "/" + productName + "/";

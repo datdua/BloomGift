@@ -194,20 +194,21 @@ public class AccountService implements UserDetailsService {
         account.setAccountStatus(true);
         account.setGender(gender);
 
-        try {
-            String avatarUrl = firebaseStorageService.uploadFileByAdmin(avatarFile,
-                    email);
-            account.setAvatar(avatarUrl);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload avatar", e);
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            try {
+                String avatarUrl = firebaseStorageService.uploadFileByCustomer(avatarFile, email);
+                account.setAvatar(avatarUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload avatar", e);
+            }
         }
 
         accountRepository.save(account);
     }
 
-    public Account updateAccount(Integer id, AccountRequest accountRequest) {
+    public Account updateAccount(Integer accountID, AccountRequest accountRequest, MultipartFile avatarFile) {
         checkvalidateAccount(accountRequest);
-        Account existingAccount = accountRepository.findById(id).orElse(null);
+        Account existingAccount = accountRepository.findById(accountID).orElse(null);
         if (existingAccount == null) {
             throw new RuntimeException("Không tìm thấy tài khoản");
         }
@@ -220,7 +221,7 @@ public class AccountService implements UserDetailsService {
         String roleName = accountRequest.getRoleName();
         String gender = accountRequest.getGender();
         Boolean accountstatus = accountRequest.getAccountStatus();
-        // --------------------------------------------//
+
         existingAccount.setFullname(fullname);
         existingAccount.setPassword(password);
         existingAccount.setPhone(phone);
@@ -236,6 +237,7 @@ public class AccountService implements UserDetailsService {
             }
             existingAccount.setRoleID(role);
         }
+
         if (accountRequest.getPassword() != null && !accountRequest.getPassword().isEmpty()
                 && !accountRequest.getPassword().equals(existingAccount.getPassword())) {
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -243,8 +245,16 @@ public class AccountService implements UserDetailsService {
             existingAccount.setPassword(encodedPassword);
         }
 
-        return accountRepository.save(existingAccount);
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            try {
+                String avatarUrl = firebaseStorageService.uploadFileByCustomer(avatarFile, existingAccount.getEmail());
+                existingAccount.setAvatar(avatarUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload avatar", e);
+            }
+        }
 
+        return accountRepository.save(existingAccount);
     }
 
     private void checkvalidateAccount(AccountRequest accountRequest) {

@@ -253,7 +253,7 @@ public class OrderService {
                                     orderDetail.getQuantity(),
                                     orderDetail.getProductID().getProductName(),
                                     orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID().getText()))
+                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null))
                             .collect(Collectors.toList());
 
                     return new OrderReponse(
@@ -267,7 +267,40 @@ public class OrderService {
                             order.getDeliveryDateTime(),
                             order.getDeliveryAddress(),
                             order.getAccountID().getFullname(),
-                            order.getPromotionID().getPromotionCode(),
+                            order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
+                            order.getPhone(),
+                            orderDetailReponses);
+                }).collect(Collectors.toList());
+
+        return orderReponses;
+    }
+
+    public List<OrderReponse> getOrderByOrderID (int orderID){
+        Order order = orderRepository.findById(orderID).orElseThrow();
+        List<OrderReponse> orderReponses = order.getOrderDetail().stream()
+                .map(orderDetail -> {
+                    List<OrderDetailReponse> orderDetailReponses = order.getOrderDetail().stream()
+                            .map(orderDetail1 -> new OrderDetailReponse(
+                                    orderDetail1.getOrderDetailID(),
+                                    orderDetail1.getProductTotalPrice(),
+                                    orderDetail1.getQuantity(),
+                                    orderDetail1.getProductID().getProductName(),
+                                    orderDetail1.getStoreID().getStoreName(),
+                                    orderDetail1.getSizeID() != null ? orderDetail1.getSizeID().getText() : null))
+                            .collect(Collectors.toList());
+
+                    return new OrderReponse(
+                            order.getOrderID(),
+                            order.getOrderPrice(),
+                            order.getOrderStatus(),
+                            order.getPoint(),
+                            order.getBanner(),
+                            order.getNote(),
+                            order.getStartDate(),
+                            order.getDeliveryDateTime(),
+                            order.getDeliveryAddress(),
+                            order.getAccountID().getFullname(),
+                            order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
                             order.getPhone(),
                             orderDetailReponses);
                 }).collect(Collectors.toList());
@@ -382,6 +415,39 @@ public class OrderService {
         cal2.setTime(date2);
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+    }
+
+    public List<OrderReponse> getOrderByOrderStatus (String orderStatus){
+        List<Order> orders = orderRepository.findByOrderStatus(orderStatus);
+        List<OrderReponse> orderReponses = orders.stream()
+                .map(order -> {
+                    List<OrderDetailReponse> orderDetailReponses = order.getOrderDetail().stream()
+                            .map(orderDetail -> new OrderDetailReponse(
+                                    orderDetail.getOrderDetailID(),
+                                    orderDetail.getProductTotalPrice(),
+                                    orderDetail.getQuantity(),
+                                    orderDetail.getProductID().getProductName(),
+                                    orderDetail.getStoreID().getStoreName(),
+                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null))
+                            .collect(Collectors.toList());
+
+                    return new OrderReponse(
+                            order.getOrderID(),
+                            order.getOrderPrice(),
+                            order.getOrderStatus(),
+                            order.getPoint(),
+                            order.getBanner(),
+                            order.getNote(),
+                            order.getStartDate(),
+                            order.getDeliveryDateTime(),
+                            order.getDeliveryAddress(),
+                            order.getAccountID().getFullname(),
+                            order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
+                            order.getPhone(),
+                            orderDetailReponses);
+                }).collect(Collectors.toList());
+
+        return orderReponses;
     }
 
 }
