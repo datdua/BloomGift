@@ -12,16 +12,37 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
+    // @Bean
+    // public RedisConnectionFactory redisConnectionFactory() {
+    //     RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
+    //     redisStandaloneConfiguration.setHostName("bloomgift12.redis.cache.windows.net");
+    //     redisStandaloneConfiguration.setPort(6380);
+    //     redisStandaloneConfiguration.setPassword("B3l4TP13MSLG1iI0opLMDsV4ZBawGRlvfAzCaH1qYEo=");
+
+    //     LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+    //             .useSsl()
+    //             .build();
+
+    //     return new LettuceConnectionFactory(redisStandaloneConfiguration, clientConfig);
+    // }
+
+    // @Bean
+    // public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+    //     RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+    //     redisTemplate.setConnectionFactory(redisConnectionFactory);
+    //     redisTemplate.setKeySerializer(new StringRedisSerializer());
+    //     redisTemplate.setValueSerializer(new StringRedisSerializer());
+    //     return redisTemplate;
+    // }
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
+        // Sử dụng Redis cục bộ trên cổng 6379
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
-        redisStandaloneConfiguration.setHostName("bloomgift12.redis.cache.windows.net");
-        redisStandaloneConfiguration.setPort(6380);
-        redisStandaloneConfiguration.setPassword("B3l4TP13MSLG1iI0opLMDsV4ZBawGRlvfAzCaH1qYEo=");
+        redisStandaloneConfiguration.setHostName("localhost"); // Địa chỉ máy chủ Redis local
+        redisStandaloneConfiguration.setPort(6379); // Cổng mặc định của Redis local
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                .useSsl()
-                .build();
+                .build(); // Không cần SSL cho Redis local
 
         return new LettuceConnectionFactory(redisStandaloneConfiguration, clientConfig);
     }
