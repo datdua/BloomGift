@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +46,7 @@ import com.google.gson.JsonParser;
 
 @Service
 public class OrderService {
+
     @Autowired
     private AccountRepository accountRepository;
 
@@ -103,14 +105,11 @@ public class OrderService {
             }
 
             promotionValue = promotion.getPromotionDiscount().floatValue();
-
-            Integer newPromotionQuantity = promotion.getQuantity() - 1;
-            promotion.setQuantity(newPromotionQuantity);
+            promotion.setQuantity(promotion.getQuantity() - 1);
         }
-        Order order = new Order();
-        List<OrderDetail> orderDetails = new ArrayList<>();
+
+        Map<Store, List<OrderDetail>> storeOrderDetailsMap = new HashMap<>();
         float totalProductPrice = 0.0f;
-        Store firstStore = null;
 
         // Sử dụng CartService để lấy thông tin giỏ hàng
         Map<String, Object> cart = cartService.getCart(account);
@@ -121,12 +120,10 @@ public class OrderService {
             Integer quantity = (Integer) cartItem.get("quantity");
             Product product = productRepository.findById(productID).orElseThrow();
             if (product.getQuantity() < quantity) {
-                throw new RuntimeException("hết sản phẩm");
+                throw new RuntimeException("Hết sản phẩm");
             }
+
             Store store = storeRepository.findByProducts(product);
-            if (firstStore == null) {
-                firstStore = store;
-            }
             Integer sizeID = cartItem.containsKey("sizeID") ? (Integer) cartItem.get("sizeID") : null;
             OrderDetail orderDetail = new OrderDetail();
             float productTotalPrice = 0.0f;
@@ -163,197 +160,139 @@ public class OrderService {
             orderDetail.setProductID(product);
             orderDetail.setQuantity(quantity);
             orderDetail.setSizeID(size);
-            orderDetail.setOrderID(order);
+            orderDetail.setOrderID(null); // Sẽ gán sau khi tạo đơn hàng
             orderDetail.setStoreID(store);
-            Integer newSold = product.getSold() + quantity;
-            product.setSold(newSold);
-            orderDetails.add(orderDetail);
+
+            // Thêm chi tiết đơn hàng vào bản đồ dựa trên cửa hàng
+            storeOrderDetailsMap.computeIfAbsent(store, k -> new ArrayList<>()).add(orderDetail);
         }
 
-        order.setAccountID(account);
-        order.setOrderStatus("Xác nhận đơn hàng");
-        order.setDeliveryAddress(deliveryAddress);
-        order.setNote(orderRequest.getNote());
-        order.setBanner(orderRequest.getBanner());
-        order.setPromotionID(promotion);
-        order.setStartDate(new Date());
-        order.setPoint(point);
-        order.setPhone(orderRequest.getPhone());
-        float orderPrice = totalProductPrice - point - promotionValue;
-        order.setOrderPrice(orderPrice);
-        order.setDeliveryDateTime(orderRequest.getDeliveryDateTime());
-        order.setOrderDetail(orderDetails);
-        order.setTransfer(transfer);
-        Integer newPoint = account.getPoint() - point;
-        account.setPoint(newPoint);
-        orderRepository.save(order);
-        if (transfer == true) {
-            Payment payment = new Payment();
-            payment.setOrderID(order);
-            payment.setAccountID(accountID);
-            payment.setMethod("chuyển khoản");
-            payment.setStoreID(firstStore);
-            payment.setBankName(firstStore.getBankAddress());
-            payment.setPaymentStatus(false);
-            payment.setTotalPrice(orderPrice);
-            payment.setBankNumber(firstStore.getBankNumber());
-            payment.setMomoNumber(firstStore.getStorePhone());
-            payment.setPaymentCode();
-            payment.setBankAccountName(firstStore.getBankAccountName());
-            payment.setFormat("text");
-            payment.setTemplate("compact");
-            payment.setAcqId(firstStore.getAcqId());
-            paymentRepository.save(payment);
+        // Tạo một đơn hàng cho mỗi cửa hàng
+        for (Map.Entry<Store, List<OrderDetail>> entry : storeOrderDetailsMap.entrySet()) {
+            Store store = entry.getKey();
+            List<OrderDetail> orderDetails = entry.getValue();
+
+            Order order = new Order();
+            order.setAccountID(account);
+            order.setOrderStatus("Xác nhận đơn hàng");
+            order.setDeliveryAddress(deliveryAddress);
+            order.setNote(orderRequest.getNote());
+            order.setBanner(orderRequest.getBanner());
+            order.setPromotionID(promotion);
+            order.setStartDate(new Date());
+            order.setPoint(point);
+            order.setPhone(orderRequest.getPhone());
+            order.setOrderDetail(orderDetails);
+            order.setTransfer(transfer);
+
+            double orderPriceDouble = orderDetails.stream()
+                    .mapToDouble(OrderDetail::getProductTotalPrice)
+                    .sum() - point - promotionValue;
+            float orderPrice = (float) orderPriceDouble;
+            order.setOrderPrice(orderPrice);
+            order.setDeliveryDateTime(orderRequest.getDeliveryDateTime());
+
+            // Gán đơn hàng cho từng chi tiết đơn hàng
+            for (OrderDetail orderDetail : orderDetails) {
+                orderDetail.setOrderID(order);
+            }
+
+            orderRepository.save(order);
+
+            // Xử lý thanh toán nếu có
+            if (transfer) {
+                Payment payment = new Payment();
+                payment.setOrderID(order);
+                payment.setAccountID(accountID);
+                payment.setMethod("chuyển khoản");
+                payment.setStoreID(store);
+                payment.setBankName(store.getBankAddress());
+                payment.setPaymentStatus(false);
+                payment.setTotalPrice(orderPrice);
+                payment.setBankNumber(store.getBankNumber());
+                payment.setMomoNumber(store.getStorePhone());
+                payment.setPaymentCode();
+                payment.setBankAccountName(store.getBankAccountName());
+                payment.setFormat("text");
+                payment.setTemplate("compact");
+                payment.setAcqId(store.getAcqId());
+                paymentRepository.save(payment);
+            }
         }
 
         // Xóa giỏ hàng sau khi đặt hàng thành công
         cartService.clearCart(account);
     }
 
-    // public void deliveryMoney(Integer accountId, Integer storeId, DeliveryRequest deliveryRequest) {
-    //     Optional<Account> account = accountRepository.findById(accountId);
-    //     if (account == null) {
-    //         return null;
-    //     }
-
+    // public void deliveryMoney(Integer accountId, Integer storeId, DeliveryRequest
+    // deliveryRequest) {
+    // Optional<Account> account = accountRepository.findById(accountId);
+    // if (account == null) {
+    // return null;
     // }
-
+    // }
+    // API để lấy tất cả đơn hàng (đã có)
     public List<OrderReponse> getAllOrder() {
         List<Order> orders = orderRepository.findAll();
         List<OrderReponse> orderReponses = orders.stream()
-                .map(order -> {
-                    List<OrderDetailReponse> orderDetailReponses = order.getOrderDetail().stream()
-                            .map(orderDetail -> new OrderDetailReponse(
-                                    orderDetail.getOrderDetailID(),
-                                    orderDetail.getProductTotalPrice(),
-                                    orderDetail.getQuantity(),
-                                    orderDetail.getProductID().getProductName(),
-                                    orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID().getText()))
-                            .collect(Collectors.toList());
-
-                    return new OrderReponse(
-                            order.getOrderID(),
-                            order.getOrderPrice(),
-                            order.getOrderStatus(),
-                            order.getPoint(),
-                            order.getBanner(),
-                            order.getNote(),
-                            order.getStartDate(),
-                            order.getDeliveryDateTime(),
-                            order.getDeliveryAddress(),
-                            order.getAccountID().getFullname(),
-                            order.getPromotionID().getPromotionCode(),
-                            order.getPhone(),
-                            orderDetailReponses);
-                }).collect(Collectors.toList());
-
+                .map(this::mapOrderToOrderResponse)
+                .collect(Collectors.toList());
         return orderReponses;
     }
 
+    // API để lấy lịch sử đơn hàng của một khách hàng (đã có)
     public List<OrderReponse> getHistoryOrderByCustomer(int accountID) {
         Account account = accountRepository.findById(accountID).orElseThrow();
         List<Order> orders = orderRepository.findByAccountID(account);
-
         List<OrderReponse> orderReponses = orders.stream()
-                .map(order -> {
-                    List<OrderDetailReponse> orderDetailReponses = order.getOrderDetail().stream()
-                            .map(orderDetail -> new OrderDetailReponse(
-                                    orderDetail.getOrderDetailID(),
-                                    orderDetail.getProductTotalPrice(),
-                                    orderDetail.getQuantity(),
-                                    orderDetail.getProductID().getProductName(),
-                                    orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null))
-                            .collect(Collectors.toList());
-
-                    return new OrderReponse(
-                            order.getOrderID(),
-                            order.getOrderPrice(),
-                            order.getOrderStatus(),
-                            order.getPoint(),
-                            order.getBanner(),
-                            order.getNote(),
-                            order.getStartDate(),
-                            order.getDeliveryDateTime(),
-                            order.getDeliveryAddress(),
-                            order.getAccountID().getFullname(),
-                            order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
-                            order.getPhone(),
-                            orderDetailReponses);
-                }).collect(Collectors.toList());
-
+                .map(this::mapOrderToOrderResponse)
+                .collect(Collectors.toList());
         return orderReponses;
     }
 
-    public List<OrderReponse> getOrderByOrderID(int orderID) {
-        Order order = orderRepository.findById(orderID).orElseThrow();
-        List<OrderReponse> orderReponses = order.getOrderDetail().stream()
-                .map(orderDetail -> {
-                    List<OrderDetailReponse> orderDetailReponses = order.getOrderDetail().stream()
-                            .map(orderDetail1 -> new OrderDetailReponse(
-                                    orderDetail1.getOrderDetailID(),
-                                    orderDetail1.getProductTotalPrice(),
-                                    orderDetail1.getQuantity(),
-                                    orderDetail1.getProductID().getProductName(),
-                                    orderDetail1.getStoreID().getStoreName(),
-                                    orderDetail1.getSizeID() != null ? orderDetail1.getSizeID().getText() : null))
-                            .collect(Collectors.toList());
+    // API mới để lấy chi tiết đơn hàng theo orderID
+    public OrderReponse getOrderByOrderID(int orderID) {
+        Order order = orderRepository.findById(orderID)
+                .orElseThrow(() -> new RuntimeException("Order không tồn tại"));
+        return mapOrderToOrderResponse(order);
+    }
 
-                    return new OrderReponse(
-                            order.getOrderID(),
-                            order.getOrderPrice(),
-                            order.getOrderStatus(),
-                            order.getPoint(),
-                            order.getBanner(),
-                            order.getNote(),
-                            order.getStartDate(),
-                            order.getDeliveryDateTime(),
-                            order.getDeliveryAddress(),
-                            order.getAccountID().getFullname(),
-                            order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
-                            order.getPhone(),
-                            orderDetailReponses);
-                }).collect(Collectors.toList());
+    // Phương thức chung để map Order thành OrderReponse
+    private OrderReponse mapOrderToOrderResponse(Order order) {
+        List<OrderDetailReponse> orderDetailReponses = order.getOrderDetail().stream()
+                .map(orderDetail -> new OrderDetailReponse(
+                        orderDetail.getOrderDetailID(),
+                        orderDetail.getProductTotalPrice(),
+                        orderDetail.getQuantity(),
+                        orderDetail.getProductID().getProductName(),
+                        orderDetail.getStoreID().getStoreName(),
+                        orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null,
+                        orderDetail.getProductID().getProductID(),
+                        orderDetail.getStoreID().getStoreID()))
+                .collect(Collectors.toList());
 
-        return orderReponses;
+        return new OrderReponse(
+                order.getOrderID(),
+                order.getOrderPrice(),
+                order.getOrderStatus(),
+                order.getPoint(),
+                order.getBanner(),
+                order.getNote(),
+                order.getStartDate(),
+                order.getDeliveryDateTime(),
+                order.getDeliveryAddress(),
+                order.getAccountID().getFullname(),
+                order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
+                order.getPhone(),
+                orderDetailReponses);
     }
 
     public List<OrderReponse> getOrderByStore(int storeID) {
-        Store stores = storeRepository.findById(storeID).orElseThrow();
-        List<OrderDetail> orderDetails = orderDetailRepository.findByStoreID(stores);
-        Set<Order> orders = orderDetails.stream()
-                .map(OrderDetail::getOrderID)
-                .collect(Collectors.toSet());
-
+        Store store = storeRepository.findById(storeID).orElseThrow(() -> new RuntimeException("Store không tồn tại"));
+        List<Order> orders = orderRepository.findByOrderDetailStoreID(store);
         List<OrderReponse> orderReponses = orders.stream()
-                .map(order -> {
-                    List<OrderDetailReponse> orderDetailReponses = order.getOrderDetail().stream()
-                            .map(orderDetail -> new OrderDetailReponse(
-                                    orderDetail.getOrderDetailID(),
-                                    orderDetail.getProductTotalPrice(),
-                                    orderDetail.getQuantity(),
-                                    orderDetail.getProductID().getProductName(),
-                                    orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null))
-                            .collect(Collectors.toList());
-
-                    return new OrderReponse(
-                            order.getOrderID(),
-                            order.getOrderPrice(),
-                            order.getOrderStatus(),
-                            order.getPoint(),
-                            order.getBanner(),
-                            order.getNote(),
-                            order.getStartDate(),
-                            order.getDeliveryDateTime(),
-                            order.getDeliveryAddress(),
-                            order.getAccountID().getFullname(),
-                            order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
-                            order.getPhone(),
-                            orderDetailReponses);
-                }).collect(Collectors.toList());
-
+                .map(this::mapOrderToOrderResponse)
+                .collect(Collectors.toList());
         return orderReponses;
     }
 
@@ -430,40 +369,15 @@ public class OrderService {
         Calendar cal2 = Calendar.getInstance();
         cal1.setTime(date1);
         cal2.setTime(date2);
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
+                && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
     public List<OrderReponse> getOrderByOrderStatus(String orderStatus) {
         List<Order> orders = orderRepository.findByOrderStatus(orderStatus);
         List<OrderReponse> orderReponses = orders.stream()
-                .map(order -> {
-                    List<OrderDetailReponse> orderDetailReponses = order.getOrderDetail().stream()
-                            .map(orderDetail -> new OrderDetailReponse(
-                                    orderDetail.getOrderDetailID(),
-                                    orderDetail.getProductTotalPrice(),
-                                    orderDetail.getQuantity(),
-                                    orderDetail.getProductID().getProductName(),
-                                    orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null))
-                            .collect(Collectors.toList());
-
-                    return new OrderReponse(
-                            order.getOrderID(),
-                            order.getOrderPrice(),
-                            order.getOrderStatus(),
-                            order.getPoint(),
-                            order.getBanner(),
-                            order.getNote(),
-                            order.getStartDate(),
-                            order.getDeliveryDateTime(),
-                            order.getDeliveryAddress(),
-                            order.getAccountID().getFullname(),
-                            order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
-                            order.getPhone(),
-                            orderDetailReponses);
-                }).collect(Collectors.toList());
-
+                .map(this::mapOrderToOrderResponse)
+                .collect(Collectors.toList());
         return orderReponses;
     }
 
