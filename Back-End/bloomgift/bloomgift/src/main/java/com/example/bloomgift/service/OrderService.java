@@ -35,6 +35,8 @@ import com.example.bloomgift.model.Product;
 import com.example.bloomgift.model.Promotion;
 import com.example.bloomgift.model.Size;
 import com.example.bloomgift.model.Store;
+import com.example.bloomgift.reponse.DeliveryReponse;
+import com.example.bloomgift.reponse.OrderByStoreReponse;
 import com.example.bloomgift.reponse.OrderDetailReponse;
 import com.example.bloomgift.reponse.OrderReponse;
 import com.example.bloomgift.repository.AccountRepository;
@@ -92,10 +94,9 @@ public class OrderService {
     @Autowired
     private DeliveryRepository deliveryRepository;
 
-
-    
     @Autowired
     private DistanceFeeRepository distanceFeeRepository;
+
     public Double makeMoneyDeliveryWithManyStore(DeliveryRequest deliveryRequest, List<Integer> storeIDs) {
         CheckAddress(deliveryRequest);
         Double totalCost = 0.0;
@@ -103,20 +104,22 @@ public class OrderService {
         String deliveryProvince = deliveryRequest.getDeliveryProvince();
         String deliveryDistrict = deliveryRequest.getDeliveryDistrict();
         String deliveryWard = deliveryRequest.getDeliveryWard();
-        String deliveryAddress = specificAddress + ", " + deliveryWard + ", " + deliveryDistrict + ", " + deliveryProvince;
-    
+        String deliveryAddress = specificAddress + ", " + deliveryWard + ", " + deliveryDistrict + ", "
+                + deliveryProvince;
+
         if (!isValidAddress(deliveryAddress)) {
             throw new RuntimeException("Invalid delivery address");
         }
-    
+
         for (Integer storeID : storeIDs) {
-            Store store = storeRepository.findById(storeID).orElseThrow(() -> new RuntimeException("Invalid store with ID: " + storeID));
-            
+            Store store = storeRepository.findById(storeID)
+                    .orElseThrow(() -> new RuntimeException("Invalid store with ID: " + storeID));
+
             DistanceFee distanceFee = distanceFeeRepository.findByStore_StoreID(storeID);
             if (distanceFee == null) {
                 throw new RuntimeException("No distance fee found for store with ID: " + storeID);
             }
-            
+
             String storeAddress = store.getStoreAddress();
             Double deliveryDistance = haversineDistance(deliveryAddress, storeAddress);
             if (deliveryDistance != null) {
@@ -124,9 +127,10 @@ public class OrderService {
                 totalCost += deliveryCost;
             }
         }
-        
-        return totalCost; 
+
+        return totalCost;
     }
+
     public Double makeMoneyDelivery(DeliveryRequest deliveryRequest, Integer storeID) {
         CheckAddress(deliveryRequest);
         Store store = storeRepository.findById(storeID).orElseThrow();
@@ -205,7 +209,6 @@ public class OrderService {
             Float fee = distanceFee.getFee();
             Double moneyFee = (delivery / range) * fee;
 
-
             if (firstStore == null) {
                 firstStore = store;
             }
@@ -230,7 +233,7 @@ public class OrderService {
                 productTotalPriceWithFee = productTotalPrice + moneyFee;
             } else {
                 float discount = product.getDiscount() != null ? product.getDiscount() : 0;
-                productTotalPrice = (product.getPrice() * (1 - discount / 100)) * quantity ;
+                productTotalPrice = (product.getPrice() * (1 - discount / 100)) * quantity;
                 productTotalPriceWithFee = productTotalPrice + moneyFee;
             }
 
@@ -295,7 +298,7 @@ public class OrderService {
             payment.setBankAccountName("TRAN THI PHUONG THAO");
             payment.setFormat("text");
             payment.setTemplate("compact");
-            // payment.setAcqId("12312");
+            payment.setAcqId(12312);
             paymentRepository.save(payment);
         }
         cartService.clearCart(account);
@@ -438,6 +441,57 @@ public class OrderService {
                 }).collect(Collectors.toList());
 
         return orderReponses;
+    }
+
+    public List<OrderByStoreReponse> getAllOrderByStore(int storeID) {
+        Store store = storeRepository.findById(storeID).orElseThrow(() -> new RuntimeException("Store not found"));
+        
+        List<OrderDetail> orderDetails = orderDetailRepository.findByStoreID(store);
+        
+        Set<Order> orders = orderDetails.stream()
+                .map(OrderDetail::getOrderID)
+                .collect(Collectors.toSet());
+        List<OrderByStoreReponse> orderResponses = orders.stream()
+                .map(order -> {
+                    List<OrderDetailReponse> orderDetailResponses = order.getOrderDetail().stream()
+                            .filter(orderDetail -> orderDetail.getStoreID().getStoreID() == storeID)
+                            .map(orderDetail -> new OrderDetailReponse(
+                                    orderDetail.getOrderDetailID(),
+                                    orderDetail.getProductTotalPrice(),
+                                    orderDetail.getQuantity(),
+                                    orderDetail.getProductID().getProductName(),
+                                    orderDetail.getStoreID().getStoreName(),
+                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null))
+                            .collect(Collectors.toList());
+    
+                Optional<Delivery> deliveryOpt = deliveryRepository.findByOrderIDAndStoreID(order, store);
+                DeliveryReponse deliveryReponse = deliveryOpt.map(delivery -> new DeliveryReponse(
+                        delivery.getDeliveryID(),
+                        delivery.getShip(),
+                        delivery.getOrderCode(),
+                        delivery.getCodShip(),
+                        delivery.getStatus(),
+                        delivery.getFreeShip())).orElse(null); 
+    
+                    return new OrderByStoreReponse(
+                            order.getOrderID(),
+                            order.getOrderPrice(),
+                            order.getOrderStatus(),
+                            order.getPoint(),
+                            order.getBanner(),
+                            order.getNote(),
+                            order.getStartDate(),
+                            order.getDeliveryDateTime(),
+                            order.getDeliveryAddress(),
+                            order.getAccountID().getFullname(),
+                            order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
+                            order.getPhone(),
+                            deliveryReponse,
+                            orderDetailResponses);
+                })
+                .collect(Collectors.toList()); 
+    
+        return orderResponses;
     }
 
     private boolean isSameDay(Date date1, Date date2) {

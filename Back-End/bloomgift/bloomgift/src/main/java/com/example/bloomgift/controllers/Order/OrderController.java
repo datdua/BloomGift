@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.bloomgift.reponse.OrderByStoreReponse;
 import com.example.bloomgift.reponse.OrderReponse;
 import com.example.bloomgift.request.DeliveryRequest;
 import com.example.bloomgift.request.OrderRequest;
@@ -58,23 +59,17 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/get-all-order")
-    public ResponseEntity<List<OrderReponse>> getAllOrders() {
-        List<OrderReponse> orders = orderService.getAllOrder();
-        return ResponseEntity.ok(orders); // Return the list of orders in the response
-    }
-
     @GetMapping("/history-order/{accountID}")
     public ResponseEntity<List<OrderReponse>> getHistoryOrderByCustomer(@PathVariable int accountID) {
         List<OrderReponse> orderReponses = orderService.getHistoryOrderByCustomer(accountID);
         return new ResponseEntity<>(orderReponses, HttpStatus.OK);
     }
 
-    @GetMapping("/get-order-by-store/{storeID}")
-    public ResponseEntity<List<OrderReponse>> getOrderByStore(@PathVariable int storeID) {
-        List<OrderReponse> orderReponses = orderService.getOrderByStore(storeID);
-        return new ResponseEntity<>(orderReponses, HttpStatus.OK);
-    }
+    // @GetMapping("/get-order-by-store/{storeID}")
+    // public ResponseEntity<List<OrderReponse>> getOrderByStore(@PathVariable int storeID) {
+    //     List<OrderReponse> orderReponses = orderService.getOrderByStore(storeID);
+    //     return new ResponseEntity<>(orderReponses, HttpStatus.OK);
+    // }
 
     @GetMapping("/get-order-by-id/{orderID}")
     public ResponseEntity<List<OrderReponse>> getOrderById(@PathVariable int orderID) {
@@ -87,4 +82,5 @@ public class OrderController {
         List<OrderReponse> orderReponses = orderService.getOrderByOrderStatus(orderStatus);
         return new ResponseEntity<>(orderReponses, HttpStatus.OK);
     }
+ 
 }
