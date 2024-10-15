@@ -70,6 +70,7 @@ public class StoreService {
         storeResponse.setIdentityName(store.getIdentityName());
         storeResponse.setPassword(store.getPassword());
         storeResponse.setRoleName(store.getRole().getRoleName());
+        storeResponse.setStoreDescription(store.getStoreDescription());
 
         return storeResponse;
     }
@@ -99,7 +100,7 @@ public class StoreService {
         store.setBankAddress(storeRequest.getBankAddress());
 
         String storePhone = storeRequest.getStorePhone();
-        if (storePhone.length() != 10) {
+        if (storePhone.length() != 9) {
             return Collections.singletonMap("message", "Số điện thoại không hợp lệ");
         }
         store.setStorePhone(storePhone);
@@ -148,6 +149,8 @@ public class StoreService {
             }
         }
 
+        store.setStoreDescription(storeRequest.getStoreDescription());
+
         store.setOtp(otp);
         store.setOtp_generated_time(LocalDateTime.now());
 
@@ -159,7 +162,7 @@ public class StoreService {
     }
 
     public ResponseEntity<?> updateStore(Integer storeID, StorePutRequest storePutRequest, MultipartFile storeAvatar) {
-        Store store = storeRepository.findById(storeID).orElseThrow();
+        Store store = storeRepository.findById(storeID).orElse(null);
 
         if (store == null) {
             return ResponseEntity.badRequest().body("Không tìm thấy cửa hàng");
@@ -170,6 +173,7 @@ public class StoreService {
         store.setStoreAddress(storePutRequest.getStoreAddress());
         store.setBankAccountName(storePutRequest.getBankAccountName());
         store.setBankAddress(storePutRequest.getBankAddress());
+        store.setStoreDescription(storePutRequest.getStoreDescription());
 
         String email = storePutRequest.getEmail();
         if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
@@ -178,7 +182,7 @@ public class StoreService {
         store.setEmail(email);
 
         String storePhone = storePutRequest.getStorePhone();
-        if (storePhone.length() != 10) {
+        if (storePhone.length() != 9) {
             return ResponseEntity.badRequest().body("Số điện thoại không hợp lệ");
         }
         store.setStorePhone(storePhone);

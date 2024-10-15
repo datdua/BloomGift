@@ -76,7 +76,6 @@ public class ProductController {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             ProductRequest productRequest = objectMapper.readValue(productRequestJson, ProductRequest.class);
-
             Product product = productService.updateProduct(productID, productRequest, images);
             return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật thành công"));
         } catch (JsonProcessingException e) {
@@ -100,6 +99,29 @@ public class ProductController {
     @GetMapping("/products/status")
     public List<ProductReponse> getProductsByProductStatus(@RequestParam Boolean productStatus) {
         return productService.getProductsByProductStatus(productStatus);
+    }
+
+    @DeleteMapping("/delete-image/{imageID}")
+    public ResponseEntity<?> deleteImage(@PathVariable Integer imageID) {
+        try {
+            productService.deleteProductImage(imageID);
+            return ResponseEntity.ok(Collections.singletonMap("message", "Ảnh đã được xóa thành công"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/get-product-by-store-and-status/{storeID}/{productStatus}")
+    public ResponseEntity<List<ProductReponse>> getProductByStoreAndStatus(@PathVariable Integer storeID,
+            @PathVariable Boolean productStatus) {
+        List<ProductReponse> productResponses = productService.getProductsByStoreProductStatus(storeID, productStatus);
+        return ResponseEntity.ok(productResponses);
+    }
+
+    @GetMapping("/get-product-by-store/{storeID}")
+    public ResponseEntity<List<ProductReponse>> getProductByStore(@PathVariable Integer storeID) {
+        List<ProductReponse> productResponses = productService.getProductByStoreID(storeID);
+        return ResponseEntity.ok(productResponses);
     }
 
 }

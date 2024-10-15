@@ -54,4 +54,15 @@ public class OrderControllerBySeller {
         return new ResponseEntity<>(orderReponses, HttpStatus.OK);
     }
 
+    @GetMapping("/get-order-by-id/{orderID}")
+    public ResponseEntity<OrderReponse> getOrderById(@PathVariable int orderID) {
+        OrderReponse orderReponses = orderService.getOrderByOrderID(orderID);
+        return new ResponseEntity<>(orderReponses, HttpStatus.OK);
+    }
+
+    @PostMapping("/update-order-status/{orderID}")
+    public ResponseEntity<?> updateOrderStatus(@PathVariable Integer orderID, @RequestParam String orderStatus) {
+        return orderService.updateOrderStatus(orderID, orderStatus);
+    }
+
 }

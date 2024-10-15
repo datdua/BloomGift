@@ -17,6 +17,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import com.example.bloomgift.model.Category;
 import com.example.bloomgift.model.Product;
@@ -39,6 +41,7 @@ import com.example.bloomgift.specification.ProductSpecification;
 
 @Service
 public class ProductService {
+
     @Autowired
     private ProductRepository productRepository;
 
@@ -429,6 +432,20 @@ public class ProductService {
         }
         logger.info("Store found: " + store.getStoreName());
 
+        // Calculate total size quantity
+        int totalSizeQuantity = 0;
+        if (productRequest.getSizes() != null) {
+            totalSizeQuantity = productRequest.getSizes().stream()
+                    .mapToInt(SizeRequest::getSizeQuantity)
+                    .sum();
+        }
+
+        // Validate total size quantity
+        if (totalSizeQuantity != quantity && !productRequest.getSizes().isEmpty()) {
+            logger.error("Tổng số lượng size phải bằng số lượng sản phẩm");
+            throw new IllegalArgumentException("Tổng số lượng size phải bằng số lượng sản phẩm");
+        }
+
         Product product = new Product();
         product.setDiscount(discount);
         product.setDescription(description);
@@ -444,16 +461,19 @@ public class ProductService {
         product.setStoreID(store);
         logger.info("Product entity populated");
 
-        List<Size> sizes = productRequest.getSizes().stream()
-                .map(sizeRequest -> {
-                    Size size = new Size();
-                    size.setPrice(sizeRequest.getPrice());
-                    size.setText(sizeRequest.getText());
-                    size.setSizeQuantity(sizeRequest.getSizeQuantity());
-                    size.setProductID(product);
-                    return size;
-                })
-                .collect(Collectors.toList());
+        List<Size> sizes = new ArrayList<>();
+        if (productRequest.getSizes() != null) {
+            sizes = productRequest.getSizes().stream()
+                    .map(sizeRequest -> {
+                        Size size = new Size();
+                        size.setPrice(sizeRequest.getPrice());
+                        size.setText(sizeRequest.getText());
+                        size.setSizeQuantity(sizeRequest.getSizeQuantity());
+                        size.setProductID(product);
+                        return size;
+                    })
+                    .collect(Collectors.toList());
+        }
         product.setSizes(sizes);
         logger.info("Sizes set for product");
 
@@ -504,6 +524,19 @@ public class ProductService {
             throw new RuntimeException("Không tìm thấy sản phẩm");
         }
 
+        // Calculate total size quantity
+        int totalSizeQuantity = 0;
+        if (productRequest.getSizes() != null) {
+            totalSizeQuantity = productRequest.getSizes().stream()
+                    .mapToInt(SizeRequest::getSizeQuantity)
+                    .sum();
+        }
+
+        // Validate total size quantity
+        if (totalSizeQuantity != productRequest.getQuantity() && !productRequest.getSizes().isEmpty()) {
+            throw new IllegalArgumentException("Total size quantity must equal product quantity");
+        }
+
         // Update basic product information
         existingProduct.setDescription(productRequest.getDescription());
         existingProduct.setDiscount(productRequest.getDiscount());
@@ -516,25 +549,27 @@ public class ProductService {
 
         // Update sizes
         List<Size> updatedSizes = new ArrayList<>();
-        for (SizeRequest sizeRequest : productRequest.getSizes()) {
-            Size existingSize = existingProduct.getSizes().stream()
-                    .filter(size -> size.getText().equals(sizeRequest.getText()))
-                    .findFirst()
-                    .orElse(null);
+        if (productRequest.getSizes() != null) {
+            for (SizeRequest sizeRequest : productRequest.getSizes()) {
+                Size existingSize = existingProduct.getSizes().stream()
+                        .filter(size -> size.getText().equals(sizeRequest.getText()))
+                        .findFirst()
+                        .orElse(null);
 
-            if (existingSize != null) {
-                // Update existing size
-                existingSize.setPrice(sizeRequest.getPrice());
-                existingSize.setSizeQuantity(sizeRequest.getSizeQuantity());
-                updatedSizes.add(existingSize);
-            } else {
-                // Create new size
-                Size newSize = new Size();
-                newSize.setPrice(sizeRequest.getPrice());
-                newSize.setText(sizeRequest.getText());
-                newSize.setSizeQuantity(sizeRequest.getSizeQuantity());
-                newSize.setProductID(existingProduct);
-                updatedSizes.add(newSize);
+                if (existingSize != null) {
+                    // Update existing size
+                    existingSize.setPrice(sizeRequest.getPrice());
+                    existingSize.setSizeQuantity(sizeRequest.getSizeQuantity());
+                    updatedSizes.add(existingSize);
+                } else {
+                    // Create new size
+                    Size newSize = new Size();
+                    newSize.setPrice(sizeRequest.getPrice());
+                    newSize.setText(sizeRequest.getText());
+                    newSize.setSizeQuantity(sizeRequest.getSizeQuantity());
+                    newSize.setProductID(existingProduct);
+                    updatedSizes.add(newSize);
+                }
             }
         }
 
@@ -594,11 +629,10 @@ public class ProductService {
                 || !StringUtils.hasText(colour)
                 || !StringUtils.hasText(categoryName)
                 || !StringUtils.hasText(productName)
-                || quantity == null
-                || price == null) {
+                || quantity == null) {
             throw new RuntimeException("Vui lòng nhập đầy đủ thông tin");
         }
-        if (discount < 0 || quantity < 0 || price < 0) {
+        if (discount < 0 || quantity < 0 ) {
             throw new RuntimeException("Vui lòng nhập đung thông tin");
 
         }
@@ -610,7 +644,6 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm: " + productID));
     }
 
-  
     public Page<Product> searchProductWithFilterPage(
             String descriptionProduct,
             String colourProduct,
@@ -650,5 +683,53 @@ public class ProductService {
         return productRepository.findAll(spec, pageable);
     }
 
+    public ResponseEntity<?> deleteProductImage(Integer imageID) {
+        ProductImage existingImage = productImageRepository.findById(imageID).orElse(null);
+        if (existingImage == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Delete file from Firebase
+        firebaseStorageService.deleteFile(existingImage.getProductImage());
+
+        // Delete image record from database
+        productImageRepository.delete(existingImage);
+
+        return ResponseEntity.ok().build();
+    }
+
+    public List<ProductReponse> getProductsByStoreProductStatus(Integer storeID, Boolean productStatus) {
+        Store store = storeRepository.findById(storeID).orElseThrow();
+        List<Product> products = productRepository.findProductByStoreIDAndProductStatus(store, productStatus);
+        List<ProductReponse> productResponses = products.stream()
+                .map(product -> {
+                    List<ProductImageReponse> imageResponses = product.getProductImages().stream()
+                            .map(image -> new ProductImageReponse(image.getImageID(), image.getProductImage()))
+                            .collect(Collectors.toList());
+                    List<SizeReponse> sizeReponses = product.getSizes().stream()
+                            .map(size -> new SizeReponse(size.getSizeID(), size.getPrice(), size.getText(),
+                                    size.getSizeQuantity()))
+                            .collect(Collectors.toList());
+                    return new ProductReponse(
+                            product.getProductID(),
+                            product.getDiscount(),
+                            product.getDescription(),
+                            product.getColour(),
+                            product.getPrice(),
+                            product.getFeatured(),
+                            product.getProductStatus(),
+                            product.getCreateDate(),
+                            product.getQuantity(),
+                            product.getSold(),
+                            product.getProductName(),
+                            product.getCategoryName(),
+                            product.getStoreName(),
+                            sizeReponses,
+                            imageResponses);
+                })
+                .collect(Collectors.toList());
+        return productResponses;
+
+    }
 
 }

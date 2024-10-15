@@ -10,13 +10,11 @@ public class StorePutRequest {
     private String bankNumber;
     private String bankAddress;
     private String taxNumber;
-    private String storeAvatar;
-    private Integer accountID;
-    private Integer categoryID;
+    private String storeStatus;
     private String identityCard;
     private String identityName;
-    private String storeStatus;
     private String password;
+    private String storeDescription;
 
     public String getStoreName() {
         return storeName;
@@ -90,30 +88,6 @@ public class StorePutRequest {
         this.taxNumber = taxNumber;
     }
 
-    public String getStoreAvatar() {
-        return storeAvatar;
-    }
-
-    public void setStoreAvatar(String storeAvatar) {
-        this.storeAvatar = storeAvatar;
-    }
-
-    public Integer getAccountID() {
-        return accountID;
-    }
-
-    public void setAccountID(Integer accountID) {
-        this.accountID = accountID;
-    }
-
-    public Integer getCategoryID() {
-        return categoryID;
-    }
-
-    public void setCategoryID(Integer categoryID) {
-        this.categoryID = categoryID;
-    }
-
     public String getIdentityCard() {
         return identityCard;
     }
@@ -144,6 +118,14 @@ public class StorePutRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getStoreDescription() {
+        return storeDescription;
+    }
+
+    public void setStoreDescription(String storeDescription) {
+        this.storeDescription = storeDescription;
     }
 
 }

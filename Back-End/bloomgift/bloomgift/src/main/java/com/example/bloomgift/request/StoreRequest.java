@@ -16,6 +16,7 @@ public class StoreRequest {
     private String password;
     private String identityCard;
     private String identityName;
+    private String storeDescription;
 
     // Getters and Setters
     public String getStoreName() {
@@ -120,5 +121,13 @@ public class StoreRequest {
 
     public void setIdentityName(String identityName) {
         this.identityName = identityName;
+    }
+
+    public String getStoreDescription() {
+        return storeDescription;
+    }
+
+    public void setStoreDescription(String storeDescription) {
+        this.storeDescription = storeDescription;
     }
 }

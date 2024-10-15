@@ -81,6 +81,9 @@ public class Store {
     @Column(name = "acqId")
     private Integer acqId;
 
+    @Column(name = "storeDescription")
+    private String storeDescription;
+
     @Column(name = "otp_generated_time")
     private LocalDateTime otp_generated_time;
 
@@ -179,6 +182,22 @@ public class Store {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getStoreDescription() {
+        return storeDescription;
+    }
+
+    public void setStoreDescription(String storeDescription) {
+        this.storeDescription = storeDescription;
+    }
+
+    public List<Payment> getPayments() {
+        return payments;
+    }
+
+    public void setPayments(List<Payment> payments) {
+        this.payments = payments;
     }
 
     public String getBankAccountName() {

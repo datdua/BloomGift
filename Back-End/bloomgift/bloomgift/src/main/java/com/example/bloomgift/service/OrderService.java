@@ -16,10 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.http.ResponseEntity;
 
 import com.example.bloomgift.model.Account;
 import com.example.bloomgift.model.Order;
@@ -211,7 +213,7 @@ public class OrderService {
                 payment.setTotalPrice(orderPrice);
                 payment.setBankNumber(store.getBankNumber());
                 payment.setMomoNumber(store.getStorePhone());
-                payment.setPaymentCode();
+                payment.setPaymentCode(null);
                 payment.setBankAccountName(store.getBankAccountName());
                 payment.setFormat("text");
                 payment.setTemplate("compact");
@@ -379,6 +381,19 @@ public class OrderService {
                 .map(this::mapOrderToOrderResponse)
                 .collect(Collectors.toList());
         return orderReponses;
+    }
+
+    public ResponseEntity<?> updateOrderStatus(Integer orderID, String orderStatus) {
+        Order order = orderRepository.findById(orderID).orElse(null);
+
+        if (order == null) {
+            return ResponseEntity.badRequest().body("Không tìm thấy đơn hàng");
+        }
+
+        order.setOrderStatus(orderStatus);
+        orderRepository.save(order);
+
+        return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật trạng thái đơn hàng thành công"));
     }
 
 }

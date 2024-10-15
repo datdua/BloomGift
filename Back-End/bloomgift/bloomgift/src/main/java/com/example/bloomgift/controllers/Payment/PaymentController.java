@@ -97,11 +97,12 @@ public class PaymentController {
             return ResponseEntity.status(500).body("Error processing payment webhook");
         }
     }
+
     @PostMapping("/confirm")
     public ResponseEntity<String> confirmPayment(@RequestParam Integer paymentID) {
         // Tìm giao dịch dựa trên ID
         Payment payment = paymentRepository.findById(paymentID).orElseThrow();
-        
+
         if (payment == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Giao dịch không tồn tại");
         }
@@ -118,5 +119,20 @@ public class PaymentController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi xác nhận thanh toán");
         }
+    }
+
+    @PutMapping("/update-payment-status/{paymentID}")
+    public ResponseEntity<?> updatePaymentStatus(@PathVariable Integer paymentID, @RequestParam boolean paymentStatus) {
+        return paymentService.updatePaymentStatus(paymentID, paymentStatus);
+    }
+
+    @PutMapping("/enter-payment-code/{paymentID}")
+    public ResponseEntity<?> enterPaymentCode(@PathVariable Integer paymentID, @RequestParam String paymentCode) {
+        return paymentService.enterPaymentCode(paymentID, paymentCode);
+    }
+
+    @GetMapping("/check-payment-code")
+    public ResponseEntity<?> checkPaymentCode(@RequestParam String paymentCode) {
+        return paymentService.checkPaymentCode(paymentCode);
     }
 }

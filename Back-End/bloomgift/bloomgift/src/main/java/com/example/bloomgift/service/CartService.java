@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,20 +101,38 @@ public class CartService {
     }
 
     @Transactional
-    public ResponseEntity<?> addToCartWithSize(Account account, Product product, int quantity, Size size) {
+    public ResponseEntity<?> addToCartWithSize(Account account, Product product, int quantity, Integer sizeID) {
         String key = "CART:" + account.getAccountID();
         Map<String, Object> productMap = (Map<String, Object>) hashOperations.get(key, product.getProductID());
+
+        // Find the size by sizeID
+        Optional<Size> selectedSizeOpt = product.getSizes().stream()
+                .filter(size -> size.getSizeID().equals(sizeID))
+                .findFirst();
+
+        if (!selectedSizeOpt.isPresent()) {
+            return ResponseEntity.badRequest().body("Size không tồn tại");
+        }
+
+        Size selectedSize = selectedSizeOpt.get();
+
+        // Validate quantity with size's available stock
+        if (selectedSize.getSizeQuantity() < quantity) {
+            return ResponseEntity.badRequest().body("Số lượng sản phẩm không đủ cho kích thước này");
+        }
 
         if (productMap != null) {
             // Update existing cart item
             int currentQuantity = ((Number) productMap.get("quantity")).intValue();
             int newQuantity = currentQuantity + quantity;
-            return updateCart(account, product, newQuantity);
+            // return updateCart(account, product, newQuantity, selectedSize);
+            return ResponseEntity.badRequest().body("Sản phẩm đã tồn tại trong giỏ hàng");
         } else {
             // Add new cart item
-            float totalPrice = size.getPrice() * quantity;
+            float discount = product.getDiscount() != null ? product.getDiscount() : 0f;
+            float discountedPrice = selectedSize.getPrice() * (1 - discount / 100f);
+            float totalPrice = discountedPrice * quantity;
 
-            // Extract all product image URLs with unique keys
             Map<String, String> productImages = new HashMap<>();
             int imageIndex = 1;
             for (ProductImage image : product.getProductImages()) {
@@ -122,28 +141,24 @@ public class CartService {
             }
 
             productMap = new HashMap<>();
-            productMap.put("storeName", product.getStoreName());
             productMap.put("productID", product.getProductID());
+            productMap.put("storeName", product.getStoreName());
             productMap.put("productName", product.getProductName());
-            productMap.put("price", size.getPrice());
-            productMap.put("sizeText", size.getText());
+            productMap.put("price", discountedPrice);
             productMap.put("quantity", quantity);
+            productMap.put("sizeID", sizeID);
+            productMap.put("sizeText", selectedSize.getText()); // Keep sizeText for display purposes
             productMap.put("totalPrice", totalPrice);
             productMap.putAll(productImages);
 
             hashOperations.put(key, product.getProductID(), productMap);
 
-            // Reduce product and size quantity
-            if (size.getSizeQuantity() < quantity || product.getQuantity() < quantity) {
-                return ResponseEntity.badRequest().body("Số lượng sản phẩm không đủ");
-            } else {
-                redisTemplate.expire(key, Duration.ofSeconds(CART_EXPIRATION));
-                product.setQuantity(product.getQuantity() - quantity);
-                size.setSizeQuantity(size.getSizeQuantity() - quantity);
-                productRepository.save(product);
-                sizeRepository.save(size);
-                return ResponseEntity.ok().body("Sản phẩm đã được thêm vào giỏ hàng");
-            }
+            // Reduce size-specific quantity
+            selectedSize.setSizeQuantity(selectedSize.getSizeQuantity() - quantity);
+            productRepository.save(product);
+
+            return ResponseEntity.ok()
+                    .body("Sản phẩm đã được thêm vào giỏ hàng với kích thước " + selectedSize.getText());
         }
     }
 
