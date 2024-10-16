@@ -19,6 +19,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -94,8 +95,11 @@ public class Store {
     @OneToMany(mappedBy = "storeID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails = new ArrayList<>();
 
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Invoice> invoices = new ArrayList<>();
+    @OneToMany(mappedBy = "storeID",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Delivery> deliveries = new ArrayList<>();
+    
+    @OneToOne(mappedBy = "store", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private DistanceFee distanceFee;  // Thêm trường để liên kết One-to-One
 
     public Store() {
     }

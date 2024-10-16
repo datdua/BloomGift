@@ -1,4 +1,5 @@
 package com.example.bloomgift.service;
+package com.example.bloomgift.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
