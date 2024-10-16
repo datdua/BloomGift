@@ -30,11 +30,9 @@ public class PaymentControllerByAdmin {
     }
 
     @PutMapping("/update-payment-status{paymentId}/{status}")
-    public ResponseEntity<Payment> updatePaymentStatus(
-            @PathVariable Integer paymentId,
+    public ResponseEntity<?> updatePaymentStatus(
+            @PathVariable Integer paymentID,
             @RequestParam Boolean paymentStatus) {
-        
-        Payment updatedPayment = paymentService.updatePaymentStatus(paymentId, paymentStatus);
-        return new ResponseEntity<>(updatedPayment, HttpStatus.OK);
+        return paymentService.updatePaymentStatus(paymentID, paymentStatus);
     }
 }

@@ -1,11 +1,8 @@
 package com.example.bloomgift.service;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,15 +11,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
-import java.util.Collections;
+import java.io.InputStreamReader;
 
+import com.google.gson.JsonParser;
+
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.http.ResponseEntity;
 
 import com.ctc.wstx.shaded.msv_core.util.Uri;
 import com.example.bloomgift.model.Account;
@@ -49,12 +51,15 @@ import com.example.bloomgift.repository.ProductRepository;
 import com.example.bloomgift.repository.PromotionRepository;
 import com.example.bloomgift.repository.SizeRepository;
 import com.example.bloomgift.repository.StoreRepository;
+import com.example.bloomgift.request.DeliveryRequest;
+import com.example.bloomgift.request.OrderDetailRequest;
 import com.example.bloomgift.request.OrderRequest;
 import com.example.bloomgift.request.OrderRequestNew;
 
 import java.io.BufferedReader;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
+import java.util.Collections;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -62,7 +67,6 @@ import com.google.gson.JsonArray;
 
 @Service
 public class OrderService {
-
     @Autowired
     private AccountRepository accountRepository;
 
@@ -183,10 +187,12 @@ public class OrderService {
             }
 
             promotionValue = promotion.getPromotionDiscount().floatValue();
-            promotion.setQuantity(promotion.getQuantity() - 1);
-        }
 
-        Map<Store, List<OrderDetail>> storeOrderDetailsMap = new HashMap<>();
+            Integer newPromotionQuantity = promotion.getQuantity() - 1;
+            promotion.setQuantity(newPromotionQuantity);
+        }
+        Order order = new Order();
+        List<OrderDetail> orderDetails = new ArrayList<>();
         float totalProductPrice = 0.0f;
         Store firstStore = null;
         Map<String, Object> cart = cartService.getCart(account);
@@ -197,9 +203,8 @@ public class OrderService {
             Integer quantity = (Integer) cartItem.get("quantity");
             Product product = productRepository.findById(productID).orElseThrow();
             if (product.getQuantity() < quantity) {
-                throw new RuntimeException("Hết sản phẩm");
+                throw new RuntimeException("hết sản phẩm");
             }
-
             Store store = storeRepository.findByProducts(product);
             DistanceFee distanceFee = distanceFeeRepository.findByStore(store);
             Double delivery = haversineDistance(deliveryAddress, store.getStoreAddress());
@@ -248,7 +253,7 @@ public class OrderService {
             orderDetail.setProductID(product);
             orderDetail.setQuantity(quantity);
             orderDetail.setSizeID(size);
-            orderDetail.setOrderID(null); // Sẽ gán sau khi tạo đơn hàng
+            orderDetail.setOrderID(order);
             orderDetail.setStoreID(store);
             Integer newSold = product.getSold() + quantity;
             product.setSold(newSold);
@@ -310,114 +315,35 @@ public class OrderService {
         return orderReponses;
     }
 
-    // API để lấy lịch sử đơn hàng của một khách hàng (đã có)
     public List<OrderReponse> getHistoryOrderByCustomer(int accountID) {
         Account account = accountRepository.findById(accountID).orElseThrow();
         List<Order> orders = orderRepository.findByAccountID(account);
         List<OrderReponse> orderReponses = orders.stream()
-                .map(order -> {
-                    List<OrderDetailReponse> orderDetailReponses = order.getOrderDetail().stream()
-                            .map(orderDetail -> new OrderDetailReponse(
-                                    orderDetail.getOrderDetailID(),
-                                    orderDetail.getProductTotalPrice(),
-                                    orderDetail.getQuantity(),
-                                    orderDetail.getProductID().getProductName(),
-                                    orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null))
-                            .collect(Collectors.toList());
-
-                    return new OrderReponse(
-                            order.getOrderID(),
-                            order.getOrderPrice(),
-                            order.getOrderStatus(),
-                            order.getPoint(),
-                            order.getBanner(),
-                            order.getNote(),
-                            order.getStartDate(),
-                            order.getDeliveryDateTime(),
-                            order.getDeliveryAddress(),
-                            order.getAccountID().getFullname(),
-                            order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
-                            order.getPhone(),
-                            orderDetailReponses);
-                }).collect(Collectors.toList());
-
+                .map(this::mapOrderToOrderResponse)
+                .collect(Collectors.toList());
         return orderReponses;
     }
 
-    public List<OrderReponse> getOrderByOrderID(int orderID) {
-        Order order = orderRepository.findById(orderID).orElseThrow();
-        List<OrderReponse> orderReponses = order.getOrderDetail().stream()
-                .map(orderDetail -> {
-                    List<OrderDetailReponse> orderDetailReponses = order.getOrderDetail().stream()
-                            .map(orderDetail1 -> new OrderDetailReponse(
-                                    orderDetail1.getOrderDetailID(),
-                                    orderDetail1.getProductTotalPrice(),
-                                    orderDetail1.getQuantity(),
-                                    orderDetail1.getProductID().getProductName(),
-                                    orderDetail1.getStoreID().getStoreName(),
-                                    orderDetail1.getSizeID() != null ? orderDetail1.getSizeID().getText() : null))
-                            .collect(Collectors.toList());
-
-        return new OrderReponse(
-                order.getOrderID(),
-                order.getOrderPrice(),
-                order.getOrderStatus(),
-                order.getPoint(),
-                order.getBanner(),
-                order.getNote(),
-                order.getStartDate(),
-                order.getDeliveryDateTime(),
-                order.getDeliveryAddress(),
-                order.getAccountID().getFullname(),
-                order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
-                order.getPhone(),
-                orderDetailReponses);
+    public OrderReponse getOrderByOrderID(int orderID) {
+        Order order = orderRepository.findById(orderID)
+                .orElseThrow(() -> new RuntimeException("Order không tồn tại"));
+        return mapOrderToOrderResponse(order);
     }
 
-    public List<OrderReponse> getOrderByStore(int storeID) {
-        Store stores = storeRepository.findById(storeID).orElseThrow();
-        List<OrderDetail> orderDetails = orderDetailRepository.findByStoreID(stores);
-        Set<Order> orders = orderDetails.stream()
-                .map(OrderDetail::getOrderID)
-                .collect(Collectors.toSet());
-
+     public List<OrderReponse> getOrderByStore(int storeID) {
+        Store store = storeRepository.findById(storeID).orElseThrow(() -> new RuntimeException("Store không tồn tại"));
+        List<Order> orders = orderRepository.findByOrderDetailStoreID(store);
         List<OrderReponse> orderReponses = orders.stream()
-                .map(order -> {
-                    List<OrderDetailReponse> orderDetailReponses = order.getOrderDetail().stream()
-                            .map(orderDetail -> new OrderDetailReponse(
-                                    orderDetail.getOrderDetailID(),
-                                    orderDetail.getProductTotalPrice(),
-                                    orderDetail.getQuantity(),
-                                    orderDetail.getProductID().getProductName(),
-                                    orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null))
-                            .collect(Collectors.toList());
-
-                    return new OrderReponse(
-                            order.getOrderID(),
-                            order.getOrderPrice(),
-                            order.getOrderStatus(),
-                            order.getPoint(),
-                            order.getBanner(),
-                            order.getNote(),
-                            order.getStartDate(),
-                            order.getDeliveryDateTime(),
-                            order.getDeliveryAddress(),
-                            order.getAccountID().getFullname(),
-                            order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
-                            order.getPhone(),
-                            orderDetailReponses);
-                }).collect(Collectors.toList());
-
+                .map(this::mapOrderToOrderResponse)
+                .collect(Collectors.toList());
         return orderReponses;
     }
 
     public List<OrderByStoreReponse> getAllOrderByStore(int storeID) {
         Store store = storeRepository.findById(storeID).orElseThrow(() -> new RuntimeException("Store not found"));
-        
+
         List<OrderDetail> orderDetails = orderDetailRepository.findByStoreID(store);
-        
+
         Set<Order> orders = orderDetails.stream()
                 .map(OrderDetail::getOrderID)
                 .collect(Collectors.toSet());
@@ -431,18 +357,20 @@ public class OrderService {
                                     orderDetail.getQuantity(),
                                     orderDetail.getProductID().getProductName(),
                                     orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null))
+                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null,
+                                    orderDetail.getProductID().getProductID(),
+                                    orderDetail.getStoreID().getStoreID()))
                             .collect(Collectors.toList());
-    
-                Optional<Delivery> deliveryOpt = deliveryRepository.findByOrderIDAndStoreID(order, store);
-                DeliveryReponse deliveryReponse = deliveryOpt.map(delivery -> new DeliveryReponse(
-                        delivery.getDeliveryID(),
-                        delivery.getShip(),
-                        delivery.getOrderCode(),
-                        delivery.getCodShip(),
-                        delivery.getStatus(),
-                        delivery.getFreeShip())).orElse(null); 
-    
+
+                    Optional<Delivery> deliveryOpt = deliveryRepository.findByOrderIDAndStoreID(order, store);
+                    DeliveryReponse deliveryReponse = deliveryOpt.map(delivery -> new DeliveryReponse(
+                            delivery.getDeliveryID(),
+                            delivery.getShip(),
+                            delivery.getOrderCode(),
+                            delivery.getCodShip(),
+                            delivery.getStatus(),
+                            delivery.getFreeShip())).orElse(null);
+
                     return new OrderByStoreReponse(
                             order.getOrderID(),
                             order.getOrderPrice(),
@@ -459,8 +387,8 @@ public class OrderService {
                             deliveryReponse,
                             orderDetailResponses);
                 })
-                .collect(Collectors.toList()); 
-    
+                .collect(Collectors.toList());
+
         return orderResponses;
     }
 
@@ -484,7 +412,9 @@ public class OrderService {
                                     orderDetail.getQuantity(),
                                     orderDetail.getProductID().getProductName(),
                                     orderDetail.getStoreID().getStoreName(),
-                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null))
+                                    orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null,
+                                    orderDetail.getProductID().getProductID(),
+                                    orderDetail.getStoreID().getStoreID()))
                             .collect(Collectors.toList());
 
                     return new OrderReponse(
@@ -691,6 +621,37 @@ public class OrderService {
         orderRepository.save(order);
 
         return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật trạng thái đơn hàng thành công"));
+    }
+
+
+    // Phương thức chung để map Order thành OrderReponse
+    private OrderReponse mapOrderToOrderResponse(Order order) {
+        List<OrderDetailReponse> orderDetailReponses = order.getOrderDetail().stream()
+                .map(orderDetail -> new OrderDetailReponse(
+                        orderDetail.getOrderDetailID(),
+                        orderDetail.getProductTotalPrice(),
+                        orderDetail.getQuantity(),
+                        orderDetail.getProductID().getProductName(),
+                        orderDetail.getStoreID().getStoreName(),
+                        orderDetail.getSizeID() != null ? orderDetail.getSizeID().getText() : null,
+                        orderDetail.getProductID().getProductID(),
+                        orderDetail.getStoreID().getStoreID()))
+                .collect(Collectors.toList());
+
+        return new OrderReponse(
+                order.getOrderID(),
+                order.getOrderPrice(),
+                order.getOrderStatus(),
+                order.getPoint(),
+                order.getBanner(),
+                order.getNote(),
+                order.getStartDate(),
+                order.getDeliveryDateTime(),
+                order.getDeliveryAddress(),
+                order.getAccountID().getFullname(),
+                order.getPromotionID() != null ? order.getPromotionID().getPromotionCode() : null,
+                order.getPhone(),
+                orderDetailReponses);
     }
 
 }

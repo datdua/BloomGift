@@ -317,12 +317,4 @@ public class Store {
         this.orderDetails = orderDetails;
     }
 
-    public List<Invoice> getInvoices() {
-        return invoices;
-    }
-
-    public void setInvoices(List<Invoice> invoices) {
-        this.invoices = invoices;
-    }
-
 }

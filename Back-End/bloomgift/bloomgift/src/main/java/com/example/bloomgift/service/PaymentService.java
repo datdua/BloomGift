@@ -1,5 +1,9 @@
 package com.example.bloomgift.service;
-package com.example.bloomgift.service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,10 +17,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
+
+import com.example.bloomgift.repository.AccountRepository;
 import com.example.bloomgift.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.example.bloomgift.model.Account;
 import com.example.bloomgift.model.Payment;
+import com.example.bloomgift.reponse.PaymentReponse;
 
 @Service
 public class PaymentService {
@@ -32,6 +40,9 @@ public class PaymentService {
 
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
 
     private final RestTemplate restTemplate;
 
@@ -87,11 +98,6 @@ public class PaymentService {
         }
     }
 
-    public void updatePaymentStatus(Integer paymentID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updatePaymentStatus'");
-    }
-
     @Transactional
     public ResponseEntity<?> updatePaymentStatus(@PathVariable Integer paymentID, boolean paymentStatus) {
         Payment payment = paymentRepository.findById(paymentID).orElse(null);
@@ -127,6 +133,38 @@ public class PaymentService {
             payment.setPaymentStatus(true);
             return ResponseEntity.ok(Collections.singletonMap("message", "Mã thanh toán hợp lệ"));
         }
+    }
+
+    public List<PaymentReponse> getAllpayment() {
+        List<Payment> payments = paymentRepository.findAll();
+        return payments.stream()
+                .map(payment -> new PaymentReponse(
+                        payment.getPaymentID(),
+                        payment.getAccountID(),
+                        payment.getMethod(),
+                        payment.getBankName(),
+                        payment.getTotalPrice(),
+                        payment.getBankName(),
+                        payment.getMomoNumber(),
+                        payment.getPaymentCode(),
+                        payment.getBankAccountName(),
+                        payment.getOrderID().getOrderID(),
+                        payment.getPaymentStatus()))
+                .collect(Collectors.toList());
+    }
+
+    public Payment inputPaymentCode(Integer accountId, Integer paymentID, String paymentCode) {
+        Account account = accountRepository.findById(accountId).orElseThrow();
+        if (account == null) {
+            throw new RuntimeException("invalid account");
+        }
+        Payment payment = paymentRepository.findById(paymentID).orElseThrow();
+        if (payment.getAccountID() != accountId) {
+            throw new RuntimeException("invalid account");
+        }
+        payment.setPaymentCode(paymentCode);
+        return paymentRepository.save(payment);
+
     }
 
 }
