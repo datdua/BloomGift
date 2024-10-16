@@ -15,9 +15,9 @@ public class RedisConfig {
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
-        redisStandaloneConfiguration.setHostName("bloomgift12.redis.cache.windows.net");
+        redisStandaloneConfiguration.setHostName("bloomgift01.redis.cache.windows.net");
         redisStandaloneConfiguration.setPort(6380);
-        redisStandaloneConfiguration.setPassword("B3l4TP13MSLG1iI0opLMDsV4ZBawGRlvfAzCaH1qYEo=");
+        redisStandaloneConfiguration.setPassword("HAJfWn8ChPdjuJVwj1bBrlYoIxYFgmtxnAzCaMIOHwc=");
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                 .useSsl()
