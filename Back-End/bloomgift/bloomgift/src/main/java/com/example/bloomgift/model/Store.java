@@ -19,6 +19,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -81,6 +82,9 @@ public class Store {
     @Column(name = "acqId")
     private Integer acqId;
 
+    @Column(name = "storeDescription")
+    private String storeDescription;
+
     @Column(name = "otp_generated_time")
     private LocalDateTime otp_generated_time;
 
@@ -90,6 +94,12 @@ public class Store {
 
     @OneToMany(mappedBy = "storeID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails = new ArrayList<>();
+
+    @OneToMany(mappedBy = "storeID",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Delivery> deliveries = new ArrayList<>();
+    
+    @OneToOne(mappedBy = "store", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private DistanceFee distanceFee;  // Thêm trường để liên kết One-to-One
 
     public Store() {
     }
@@ -176,6 +186,22 @@ public class Store {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getStoreDescription() {
+        return storeDescription;
+    }
+
+    public void setStoreDescription(String storeDescription) {
+        this.storeDescription = storeDescription;
+    }
+
+    public List<Payment> getPayments() {
+        return payments;
+    }
+
+    public void setPayments(List<Payment> payments) {
+        this.payments = payments;
     }
 
     public String getBankAccountName() {

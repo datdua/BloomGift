@@ -7,5 +7,7 @@ import com.example.bloomgift.model.Payment;
 public interface PaymentRepository extends JpaRepository<Payment,Integer>{
 
     Payment findByBankNumberAndTotalPrice(String accountNumber, Float amount);
+
+    Payment findByPaymentCode(String paymentCode);
     
 }

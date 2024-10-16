@@ -10,6 +10,8 @@ public class OrderDetailReponse {
     private String productName;
     private String storeName;
     private String  sizeText;
+    private Integer productID;
+    private Integer storeID;
 
     public OrderDetailReponse() {
     }
@@ -62,14 +64,32 @@ public class OrderDetailReponse {
         this.sizeText = sizeText;
     }
 
+    public Integer getProductID() {
+        return productID;
+    }
+
+    public void setProductID(Integer productID) {
+        this.productID = productID;
+    }
+
+    public Integer getStoreID() {
+        return storeID;
+    }
+
+    public void setStoreID(Integer storeID) {
+        this.storeID = storeID;
+    }
+
     public OrderDetailReponse(Integer orderDetailID, Float productTotalPrice, Integer quantity, String productName,
-            String storeName, String sizeText) {
+            String storeName, String sizeText, Integer productID, Integer storeID) {
         this.orderDetailID = orderDetailID;
         this.productTotalPrice = productTotalPrice;
         this.quantity = quantity;
         this.productName = productName;
         this.storeName = storeName;
         this.sizeText = sizeText;
+        this.productID = productID;
+        this.storeID = storeID;
     }
 
     

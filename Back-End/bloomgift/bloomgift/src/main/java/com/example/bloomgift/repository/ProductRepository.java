@@ -20,5 +20,7 @@ public interface ProductRepository extends JpaRepository<Product,Integer> , JpaS
     List<Product> findProductByStoreID(Store storeID);
     
     List<Product> findByProductStatus(Boolean productStatus);
+
+    List<Product> findProductByStoreIDAndProductStatus(Store store, Boolean productStatus);
   
 }

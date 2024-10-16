@@ -153,21 +153,21 @@ public class Payment {
     }
 
     public void setPaymentCode() {
-        String paymentCode = generateRandomCode(10); 
+        // String paymentCode = generateRandomCode(10); 
         this.paymentCode = paymentCode;
     }
-      private String generateRandomCode(int length) {
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        SecureRandom random = new SecureRandom();
-        StringBuilder code = new StringBuilder();
+    //   private String generateRandomCode(int length) {
+    //     String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    //     SecureRandom random = new SecureRandom();
+    //     StringBuilder code = new StringBuilder();
 
-        for (int i = 0; i < length; i++) {
-            int index = random.nextInt(characters.length());
-            code.append(characters.charAt(index));
-        }
+    //     for (int i = 0; i < length; i++) {
+    //         int index = random.nextInt(characters.length());
+    //         code.append(characters.charAt(index));
+    //     }
 
-        return code.toString();
-    }
+    //     return code.toString();
+    // }
 
 
     public void setPaymentCode(String paymentCode) {

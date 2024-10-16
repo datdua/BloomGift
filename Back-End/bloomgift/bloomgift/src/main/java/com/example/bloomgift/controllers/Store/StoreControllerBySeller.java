@@ -25,7 +25,6 @@ import com.example.bloomgift.service.StoreService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 
-
 @RestController
 @RequestMapping("/api/seller/store/store-management")
 public class StoreControllerBySeller {
@@ -57,7 +56,7 @@ public class StoreControllerBySeller {
             StorePutRequest storePutRequest = objectMapper.readValue(storePutRequestJson, StorePutRequest.class);
             return storeService.updateStore(storeID, storePutRequest, storeAvatar);
         } catch (Exception e) {
-            return ResponseEntity.status(400).body("Invalid request data");
+            return ResponseEntity.status(400).body("Invalid request data: " + e.getMessage());
         }
     }
 

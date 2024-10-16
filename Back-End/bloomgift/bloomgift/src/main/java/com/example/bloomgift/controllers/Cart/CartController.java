@@ -66,7 +66,7 @@ public class CartController {
             return ResponseEntity.badRequest().body("Kích cỡ không tồn tại hoặc không thuộc về sản phẩm.");
         }
 
-        return cartService.addToCartWithSize(account, product, quantity, size);
+        return cartService.addToCartWithSize(account, product, quantity, sizeID);
     }
 
     @GetMapping("/view/{accountId}")

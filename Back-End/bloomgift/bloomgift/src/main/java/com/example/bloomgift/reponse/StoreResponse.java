@@ -17,6 +17,7 @@ public class StoreResponse {
     private String identityName;
     private String password;
     private String roleName;
+    private String storeDescription;
 
     public StoreResponse() {
     }
@@ -148,5 +149,15 @@ public class StoreResponse {
     public void setRoleName(String roleName) {
         this.roleName = roleName;
     }
+
+    public String getStoreDescription() {
+        return storeDescription;
+    }
+
+    public void setStoreDescription(String storeDescription) {
+        this.storeDescription = storeDescription;
+    }
+
+    
 
 }
